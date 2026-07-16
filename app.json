@@ -1,0 +1,62 @@
+{
+  "expo": {
+    "name": "ReptiKeep",
+    "slug": "ReptiKeep",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/icon.png",
+    "scheme": "reptikeep",
+    "userInterfaceStyle": "automatic",
+    "ios": {
+      "icon": "./assets/ios.icon",
+      "bundleIdentifier": "app.reptikeep"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#E6F4FE",
+        "foregroundImage": "./assets/images/android-icon-foreground.png",
+        "backgroundImage": "./assets/images/android-icon-background.png",
+        "monochromeImage": "./assets/images/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false,
+      "package": "com.anonymous.ReptiKeep"
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#FBF7EE",
+          "image": "./assets/splash-icon-light.png",
+          "dark": {
+            "image": "./assets/splash-icon-dark.png",
+            "backgroundColor": "#120D09"
+          },
+          "imageWidth": 150
+        }
+      ],
+      [
+        "expo-font",
+        {
+          "fonts": [
+            "./public/fonts/Solway-Bold.ttf",
+            "./public/fonts/Solway-ExtraBold.ttf",
+            "./public/fonts/SpaceMono-Bold.ttf"
+          ]
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Attach a photo to a reptile's profile."
+        }
+      ],
+      "expo-localization",
+      "./plugins/with-no-push-entitlement"
+    ],
+    "experiments": {
+      "typedRoutes": true,
+      "reactCompiler": true
+    }
+  }
+}

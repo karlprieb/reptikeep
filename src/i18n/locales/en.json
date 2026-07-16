@@ -1,0 +1,522 @@
+{
+  "tabs": {
+    "reptiles": "Reptiles",
+    "reminders": "Reminders",
+    "settings": "Settings",
+    "search": "Search"
+  },
+  "settings": {
+    "title": "Settings",
+    "general": "General",
+    "subtitle": "Choose the language used throughout the app. Follow device uses your system preference.",
+    "language": "Language",
+    "followDevice": "Follow device",
+    "english": "English",
+    "portuguese": "Português",
+    "advanced": "Advanced",
+    "advancedButton": "Advanced settings",
+    "hideAdvanced": "Hide advanced settings",
+    "data": "App data",
+    "reset": "Reset app data",
+    "resetTitle": "Reset app data?",
+    "resetFooter": "Permanently deletes every reptile and activity record stored on this device. Your language setting will not change.",
+    "resetMessage": "This action cannot be undone.",
+    "resetConfirm": "Reset data",
+    "cancel": "Cancel"
+  },
+  "defaults": {
+    "section": "Logging defaults",
+    "globalFooter": "What a new log sheet opens on, and how weights are shown everywhere. Each reptile follows these unless it overrides them.",
+    "animalFooter": "Applies to {{animalName}} only. Rows left on Follow global track your Settings.",
+    "animalFooterNew": "Applies to this reptile only. Rows left on Follow global track your Settings.",
+    "followGlobal": "Follow global · {{value}}",
+    "mealMeasure": "Meal measure",
+    "frozen": "Frozen prey",
+    "frozenYes": "Frozen",
+    "frozenNo": "Fresh",
+    "weightUnit": "Weight unit",
+    "poopType": "Poop type"
+  },
+  "reptiles": {
+    "title": "Reptiles",
+    "empty": {
+      "title": "No reptiles yet",
+      "subtitle": "Add your first reptile to start tracking feedings, sheds, and growth."
+    },
+    "add": "Add reptile",
+    "addHint": "Adds a new reptile to your collection",
+    "filters": "Filters",
+    "filtersHint": "Filters the reptile list",
+    "options": "Options",
+    "optionsHint": "Sort, filter and change how your reptiles are shown",
+    "sort": {
+      "by": "Sort By",
+      "name": "Name",
+      "commonName": "Common Name",
+      "scientificName": "Scientific Name",
+      "lastActivity": "Last Activity",
+      "ascending": "Ascending",
+      "descending": "Descending"
+    },
+    "view": {
+      "grid": "Grid",
+      "single": "Single Column",
+      "list": "List"
+    }
+  },
+  "reminders": {
+    "title": "Reminders",
+    "waterChange": "Water change",
+    "enabled": "Remind me",
+    "dueToday": "Due today",
+    "dueIn_one": "In {{count}} day",
+    "dueIn_other": "In {{count}} days",
+    "timeFooter": "Reminders arrive at {{time}}.",
+    "section": {
+      "overdue": "Overdue",
+      "today": "Today",
+      "upcoming": "Upcoming"
+    },
+    "swipe": {
+      "schedule": "Schedule",
+      "mute": "Turn off"
+    },
+    "empty": {
+      "title": "Nothing due",
+      "subtitle": "Set a water change schedule in Settings, or on a reptile's own profile, and what's coming up shows here."
+    },
+    "settings": {
+      "section": "Reminders",
+      "time": "Daily reminder time",
+      "footer": "The day's reminders arrive together at this time. Turn them on for a reptile in its own profile."
+    },
+    "permission": {
+      "title": "Notifications are off",
+      "ask": "Turn them on to hear about the day's care at {{time}}. Everything below keeps working either way.",
+      "blocked": "Allow notifications for ReptiKeep in the Settings app to hear about the day's care. Everything below keeps working either way.",
+      "action": "Turn on notifications",
+      "openSettings": "Open Settings"
+    },
+    "notification": {
+      "title": "Water change due",
+      "body_one": "{{names}} needs fresh water today.",
+      "body_other": "{{names}} need fresh water today.",
+      "overflow": "{{names}} and {{count}} more"
+    }
+  },
+  "search": {
+    "title": "Search",
+    "placeholder": "Search reptiles",
+    "noResults": {
+      "title": "No reptiles found",
+      "description": "No reptiles match “{{query}}”."
+    }
+  },
+  "animal": {
+    "notFound": "Animal not found",
+    "notFoundSubtitle": "This reptile may have been removed.",
+    "addActivity": "Add activity",
+    "actions": "More actions",
+    "actionsHint": "Edit or delete this reptile",
+    "edit": "Edit reptile",
+    "delete": "Delete reptile",
+    "deleteTitle": "Delete {{animalName}}?",
+    "deleteMessage": "This also deletes every feeding, growth, shed and poop record logged for {{animalName}}. There is no way to undo it.",
+    "deleteConfirm": "Delete",
+    "cancel": "Cancel"
+  },
+  "addRecord": {
+    "title": "Add a record",
+    "prompt": "What would you like to log for {{animalName}}?",
+    "close": "Close",
+    "closeHint": "Dismisses without choosing an activity",
+    "feeding": {
+      "title": "Feeding",
+      "description": "Log a meal"
+    },
+    "weight": {
+      "title": "Growth",
+      "description": "Record a weigh-in"
+    },
+    "shed": {
+      "title": "Shed",
+      "description": "Log a shed"
+    },
+    "defecation": {
+      "title": "Poop",
+      "description": "Feces & urate"
+    },
+    "habitat": {
+      "title": "Habitat",
+      "description": "Water & upkeep"
+    }
+  },
+  "feedingForm": {
+    "title": "Log feeding",
+    "editTitle": "Edit feeding",
+    "cancel": "Cancel",
+    "cancelHint": "Dismisses without saving",
+    "save": "Save",
+    "saveHint": "Adds this feeding to {{animalName}}'s history",
+    "editSaveHint": "Saves these changes to this feeding record",
+    "timing": "Timing",
+    "when": "When",
+    "timingHint": "Logging for {{animalName}}. Backdate this to when the feeding happened.",
+    "mealDetails": "Meal details",
+    "foodType": "Food type",
+    "measureBy": "Measure food by",
+    "measure": {
+      "amount": "Amount",
+      "weight": "Weight"
+    },
+    "amount": "Amount or portion",
+    "amountHint": "Optional. Enter a count or portion, such as 1, 3, or 1 meal.",
+    "feederWeight": "Feeder weight",
+    "weightUnit": "Weight unit",
+    "weightHint": "Optional. Choose the unit used for feeder weight.",
+    "units": {
+      "g": "Grams (g)",
+      "kg": "Kilograms (kg)",
+      "lb": "Pounds (lb)"
+    },
+    "invalidWeight": "Enter a valid feeder weight of zero or more.",
+    "outcome": "Outcome",
+    "frozen": "Frozen/thawed food",
+    "refused": "Refused",
+    "notes": "Notes",
+    "notesPlaceholder": "Add an observation"
+  },
+  "weightForm": {
+    "title": "Log weight",
+    "editTitle": "Edit weigh-in",
+    "cancel": "Cancel",
+    "cancelHint": "Dismisses without saving",
+    "save": "Save",
+    "saveHint": "Adds this weigh-in to {{animalName}}'s history",
+    "editSaveHint": "Saves these changes to this weigh-in",
+    "weighIn": "Weigh-in",
+    "weight": "Weight",
+    "weightPlaceholder": "Weight in {{unit}}",
+    "unit": "Weight unit",
+    "unitShort": {
+      "g": "g",
+      "kg": "kg",
+      "lb": "lb"
+    },
+    "previous": "Previous",
+    "change": "Change",
+    "hint": "Stored in grams, whichever unit you enter.",
+    "firstHint": "First weigh-in for {{animalName}}. The next one will compare against it.",
+    "invalidWeight": "Enter a weight of at least 1 g.",
+    "implausible": "That is a big jump from the last weigh-in — check the unit.",
+    "timing": "Timing",
+    "when": "When",
+    "timingHint": "Logging for {{animalName}}. Backdate this to when you weighed them.",
+    "notes": "Notes",
+    "notesPlaceholder": "Add an observation"
+  },
+  "shedForm": {
+    "title": "Log shed",
+    "editTitle": "Edit shed",
+    "cancel": "Cancel",
+    "cancelHint": "Dismisses without saving",
+    "save": "Save",
+    "saveHint": "Adds this shed to {{animalName}}'s history",
+    "editSaveHint": "Saves these changes to this shed record",
+    "timing": "Timing",
+    "when": "When",
+    "timingHint": "Logging for {{animalName}}. Backdate this to when the shed happened.",
+    "observation": "Observation",
+    "issues": "Issues noticed",
+    "issuesHint": "Turn on if the shed was incomplete or the animal had trouble.",
+    "notes": "Notes",
+    "notesPlaceholder": "Add an observation"
+  },
+  "defecationForm": {
+    "title": "Log poop",
+    "editTitle": "Edit poop",
+    "cancel": "Cancel",
+    "cancelHint": "Dismisses without saving",
+    "save": "Save",
+    "saveHint": "Adds this poop record to {{animalName}}'s history",
+    "editSaveHint": "Saves these changes to this poop record",
+    "observation": "Observation",
+    "type": "Type",
+    "typeHint": "Choose what was observed.",
+    "issues": "Issues noticed",
+    "issuesHint": "Turn on if anything looked abnormal.",
+    "timing": "Timing",
+    "when": "When",
+    "timingHint": "Logging for {{animalName}}. Backdate this to when it happened.",
+    "notes": "Notes",
+    "notesPlaceholder": "Add an observation"
+  },
+  "newReptile": {
+    "title": "New reptile",
+    "cancel": "Cancel",
+    "cancelHint": "Dismisses without saving",
+    "save": "Save",
+    "saveHint": "Adds this reptile to your collection"
+  },
+  "editReptile": {
+    "title": "Edit reptile",
+    "cancel": "Cancel",
+    "cancelHint": "Dismisses without saving your changes",
+    "save": "Save",
+    "saveHint": "Saves these changes to {{animalName}}'s profile"
+  },
+  "reptileForm": {
+    "name": "Name",
+    "commonName": "Common name",
+    "scientificName": "Scientific name",
+    "sex": "Sex",
+    "knownBirthDate": "Known birth date",
+    "birthDate": "Birth date",
+    "acquired": "Acquired",
+    "addPhoto": "Add photo",
+    "changePhoto": "Change photo",
+    "removePhoto": "Remove photo",
+    "photoSaveError": "We couldn't save this photo. Try again or remove it to save without a photo.",
+    "details": "Details"
+  },
+  "feedingSchedule": {
+    "section": "Feeding schedule",
+    "enabled": "Use feeding schedule",
+    "footer": "Overdue status starts after the first accepted feeding."
+  },
+  "sex": {
+    "unknown": "Unknown",
+    "male": "Male",
+    "female": "Female"
+  },
+  "detail": {
+    "birthDate": "Birth date",
+    "acquired": "Acquired",
+    "currentWeight": "Current weight",
+    "noWeight": "No weight logged",
+    "lastFed": "Last fed",
+    "unknownValue": "—",
+    "relative": {
+      "today": "Today",
+      "yesterday": "Yesterday",
+      "daysAgo_one": "{{count}} day ago",
+      "daysAgo_other": "{{count}} days ago",
+      "bornToday": "Born today",
+      "daysOld_one": "{{count}} day old",
+      "daysOld_other": "{{count}} days old",
+      "monthsOld_one": "{{count}} mo old",
+      "monthsOld_other": "{{count}} mo old",
+      "yearUnit_one": "{{count}} yr",
+      "yearUnit_other": "{{count}} yr",
+      "yearsOld_one": "{{count}} yr old",
+      "yearsOld_other": "{{count}} yr old",
+      "yearsMonthsOld_one": "{{years}} yr {{count}} mo old",
+      "yearsMonthsOld_other": "{{years}} yr {{count}} mo old",
+      "monthsAgo_one": "{{count}} mo ago",
+      "monthsAgo_other": "{{count}} mo ago",
+      "yearsAgo_one": "{{count}} yr ago",
+      "yearsAgo_other": "{{count}} yr ago",
+      "yearsMonthsAgo_one": "{{years}} yr {{count}} mo ago",
+      "yearsMonthsAgo_other": "{{years}} yr {{count}} mo ago"
+    },
+    "lastWaterChange": "Last water change"
+  },
+  "timeline": {
+    "title": "Recent activity",
+    "empty": {
+      "title": "Nothing logged yet",
+      "subtitle": "Everything you record for {{animalName}} will appear here.",
+      "action": "Log the first record"
+    },
+    "showAll_one": "See all {{count}} record",
+    "showAll_other": "See all {{count}} records",
+    "showAllHint": "Opens the full history for this reptile",
+    "historyTitle": "Activities",
+    "sinceLast_one": "{{count}} day since last",
+    "sinceLast_other": "{{count}} days since last",
+    "refused": "Refused",
+    "issues": "Issues noted",
+    "poop": {
+      "poop": "Feces",
+      "urate": "Urate",
+      "both": "Feces & urate"
+    },
+    "openHint": "Opens this record",
+    "swipe": {
+      "edit": "Edit",
+      "delete": "Delete"
+    },
+    "waterChanged": "Water changed"
+  },
+  "feeding": {
+    "noFeedingLogged": "No feeding logged",
+    "neverFed": "Never fed"
+  },
+  "a11y": {
+    "addReptile": {
+      "label": "Add reptile",
+      "hint": "Adds a new reptile"
+    },
+    "animalCard": {
+      "hint": "Opens details for {{animalName}}"
+    },
+    "language": {
+      "hint": "Opens a menu to choose the app language"
+    },
+    "resetData": {
+      "hint": "Opens a confirmation before deleting all app data"
+    },
+    "advancedSettings": {
+      "hint": "Shows or hides advanced settings"
+    },
+    "reptileForm": {
+      "speciesSuggestion": {
+        "hint": "Fills in the common and scientific name for this species"
+      }
+    },
+    "feedingSchedule": {
+      "enabled": {
+        "hint": "Shows when this reptile is overdue for feeding"
+      },
+      "frequency": {
+        "hint": "Opens a menu to choose how often this reptile is fed"
+      },
+      "customDays": {
+        "hint": "Enter the number of days between feedings"
+      }
+    },
+    "defaults": {
+      "mealMeasure": {
+        "hint": "Opens a menu to choose how meals are measured by default"
+      },
+      "frozen": {
+        "hint": "Sets whether new feedings start marked as frozen prey"
+      },
+      "weightUnit": {
+        "hint": "Opens a menu to choose the unit weights are entered and shown in"
+      },
+      "poopType": {
+        "hint": "Opens a menu to choose the poop type new records start on"
+      }
+    },
+    "habitatForm": {
+      "water": "Turn off to log enclosure upkeep without a water change"
+    },
+    "waterSchedule": {
+      "enabled": {
+        "hint": "Sets one water change cadence for every reptile in the collection"
+      },
+      "frequency": {
+        "hint": "Opens a menu to choose how often the water is changed"
+      },
+      "customDays": {
+        "hint": "Enter the number of days between water changes"
+      }
+    },
+    "reminders": {
+      "water": {
+        "hint": "Sends a notification when this reptile's water change comes due"
+      },
+      "time": {
+        "hint": "Opens a picker to choose what time the day's reminders arrive"
+      },
+      "row": {
+        "hint": "Opens a water change record you can backdate or annotate"
+      },
+      "done": {
+        "label": "Water changed for {{animalName}}",
+        "hint": "Logs a water change now and moves this to its next due date"
+      },
+      "allow": {
+        "hint": "Asks iOS for permission to send reminders"
+      },
+      "openSettings": {
+        "hint": "Opens ReptiKeep in the iOS Settings app"
+      }
+    }
+  },
+  "activity": {
+    "type": {
+      "feed": "Feed",
+      "shed": "Shed",
+      "poop": "Poop",
+      "weight": "Growth",
+      "habitat": "Habitat"
+    },
+    "status": {
+      "success": "Fed",
+      "danger": "Overdue",
+      "neutral": "No data"
+    }
+  },
+  "activityDetail": {
+    "title": "Record",
+    "done": "Done",
+    "doneHint": "Closes this record",
+    "actions": "More actions",
+    "actionsHint": "Edit or delete this record",
+    "edit": "Edit record",
+    "delete": "Delete record",
+    "deleteTitle": "Delete this {{activityType}} record?",
+    "deleteMessage": "This record is the only account of what happened. There is no way to undo it.",
+    "deleteConfirm": "Delete",
+    "cancel": "Cancel",
+    "meal": "Meal",
+    "sincePrevious": "Since previous",
+    "dayInterval_one": "{{count}} day",
+    "dayInterval_other": "{{count}} days",
+    "notes": "Notes",
+    "yes": "Yes",
+    "no": "No",
+    "recordedOn": "Logged on {{date}}, after the fact.",
+    "loggedFor": "Logged for {{animalName}}."
+  },
+  "schedule": {
+    "frequency": {
+      "label": "Frequency",
+      "daily": "Daily",
+      "everyOtherDay": "Every other day",
+      "weekly": "Weekly",
+      "everyTwoWeeks": "Every 2 weeks",
+      "monthly": "Monthly",
+      "custom": "Custom"
+    },
+    "customDays": "Number of days",
+    "customDaysPlaceholder": "Days",
+    "invalidDays": "Enter a whole number of days greater than zero.",
+    "off": "Off",
+    "everyDays_one": "Every day",
+    "everyDays_other": "Every {{count}} days",
+    "overdue_one": "{{count}} day overdue",
+    "overdue_other": "{{count}} days overdue"
+  },
+  "waterSchedule": {
+    "section": "Water change schedule",
+    "enabled": "Use a collection schedule",
+    "globalFooter": "Off unless you turn it on. With it on, every reptile follows this cadence unless its own profile says otherwise.",
+    "animalFooter": "Applies to {{animalName}} only. Left on Follow global, it tracks your Settings.",
+    "animalFooterNew": "Applies to this reptile only. Left on Follow global, it tracks your Settings."
+  },
+  "water": {
+    "overdue": "Water overdue",
+    "noneLogged": "No water change logged"
+  },
+  "habitatForm": {
+    "title": "Log habitat",
+    "editTitle": "Edit habitat",
+    "cancel": "Cancel",
+    "cancelHint": "Dismisses without saving",
+    "save": "Save",
+    "saveHint": "Adds this habitat record to {{animalName}}'s history",
+    "editSaveHint": "Saves these changes to this habitat record",
+    "timing": "Timing",
+    "when": "When",
+    "timingHint": "Logging for {{animalName}}. Backdate this to when you did the work.",
+    "upkeep": "Upkeep",
+    "water": "Water changed",
+    "waterHint": "This is the record the water change schedule counts from.",
+    "noWaterHint": "Logged as enclosure upkeep only — the water change schedule will not count this.",
+    "notes": "Notes",
+    "notesPlaceholder": "Add an observation"
+  }
+}

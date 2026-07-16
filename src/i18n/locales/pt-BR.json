@@ -1,0 +1,522 @@
+{
+  "tabs": {
+    "reptiles": "Répteis",
+    "reminders": "Lembretes",
+    "settings": "Ajustes",
+    "search": "Buscar"
+  },
+  "settings": {
+    "title": "Ajustes",
+    "general": "Geral",
+    "subtitle": "Escolha o idioma usado em todo o aplicativo. Seguir dispositivo usa a preferência do sistema.",
+    "language": "Idioma",
+    "followDevice": "Seguir dispositivo",
+    "english": "English",
+    "portuguese": "Português",
+    "advanced": "Avançado",
+    "advancedButton": "Ajustes avançados",
+    "hideAdvanced": "Ocultar ajustes avançados",
+    "data": "Dados do app",
+    "reset": "Apagar dados do app",
+    "resetTitle": "Apagar os dados do app?",
+    "resetFooter": "Exclui permanentemente todos os répteis e registros de atividade deste dispositivo. O idioma não será alterado.",
+    "resetMessage": "Esta ação não pode ser desfeita.",
+    "resetConfirm": "Apagar dados",
+    "cancel": "Cancelar"
+  },
+  "defaults": {
+    "section": "Padrões de registro",
+    "globalFooter": "Como um novo registro abre, e como os pesos aparecem em todo o app. Cada réptil segue estes valores, a menos que os substitua.",
+    "animalFooter": "Vale só para {{animalName}}. As linhas deixadas em Seguir global acompanham seus Ajustes.",
+    "animalFooterNew": "Vale só para este réptil. As linhas deixadas em Seguir global acompanham seus Ajustes.",
+    "followGlobal": "Seguir global · {{value}}",
+    "mealMeasure": "Medida da refeição",
+    "frozen": "Presa congelada",
+    "frozenYes": "Congelada",
+    "frozenNo": "Fresca",
+    "weightUnit": "Unidade de peso",
+    "poopType": "Tipo de fezes"
+  },
+  "reptiles": {
+    "title": "Répteis",
+    "empty": {
+      "title": "Nenhum réptil ainda",
+      "subtitle": "Adicione seu primeiro réptil para começar a registrar alimentações, mudas e crescimento."
+    },
+    "add": "Adicionar réptil",
+    "addHint": "Adiciona um novo réptil à sua coleção",
+    "filters": "Filtros",
+    "filtersHint": "Filtra a lista de répteis",
+    "options": "Opções",
+    "optionsHint": "Ordene, filtre e mude como seus répteis são exibidos",
+    "sort": {
+      "by": "Ordenar por",
+      "name": "Nome",
+      "commonName": "Nome Popular",
+      "scientificName": "Nome Científico",
+      "lastActivity": "Última Atividade",
+      "ascending": "Crescente",
+      "descending": "Decrescente"
+    },
+    "view": {
+      "grid": "Grade",
+      "single": "Coluna Única",
+      "list": "Lista"
+    }
+  },
+  "reminders": {
+    "title": "Lembretes",
+    "waterChange": "Troca de água",
+    "enabled": "Me lembrar",
+    "dueToday": "Vence hoje",
+    "dueIn_one": "Em {{count}} dia",
+    "dueIn_other": "Em {{count}} dias",
+    "timeFooter": "Os lembretes chegam às {{time}}.",
+    "section": {
+      "overdue": "Atrasados",
+      "today": "Hoje",
+      "upcoming": "Em breve"
+    },
+    "swipe": {
+      "schedule": "Rotina",
+      "mute": "Desligar"
+    },
+    "empty": {
+      "title": "Nada por vencer",
+      "subtitle": "Defina uma rotina de troca de água nos Ajustes, ou no perfil de um réptil, e o que estiver por vir aparece aqui."
+    },
+    "settings": {
+      "section": "Lembretes",
+      "time": "Horário dos lembretes",
+      "footer": "Os lembretes do dia chegam juntos neste horário. Ative-os para um réptil no perfil dele."
+    },
+    "permission": {
+      "title": "As notificações estão desligadas",
+      "ask": "Ligue para saber dos cuidados do dia às {{time}}. Tudo aqui embaixo continua funcionando de qualquer jeito.",
+      "blocked": "Permita notificações do ReptiKeep no app Ajustes para saber dos cuidados do dia. Tudo aqui embaixo continua funcionando de qualquer jeito.",
+      "action": "Ligar notificações",
+      "openSettings": "Abrir Ajustes"
+    },
+    "notification": {
+      "title": "Troca de água",
+      "body_one": "{{names}} precisa de água fresca hoje.",
+      "body_other": "{{names}} precisam de água fresca hoje.",
+      "overflow": "{{names}} e mais {{count}}"
+    }
+  },
+  "search": {
+    "title": "Buscar",
+    "placeholder": "Buscar répteis",
+    "noResults": {
+      "title": "Nenhum réptil encontrado",
+      "description": "Nenhum réptil corresponde a “{{query}}”."
+    }
+  },
+  "animal": {
+    "notFound": "Animal não encontrado",
+    "notFoundSubtitle": "Este réptil pode ter sido removido.",
+    "addActivity": "Adicionar atividade",
+    "actions": "Mais ações",
+    "actionsHint": "Editar ou excluir este réptil",
+    "edit": "Editar réptil",
+    "delete": "Excluir réptil",
+    "deleteTitle": "Excluir {{animalName}}?",
+    "deleteMessage": "Isto também exclui todos os registros de alimentação, crescimento, muda e fezes de {{animalName}}. Não há como desfazer.",
+    "deleteConfirm": "Excluir",
+    "cancel": "Cancelar"
+  },
+  "addRecord": {
+    "title": "Adicionar registro",
+    "prompt": "O que você gostaria de registrar para {{animalName}}?",
+    "close": "Fechar",
+    "closeHint": "Fecha sem escolher uma atividade",
+    "feeding": {
+      "title": "Alimentação",
+      "description": "Registrar uma refeição"
+    },
+    "weight": {
+      "title": "Crescimento",
+      "description": "Registrar uma pesagem"
+    },
+    "shed": {
+      "title": "Muda",
+      "description": "Registrar uma muda"
+    },
+    "defecation": {
+      "title": "Fezes",
+      "description": "Fezes e urato"
+    },
+    "habitat": {
+      "title": "Habitat",
+      "description": "Água e manutenção"
+    }
+  },
+  "feedingForm": {
+    "title": "Registrar alimentação",
+    "editTitle": "Editar alimentação",
+    "cancel": "Cancelar",
+    "cancelHint": "Descarta sem salvar",
+    "save": "Salvar",
+    "saveHint": "Adiciona esta alimentação ao histórico de {{animalName}}",
+    "editSaveHint": "Salva estas alterações neste registro de alimentação",
+    "timing": "Momento",
+    "when": "Quando",
+    "timingHint": "Registro para {{animalName}}. Ajuste para o momento em que a alimentação aconteceu.",
+    "mealDetails": "Detalhes da refeição",
+    "foodType": "Tipo de alimento",
+    "measureBy": "Medir alimento por",
+    "measure": {
+      "amount": "Quantidade",
+      "weight": "Peso"
+    },
+    "amount": "Quantidade ou porção",
+    "amountHint": "Opcional. Insira uma contagem ou porção, como 1, 3 ou 1 refeição.",
+    "feederWeight": "Peso do alimento",
+    "weightUnit": "Unidade de peso",
+    "weightHint": "Opcional. Escolha a unidade usada para o peso do alimento.",
+    "units": {
+      "g": "Gramas (g)",
+      "kg": "Quilogramas (kg)",
+      "lb": "Libras (lb)"
+    },
+    "invalidWeight": "Insira um peso válido igual ou maior que zero.",
+    "outcome": "Resultado",
+    "frozen": "Alimento congelado/descongelado",
+    "refused": "Recusou",
+    "notes": "Observações",
+    "notesPlaceholder": "Adicione uma observação"
+  },
+  "weightForm": {
+    "title": "Registrar peso",
+    "editTitle": "Editar pesagem",
+    "cancel": "Cancelar",
+    "cancelHint": "Descarta sem salvar",
+    "save": "Salvar",
+    "saveHint": "Adiciona esta pesagem ao histórico de {{animalName}}",
+    "editSaveHint": "Salva estas alterações nesta pesagem",
+    "weighIn": "Pesagem",
+    "weight": "Peso",
+    "weightPlaceholder": "Peso em {{unit}}",
+    "unit": "Unidade de peso",
+    "unitShort": {
+      "g": "g",
+      "kg": "kg",
+      "lb": "lb"
+    },
+    "previous": "Anterior",
+    "change": "Variação",
+    "hint": "Registrado em gramas, qualquer que seja a unidade escolhida.",
+    "firstHint": "Primeira pesagem de {{animalName}}. A próxima será comparada com esta.",
+    "invalidWeight": "Insira um peso de pelo menos 1 g.",
+    "implausible": "Diferença grande em relação à última pesagem — confira a unidade.",
+    "timing": "Momento",
+    "when": "Quando",
+    "timingHint": "Registro para {{animalName}}. Ajuste para o momento em que você pesou.",
+    "notes": "Observações",
+    "notesPlaceholder": "Adicione uma observação"
+  },
+  "shedForm": {
+    "title": "Registrar muda",
+    "editTitle": "Editar muda",
+    "cancel": "Cancelar",
+    "cancelHint": "Descarta sem salvar",
+    "save": "Salvar",
+    "saveHint": "Adiciona esta muda ao histórico de {{animalName}}",
+    "editSaveHint": "Salva estas alterações neste registro de muda",
+    "timing": "Momento",
+    "when": "Quando",
+    "timingHint": "Registro para {{animalName}}. Ajuste para o momento em que a muda aconteceu.",
+    "observation": "Observação",
+    "issues": "Problemas observados",
+    "issuesHint": "Ative se a muda foi incompleta ou o animal teve dificuldade.",
+    "notes": "Observações",
+    "notesPlaceholder": "Adicione uma observação"
+  },
+  "defecationForm": {
+    "title": "Registrar fezes",
+    "editTitle": "Editar fezes",
+    "cancel": "Cancelar",
+    "cancelHint": "Descarta sem salvar",
+    "save": "Salvar",
+    "saveHint": "Adiciona este registro de fezes ao histórico de {{animalName}}",
+    "editSaveHint": "Salva estas alterações neste registro de fezes",
+    "observation": "Observação",
+    "type": "Tipo",
+    "typeHint": "Escolha o que foi observado.",
+    "issues": "Problemas observados",
+    "issuesHint": "Ative se algo pareceu anormal.",
+    "timing": "Momento",
+    "when": "Quando",
+    "timingHint": "Registro para {{animalName}}. Ajuste para o momento em que aconteceu.",
+    "notes": "Observações",
+    "notesPlaceholder": "Adicione uma observação"
+  },
+  "newReptile": {
+    "title": "Novo réptil",
+    "cancel": "Cancelar",
+    "cancelHint": "Descarta sem salvar",
+    "save": "Salvar",
+    "saveHint": "Adiciona este réptil à sua coleção"
+  },
+  "editReptile": {
+    "title": "Editar réptil",
+    "cancel": "Cancelar",
+    "cancelHint": "Descarta sem salvar as alterações",
+    "save": "Salvar",
+    "saveHint": "Salva estas alterações no perfil de {{animalName}}"
+  },
+  "reptileForm": {
+    "name": "Nome",
+    "commonName": "Nome comum",
+    "scientificName": "Nome científico",
+    "sex": "Sexo",
+    "knownBirthDate": "Data de nascimento conhecida",
+    "birthDate": "Data de nascimento",
+    "acquired": "Aquisição",
+    "addPhoto": "Adicionar foto",
+    "changePhoto": "Alterar foto",
+    "removePhoto": "Remover foto",
+    "photoSaveError": "Não foi possível salvar esta foto. Tente novamente ou remova-a para salvar sem foto.",
+    "details": "Detalhes"
+  },
+  "feedingSchedule": {
+    "section": "Rotina de alimentação",
+    "enabled": "Usar rotina de alimentação",
+    "footer": "O atraso começa a ser contado após a primeira alimentação aceita."
+  },
+  "sex": {
+    "unknown": "Desconhecido",
+    "male": "Macho",
+    "female": "Fêmea"
+  },
+  "detail": {
+    "birthDate": "Data de nascimento",
+    "acquired": "Aquisição",
+    "currentWeight": "Peso atual",
+    "noWeight": "Sem peso registrado",
+    "lastFed": "Última alimentação",
+    "unknownValue": "—",
+    "relative": {
+      "today": "Hoje",
+      "yesterday": "Ontem",
+      "daysAgo_one": "há {{count}} dia",
+      "daysAgo_other": "há {{count}} dias",
+      "bornToday": "Nasceu hoje",
+      "daysOld_one": "{{count}} dia de vida",
+      "daysOld_other": "{{count}} dias de vida",
+      "monthsOld_one": "{{count}} mês de vida",
+      "monthsOld_other": "{{count}} meses de vida",
+      "yearUnit_one": "{{count}} ano",
+      "yearUnit_other": "{{count}} anos",
+      "yearsOld_one": "{{count}} ano de vida",
+      "yearsOld_other": "{{count}} anos de vida",
+      "yearsMonthsOld_one": "$t(detail.relative.yearUnit, {\"count\": {{years}} }) e {{count}} mês de vida",
+      "yearsMonthsOld_other": "$t(detail.relative.yearUnit, {\"count\": {{years}} }) e {{count}} meses de vida",
+      "monthsAgo_one": "há {{count}} mês",
+      "monthsAgo_other": "há {{count}} meses",
+      "yearsAgo_one": "há {{count}} ano",
+      "yearsAgo_other": "há {{count}} anos",
+      "yearsMonthsAgo_one": "há $t(detail.relative.yearUnit, {\"count\": {{years}} }) e {{count}} mês",
+      "yearsMonthsAgo_other": "há $t(detail.relative.yearUnit, {\"count\": {{years}} }) e {{count}} meses"
+    },
+    "lastWaterChange": "Última troca de água"
+  },
+  "timeline": {
+    "title": "Atividades recentes",
+    "empty": {
+      "title": "Nada registrado ainda",
+      "subtitle": "Tudo o que você registrar para {{animalName}} aparecerá aqui.",
+      "action": "Registrar o primeiro"
+    },
+    "showAll_one": "Ver {{count}} registro",
+    "showAll_other": "Ver todos os {{count}} registros",
+    "showAllHint": "Abre o histórico completo deste réptil",
+    "historyTitle": "Atividades",
+    "sinceLast_one": "{{count}} dia desde o anterior",
+    "sinceLast_other": "{{count}} dias desde o anterior",
+    "refused": "Recusou",
+    "issues": "Com observações",
+    "poop": {
+      "poop": "Fezes",
+      "urate": "Urato",
+      "both": "Fezes e urato"
+    },
+    "openHint": "Abre este registro",
+    "swipe": {
+      "edit": "Editar",
+      "delete": "Excluir"
+    },
+    "waterChanged": "Água trocada"
+  },
+  "feeding": {
+    "noFeedingLogged": "Nenhuma alimentação registrada",
+    "neverFed": "Nunca alimentado"
+  },
+  "a11y": {
+    "addReptile": {
+      "label": "Adicionar réptil",
+      "hint": "Adiciona um novo réptil"
+    },
+    "animalCard": {
+      "hint": "Abre os detalhes de {{animalName}}"
+    },
+    "language": {
+      "hint": "Abre um menu para escolher o idioma do app"
+    },
+    "resetData": {
+      "hint": "Abre uma confirmação antes de excluir todos os dados do app"
+    },
+    "advancedSettings": {
+      "hint": "Mostra ou oculta os ajustes avançados"
+    },
+    "reptileForm": {
+      "speciesSuggestion": {
+        "hint": "Preenche o nome comum e o nome científico desta espécie"
+      }
+    },
+    "feedingSchedule": {
+      "enabled": {
+        "hint": "Mostra quando a alimentação deste réptil está atrasada"
+      },
+      "frequency": {
+        "hint": "Abre um menu para escolher a frequência de alimentação deste réptil"
+      },
+      "customDays": {
+        "hint": "Insira o número de dias entre as alimentações"
+      }
+    },
+    "defaults": {
+      "mealMeasure": {
+        "hint": "Abre um menu para escolher como as refeições são medidas por padrão"
+      },
+      "frozen": {
+        "hint": "Define se novas alimentações começam marcadas como presa congelada"
+      },
+      "weightUnit": {
+        "hint": "Abre um menu para escolher a unidade em que os pesos são inseridos e exibidos"
+      },
+      "poopType": {
+        "hint": "Abre um menu para escolher o tipo com que novos registros começam"
+      }
+    },
+    "habitatForm": {
+      "water": "Desative para registrar manutenção do terrário sem troca de água"
+    },
+    "waterSchedule": {
+      "enabled": {
+        "hint": "Define uma frequência de troca de água para todos os répteis da coleção"
+      },
+      "frequency": {
+        "hint": "Abre um menu para escolher com que frequência a água é trocada"
+      },
+      "customDays": {
+        "hint": "Insira o número de dias entre as trocas de água"
+      }
+    },
+    "reminders": {
+      "water": {
+        "hint": "Envia uma notificação quando a troca de água deste réptil vencer"
+      },
+      "time": {
+        "hint": "Abre um seletor para escolher a que horas os lembretes do dia chegam"
+      },
+      "row": {
+        "hint": "Abre um registro de troca de água que você pode retroagir ou comentar"
+      },
+      "done": {
+        "label": "Água trocada de {{animalName}}",
+        "hint": "Registra a troca de água agora e move isto para o próximo vencimento"
+      },
+      "allow": {
+        "hint": "Pede ao iOS permissão para enviar lembretes"
+      },
+      "openSettings": {
+        "hint": "Abre o ReptiKeep no app Ajustes do iOS"
+      }
+    }
+  },
+  "activity": {
+    "type": {
+      "feed": "Alimentação",
+      "shed": "Muda",
+      "poop": "Fezes",
+      "weight": "Crescimento",
+      "habitat": "Habitat"
+    },
+    "status": {
+      "success": "Alimentado",
+      "danger": "Atrasado",
+      "neutral": "Sem dados"
+    }
+  },
+  "activityDetail": {
+    "title": "Registro",
+    "done": "Concluir",
+    "doneHint": "Fecha este registro",
+    "actions": "Mais ações",
+    "actionsHint": "Editar ou excluir este registro",
+    "edit": "Editar registro",
+    "delete": "Excluir registro",
+    "deleteTitle": "Excluir este registro de {{activityType}}?",
+    "deleteMessage": "Este registro é o único relato do que aconteceu. Não há como desfazer.",
+    "deleteConfirm": "Excluir",
+    "cancel": "Cancelar",
+    "meal": "Refeição",
+    "sincePrevious": "Desde o anterior",
+    "dayInterval_one": "{{count}} dia",
+    "dayInterval_other": "{{count}} dias",
+    "notes": "Observações",
+    "yes": "Sim",
+    "no": "Não",
+    "recordedOn": "Registrado em {{date}}, depois do ocorrido.",
+    "loggedFor": "Registrado para {{animalName}}."
+  },
+  "schedule": {
+    "frequency": {
+      "label": "Frequência",
+      "daily": "Diariamente",
+      "everyOtherDay": "A cada dois dias",
+      "weekly": "Semanalmente",
+      "everyTwoWeeks": "A cada 2 semanas",
+      "monthly": "Mensalmente",
+      "custom": "Personalizada"
+    },
+    "customDays": "Número de dias",
+    "customDaysPlaceholder": "Dias",
+    "invalidDays": "Insira um número inteiro de dias maior que zero.",
+    "off": "Desativada",
+    "everyDays_one": "Todo dia",
+    "everyDays_other": "A cada {{count}} dias",
+    "overdue_one": "{{count}} dia de atraso",
+    "overdue_other": "{{count}} dias de atraso"
+  },
+  "waterSchedule": {
+    "section": "Rotina de troca de água",
+    "enabled": "Usar rotina da coleção",
+    "globalFooter": "Desativada até você ligar. Com ela ligada, todos os répteis seguem esta frequência, a menos que o perfil de cada um diga outra coisa.",
+    "animalFooter": "Vale só para {{animalName}}. Em Seguir global, acompanha seus Ajustes.",
+    "animalFooterNew": "Vale só para este réptil. Em Seguir global, acompanha seus Ajustes."
+  },
+  "water": {
+    "overdue": "Água atrasada",
+    "noneLogged": "Nenhuma troca de água registrada"
+  },
+  "habitatForm": {
+    "title": "Registrar habitat",
+    "editTitle": "Editar habitat",
+    "cancel": "Cancelar",
+    "cancelHint": "Descarta sem salvar",
+    "save": "Salvar",
+    "saveHint": "Adiciona este registro de habitat ao histórico de {{animalName}}",
+    "editSaveHint": "Salva estas alterações neste registro de habitat",
+    "timing": "Momento",
+    "when": "Quando",
+    "timingHint": "Registro para {{animalName}}. Ajuste para o momento em que você fez o trabalho.",
+    "upkeep": "Manutenção",
+    "water": "Água trocada",
+    "waterHint": "Este é o registro que a rotina de troca de água usa como referência.",
+    "noWaterHint": "Registrado apenas como manutenção do terrário — a rotina de troca de água não vai contar isto.",
+    "notes": "Observações",
+    "notesPlaceholder": "Adicione uma observação"
+  }
+}
