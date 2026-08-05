@@ -44,7 +44,7 @@ const REPLACEMENT_PHOTO = {
   uri: "file:///picker/latest-willow.heic",
   fileName: "latest-willow.heic",
 };
-const MANAGED_PHOTO = "file:///documents/animal-photos/test-uuid-1.heic";
+const MANAGED_PHOTO = "file:///documents/animal-photos/test-uuid-1.webp";
 
 async function pickPhoto(screen: ReturnType<typeof render>): Promise<void> {
   fireEvent.press(screen.getByLabelText("Add photo"));
@@ -364,7 +364,7 @@ describe("ReptileFormSheet photo persistence", () => {
   });
 });
 
-const EXISTING_PHOTO = "file:///documents/animal-photos/willow.heic";
+const EXISTING_PHOTO = "file:///documents/animal-photos/willow.webp";
 
 function existingAnimal(
   overrides: Partial<animalState.Animal> = {},

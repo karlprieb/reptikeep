@@ -1,18 +1,17 @@
 import { Directory, File, Paths } from "expo-file-system";
 
+import { processAnimalPhoto } from "@/utils/image-processing";
+
 export interface AnimalPhotoSource {
   uri: string;
 }
 
 const MANAGED_DIRECTORY_NAME = "animal-photos";
-const FALLBACK_EXTENSION = ".jpg";
+const MANAGED_EXTENSION = ".webp";
+const STAGING_SUFFIX = ".staging";
 
 function getManagedDirectory(): Directory {
   return new Directory(Paths.document, MANAGED_DIRECTORY_NAME);
-}
-
-function getPhotoExtension(source: AnimalPhotoSource): string {
-  return Paths.extname(source.uri).toLowerCase() || FALLBACK_EXTENSION;
 }
 
 function getSafeAnimalId(animalId: string): string {
@@ -21,26 +20,34 @@ function getSafeAnimalId(animalId: string): string {
   return safeAnimalId;
 }
 
+function deleteCacheFile(uri: string): void {
+  try {
+    new File(uri).delete();
+  } catch {}
+}
+
 export async function importAnimalPhoto(
   source: AnimalPhotoSource,
   animalId: string,
 ): Promise<string> {
+  const processedUri = await processAnimalPhoto(source.uri);
   const directory = getManagedDirectory();
   directory.create({ idempotent: true, intermediates: true });
 
-  const destination = new File(
-    directory,
-    `${getSafeAnimalId(animalId)}${getPhotoExtension(source)}`,
-  );
+  const filename = `${getSafeAnimalId(animalId)}${MANAGED_EXTENSION}`;
+  const stagingFile = new File(directory, `${filename}${STAGING_SUFFIX}`);
+  const destination = new File(directory, filename);
 
   try {
-    await new File(source.uri).copy(destination, { overwrite: true });
+    await new File(processedUri).copy(stagingFile, { overwrite: true });
+    stagingFile.rename(filename);
+    return destination.uri;
   } catch (error) {
-    if (destination.exists) destination.delete();
+    if (stagingFile.exists) stagingFile.delete();
     throw error;
+  } finally {
+    deleteCacheFile(processedUri);
   }
-
-  return destination.uri;
 }
 
 export function getAnimalPhotoUri(photo: string): string {

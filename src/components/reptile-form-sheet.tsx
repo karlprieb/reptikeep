@@ -304,7 +304,6 @@ export function ReptileFormSheet({ animal }: ReptileFormSheetProps) {
 
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ["images"],
-      quality: 0.8,
     });
     if (result.canceled) return;
 
