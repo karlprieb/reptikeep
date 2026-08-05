@@ -1,4 +1,6 @@
+import i18n from "@/i18n";
 import {
+  formatFileSize,
   formatPercent,
   formatSignedPercent,
   formatWeight,
@@ -77,5 +79,34 @@ describe("formatPercent", () => {
     expect(formatPercent(-9.66)).toBe("9.7%");
     expect(formatPercent(23)).toBe("23%");
     expect(formatPercent(0)).toBe("0%");
+  });
+});
+
+describe("formatFileSize", () => {
+  it("steps up through the byte units", () => {
+    expect(formatFileSize(512)).toBe("512 B");
+    expect(formatFileSize(18223)).toBe("17.8 KB");
+    expect(formatFileSize(10 * 1024 * 1024)).toBe("10 MB");
+  });
+
+  it("reads an unusable size as a placeholder", () => {
+    expect(formatFileSize(-1)).toBe("—");
+    expect(formatFileSize(Number.NaN)).toBe("—");
+  });
+});
+
+describe("locale awareness", () => {
+  it("uses the active language's separators", async () => {
+    await i18n.changeLanguage("pt-BR");
+
+    try {
+      expect(formatWeight(1340, "g")).toBe("1.340 g");
+      expect(formatWeight(1340, "kg")).toBe("1,34 kg");
+      expect(formatWeightDelta(-1240, "kg")).toBe("−1,24 kg");
+      expect(formatPercent(17.86)).toBe("17,9%");
+      expect(formatFileSize(18223)).toBe("17,8 KB");
+    } finally {
+      await i18n.changeLanguage("en");
+    }
   });
 });

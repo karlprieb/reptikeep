@@ -42,7 +42,8 @@
       [
         "expo-image-picker",
         {
-          "photosPermission": "Attach a photo to a reptile's profile."
+          "photosPermission": "Attach a photo or a document to a reptile's profile.",
+          "cameraPermission": "Take a picture of a document to attach it to a reptile."
         }
       ],
       "expo-localization",

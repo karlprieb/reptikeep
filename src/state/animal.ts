@@ -11,6 +11,7 @@ import { toCalendarDate } from "@/utils/format-date";
 
 import { persistedAsWritten, persistPlugin } from "./persist";
 import { removeActivitiesForAnimal } from "./activity-stores";
+import { removeDocumentsForAnimal } from "./document";
 import type { AnimalSchedule, CareSchedule } from "./care-schedule";
 import type { AnimalLoggingDefaults } from "./logging-defaults";
 
@@ -64,6 +65,7 @@ export function removeAnimal(id: string): void {
     const { [id]: _, ...rest } = animals$.peek();
     animals$.set(rest);
     removeActivitiesForAnimal(id);
+    removeDocumentsForAnimal(id);
   });
 
   deleteManagedAnimalPhoto(photoUri);

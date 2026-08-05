@@ -39,6 +39,14 @@ const activityTables = [
   "habitats",
 ] as const;
 
+function withDocuments(
+  sentence: string,
+  documentSentence: string,
+  documents: number,
+): string {
+  return documents > 0 ? `${sentence} ${documentSentence}` : sentence;
+}
+
 export default function BackupRestoreScreen() {
   const { t } = useTranslation();
   const theme = useTheme();
@@ -67,6 +75,12 @@ export default function BackupRestoreScreen() {
   const logBackupError = (operation: string, error: unknown) => {
     if (__DEV__) console.error(`Backup ${operation} failed`, error);
   };
+  const successMessage = (restored: RestoredBackup) =>
+    withDocuments(
+      t("backup.success", { ...restored, count: restored.animals }),
+      t("backup.documentsRestored", { count: restored.documents }),
+      restored.documents,
+    );
 
   const exportBackup = async () => {
     setBusy(true);
@@ -106,14 +120,16 @@ export default function BackupRestoreScreen() {
             count + Object.keys(parsed.data[table] ?? {}).length,
           0,
         ),
+        documents: Object.keys(parsed.data.documents ?? {}).length,
       };
       setBusy(false);
       Alert.alert(
         t("backup.restoreTitle"),
-        t("backup.restoreMessage", {
-          ...summary,
-          count: summary.animals,
-        }),
+        withDocuments(
+          t("backup.restoreMessage", { ...summary, count: summary.animals }),
+          t("backup.documentsIncluded", { count: summary.documents }),
+          summary.documents,
+        ),
         [
           { text: t("settings.cancel"), style: "cancel" },
           {
@@ -136,9 +152,7 @@ export default function BackupRestoreScreen() {
     try {
       const restored = await restoreBackup(candidate);
       setSuccess(restored);
-      AccessibilityInfo.announceForAccessibility(
-        t("backup.success", { ...restored, count: restored.animals }),
-      );
+      AccessibilityInfo.announceForAccessibility(successMessage(restored));
     } catch (error) {
       logBackupError("restore", error);
       setError(t("backup.restoreError"));
@@ -265,7 +279,7 @@ export default function BackupRestoreScreen() {
         {success && (
           <Section>
             <Text modifiers={[foregroundStyle(theme.textSecondary)]}>
-              {t("backup.success", { ...success, count: success.animals })}
+              {successMessage(success)}
             </Text>
           </Section>
         )}

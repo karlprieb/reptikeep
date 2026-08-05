@@ -27,7 +27,7 @@
   "backup": {
     "title": "Backup & restore",
     "exportSection": "Export",
-    "exportFooter": "Backups are standard ZIP files containing your selected data and WebP photos.",
+    "exportFooter": "Backups are standard ZIP files containing your selected data, WebP photos and any attached documents.",
     "exportAll": "Export all data",
     "includePreferences": "Include preferences",
     "animalsNone": "Animals: none",
@@ -47,6 +47,10 @@
     "restoreMessage_other": "This backup has {{animals}} reptiles and {{records}} records. It will replace your current reptiles and records.",
     "success_one": "Restored {{animals}} reptile and {{records}} record.",
     "success_other": "Restored {{animals}} reptiles and {{records}} records.",
+    "documentsIncluded_one": "It also includes {{count}} document.",
+    "documentsIncluded_other": "It also includes {{count}} documents.",
+    "documentsRestored_one": "Also restored {{count}} document.",
+    "documentsRestored_other": "Also restored {{count}} documents.",
     "error": "Could not prepare this backup.",
     "restoreError": "Could not restore this backup. Please try again."
   },
@@ -154,9 +158,60 @@
     "edit": "Edit reptile",
     "delete": "Delete reptile",
     "deleteTitle": "Delete {{animalName}}?",
-    "deleteMessage": "This also deletes every feeding, growth, shed and poop record logged for {{animalName}}. There is no way to undo it.",
+    "deleteMessage": "This also deletes every feeding, growth, shed, poop record, and document logged for {{animalName}}. There is no way to undo it.",
     "deleteConfirm": "Delete",
     "cancel": "Cancel"
+  },
+  "documents": {
+    "title": "Documents",
+    "add": "Add document",
+    "empty": {
+      "title": "No documents yet",
+      "description": "Invoices, certificates and permits for this reptile live here."
+    },
+    "kind": {
+      "invoice": "Invoice or receipt",
+      "authenticity": "Certificate of authenticity",
+      "origin": "Certificate of origin",
+      "permit": "Permit or licence",
+      "other": "Other"
+    },
+    "swipe": {
+      "edit": "Edit",
+      "delete": "Delete"
+    },
+    "deleteTitle": "Delete {{title}}?",
+    "deleteMessage": "This removes the file from this device. There is no way to undo it.",
+    "deleteConfirm": "Delete",
+    "cancel": "Cancel",
+    "form": {
+      "title": "New document",
+      "editTitle": "Edit document",
+      "cancel": "Cancel",
+      "cancelHint": "Dismisses without saving",
+      "save": "Save",
+      "saveHint": "Adds this document to {{animalName}}'s records",
+      "editSaveHint": "Saves these changes to this document",
+      "chooseFile": "Choose a document",
+      "source": {
+        "files": "Files",
+        "photos": "Photos",
+        "camera": "Camera"
+      },
+      "details": "Details",
+      "titleField": "Title",
+      "kindField": "Kind",
+      "knownIssueDate": "Known issue date",
+      "issueDate": "Issue date",
+      "tooLarge": "Documents must be {{limit}} or smaller. This one is {{size}}.",
+      "unsupportedType": "That file type isn't supported. Choose a PDF, JPG, PNG, or HEIC.",
+      "saveError": "We couldn't save this document. Try again."
+    },
+    "preview": {
+      "share": "Share",
+      "missingTitle": "Document unavailable",
+      "missingDescription": "This file could not be found. It may have been removed from this device."
+    }
   },
   "addRecord": {
     "title": "Add a record",
@@ -478,6 +533,37 @@
       },
       "openSettings": {
         "hint": "Opens ReptiKeep in the iOS Settings app"
+      }
+    },
+    "documents": {
+      "add": {
+        "hint": "Adds a new document for this reptile"
+      },
+      "row": {
+        "hint": "Opens this document"
+      },
+      "fileWell": {
+        "hint": "Opens options to add a file from Files, Photos, or Camera"
+      },
+      "source": {
+        "files": {
+          "hint": "Chooses a file from the Files app"
+        },
+        "photos": {
+          "hint": "Chooses a photo from your library"
+        },
+        "camera": {
+          "hint": "Takes a photo with the camera"
+        }
+      },
+      "kindPicker": {
+        "hint": "Opens a menu to choose the kind of document"
+      },
+      "issueDateToggle": {
+        "hint": "Shows a date picker for when this document was issued"
+      },
+      "share": {
+        "hint": "Shares this document"
       }
     }
   },

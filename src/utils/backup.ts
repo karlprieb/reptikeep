@@ -1,14 +1,29 @@
 import { batch, syncState, when } from "@legendapp/state";
 import * as Sharing from "expo-sharing";
 import { Directory, File, Paths } from "expo-file-system";
-import { unzipSync, zipSync } from "fflate";
+import { unzipSync, zipSync, type Zippable } from "fflate";
 
 import { activityStores } from "@/state/activity-stores";
 import { animals$, type Animal } from "@/state/animal";
 import { careSchedules$ } from "@/state/care-schedule";
+import {
+  documents$,
+  DOCUMENT_KINDS,
+  type AnimalDocument,
+  type DocumentKind,
+} from "@/state/document";
 import { defaults$ } from "@/state/logging-defaults";
 import { reminders$ } from "@/state/reminders";
 import { setLanguage, settings$ } from "@/state/settings";
+import {
+  DOCUMENT_EXTENSIONS,
+  MAX_DOCUMENT_BYTES,
+  deleteManagedAnimalDocument,
+  managedAnimalDocumentUri,
+  readAnimalDocumentBytes,
+  writeAnimalDocument,
+  type DocumentExtension,
+} from "@/utils/animal-document-storage";
 import {
   deleteManagedAnimalPhoto,
   getAnimalPhotoUri,
@@ -16,13 +31,16 @@ import {
 } from "@/utils/animal-photo-storage";
 
 const FORMAT = "app.reptikeep.backup";
-const VERSION = 1;
-const MAX_ARCHIVE_BYTES = 20 * 1024 * 1024;
-const MAX_EXPANDED_BYTES = 80 * 1024 * 1024;
-const MAX_ENTRY_BYTES = 8 * 1024 * 1024;
+const VERSION = 2;
+const SUPPORTED_VERSIONS = [1, 2];
+// ponytail: whole archive is decoded in memory, so these ceilings are RAM-bound; streaming zip is the upgrade path if keepers hit them.
+const MAX_ARCHIVE_BYTES = 80 * 1024 * 1024;
+const MAX_EXPANDED_BYTES = 160 * 1024 * 1024;
+const MAX_ENTRY_BYTES = MAX_DOCUMENT_BYTES;
 const MAX_PHOTO_BYTES = 5 * 1024 * 1024;
-const MAX_ENTRIES = 128;
+const MAX_ENTRIES = 1024;
 const MAX_RATIO = 100;
+const DOCUMENT_PREFIX = "documents/";
 const encoder = new TextEncoder();
 const decoder = new TextDecoder();
 
@@ -50,6 +68,7 @@ export type RestoredBackup = {
   scopes: Scopes;
   animals: number;
   records: number;
+  documents: number;
 };
 type BackupData = {
   animals?: Record<string, Animal>;
@@ -58,11 +77,13 @@ type BackupData = {
   sheds?: Table;
   defecations?: Table;
   habitats?: Table;
+  documents?: Table;
   settings?: Record<string, unknown>;
   loggingDefaults?: Record<string, unknown>;
   reminders?: Record<string, unknown>;
   careSchedules?: Record<string, unknown>;
 };
+type DocumentEntry = { extension: string; bytes: Uint8Array };
 type ParsedBackup = {
   manifest: {
     format: string;
@@ -73,6 +94,7 @@ type ParsedBackup = {
   };
   data: BackupData;
   photos: Record<string, Uint8Array>;
+  documents: Record<string, DocumentEntry>;
 };
 
 function cacheDirectory(): Directory {
@@ -184,7 +206,9 @@ function inspectZip(bytes: Uint8Array): void {
       throw new Error("Backup contains an invalid file path.");
     }
     if (
-      !/^(manifest|data)\.json$|^photos\/[A-Za-z0-9_-]+\.webp$/.test(path) ||
+      !/^(manifest|data)\.json$|^photos\/[A-Za-z0-9_-]+\.webp$|^documents\/[A-Za-z0-9_-]+\.(pdf|jpg|png|heic)$/.test(
+        path,
+      ) ||
       paths.has(path.toLowerCase())
     )
       throw new Error("Backup contains an invalid file path.");
@@ -377,8 +401,77 @@ function validActivity(
     );
   return typeof record.water === "boolean";
 }
+function hasDocumentMagic(entry: DocumentEntry): boolean {
+  const { bytes, extension } = entry;
+  if (extension === "pdf")
+    return (
+      bytes[0] === 0x25 &&
+      bytes[1] === 0x50 &&
+      bytes[2] === 0x44 &&
+      bytes[3] === 0x46
+    );
+  if (extension === "jpg")
+    return bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff;
+  if (extension === "png")
+    return (
+      bytes[0] === 0x89 &&
+      bytes[1] === 0x50 &&
+      bytes[2] === 0x4e &&
+      bytes[3] === 0x47
+    );
+  return (
+    bytes[4] === 0x66 &&
+    bytes[5] === 0x74 &&
+    bytes[6] === 0x79 &&
+    bytes[7] === 0x70
+  );
+}
+function validDocument(
+  record: unknown,
+  id: string,
+  animals: Record<string, Animal>,
+  entries: Record<string, DocumentEntry>,
+): boolean {
+  if (
+    !isPlainObject(record) ||
+    !safeId(id) ||
+    record.id !== id ||
+    !exactKeys(record, [
+      "id",
+      "animalId",
+      "createdAt",
+      "title",
+      "kind",
+      "issuedDate",
+      "file",
+      "extension",
+      "size",
+    ]) ||
+    !safeId(record.animalId) ||
+    !animals[record.animalId] ||
+    !validInstant(record.createdAt) ||
+    typeof record.title !== "string" ||
+    record.title.length > 200 ||
+    !DOCUMENT_KINDS.includes(record.kind as DocumentKind) ||
+    (record.issuedDate !== undefined && !validCalendarDate(record.issuedDate))
+  )
+    return false;
+  if (
+    !DOCUMENT_EXTENSIONS.includes(record.extension as DocumentExtension) ||
+    record.file !== `${DOCUMENT_PREFIX}${id}.${record.extension}`
+  )
+    return false;
+  const entry = entries[id];
+  return (
+    !!entry &&
+    entry.extension === record.extension &&
+    entry.bytes.byteLength <= MAX_DOCUMENT_BYTES &&
+    record.size === entry.bytes.byteLength &&
+    hasDocumentMagic(entry)
+  );
+}
 function validate(parsed: ParsedBackup): void {
-  const { data, manifest, photos } = parsed;
+  const { data, manifest, photos, documents } = parsed;
   if (
     !isPlainObject(manifest) ||
     !exactKeys(manifest, [
@@ -389,7 +482,7 @@ function validate(parsed: ParsedBackup): void {
       "inventory",
     ]) ||
     manifest.format !== FORMAT ||
-    manifest.schemaVersion !== VERSION ||
+    !SUPPORTED_VERSIONS.includes(manifest.schemaVersion as number) ||
     !validInstant(manifest.createdAt) ||
     !isPlainObject(manifest.scopes)
   )
@@ -401,7 +494,11 @@ function validate(parsed: ParsedBackup): void {
   ))
     throw new Error("Backup scopes are invalid.");
   const keys = Object.keys(data);
-  const husbandryKeys = ["animals", ...activityNames];
+  const husbandryKeys = [
+    "animals",
+    ...activityNames,
+    ...((manifest.schemaVersion as number) >= 2 ? ["documents"] : []),
+  ];
   const preferenceKeys = [
     "settings",
     "loggingDefaults",
@@ -427,6 +524,8 @@ function validate(parsed: ParsedBackup): void {
   const animals = (data.animals ?? {}) as Record<string, Animal>;
   if (scopes.husbandry === "absent" && Object.keys(photos).length)
     throw new Error("Backup has an unexpected photo.");
+  if (scopes.husbandry === "absent" && Object.keys(documents).length)
+    throw new Error("Backup has an unexpected document.");
   for (const [id, photo] of Object.entries(photos))
     if (
       !animals[id] ||
@@ -448,6 +547,13 @@ function validate(parsed: ParsedBackup): void {
     for (const [id, record] of Object.entries((data[name] ?? {}) as Table))
       if (!validActivity(name, record, id, animals))
         throw new Error("Backup has an invalid activity.");
+  const documentRecords = (data.documents ?? {}) as Table;
+  for (const [id, record] of Object.entries(documentRecords))
+    if (!validDocument(record, id, animals, documents))
+      throw new Error("Backup has an invalid document.");
+  for (const id of Object.keys(documents))
+    if (!documentRecords[id])
+      throw new Error("Backup has an unclaimed document file.");
   if (scopes.preferences === "present") {
     const settings = data.settings!;
     const defaults = data.loggingDefaults!;
@@ -489,6 +595,7 @@ function validate(parsed: ParsedBackup): void {
 async function waitForHydration(): Promise<void> {
   const stores = [
     animals$,
+    documents$,
     settings$,
     defaults$,
     reminders$,
@@ -523,6 +630,10 @@ function recordCount(data: BackupData): number {
     (count, name) => count + Object.keys(data[name] ?? {}).length,
     0,
   );
+}
+
+function documentCount(data: BackupData): number {
+  return Object.keys(data.documents ?? {}).length;
 }
 
 export function backupName(now = new Date()): string {
@@ -582,6 +693,42 @@ export function animalForBackup(animal: Animal): Animal {
       typeof animal.reminders?.water === "boolean"
         ? { water: animal.reminders.water }
         : undefined,
+  };
+}
+function isBackupableDocument(document: unknown): document is AnimalDocument {
+  return (
+    isPlainObject(document) &&
+    safeId(document.id) &&
+    safeId(document.animalId) &&
+    validInstant(document.createdAt) &&
+    typeof document.title === "string" &&
+    DOCUMENT_KINDS.includes(document.kind as DocumentKind) &&
+    (document.issuedDate === undefined ||
+      validCalendarDate(document.issuedDate)) &&
+    typeof document.file === "string" &&
+    DOCUMENT_EXTENSIONS.includes(document.extension as DocumentExtension) &&
+    typeof document.size === "number" &&
+    Number.isFinite(document.size) &&
+    document.size >= 0
+  );
+}
+
+export function documentForBackup(
+  document: AnimalDocument,
+  bytes: Uint8Array,
+): AnimalDocument {
+  return {
+    id: document.id,
+    animalId: document.animalId,
+    createdAt: document.createdAt,
+    title: document.title.trim().slice(0, 200),
+    kind: DOCUMENT_KINDS.includes(document.kind) ? document.kind : "other",
+    issuedDate: validCalendarDate(document.issuedDate)
+      ? document.issuedDate
+      : undefined,
+    file: `${DOCUMENT_PREFIX}${document.id}.${document.extension}`,
+    extension: document.extension,
+    size: bytes.byteLength,
   };
 }
 export function preferencesForBackup() {
@@ -658,6 +805,7 @@ export async function createBackup(selection?: BackupSelection): Promise<File> {
   if (scopes.husbandry === "absent" && scopes.preferences === "absent")
     throw new Error("Choose data to export.");
   const data: BackupData = {};
+  const contents: Record<string, Uint8Array> = {};
   if (scopes.husbandry !== "absent") {
     data.animals = Object.fromEntries(
       ids.map((id) => [id, animalForBackup(sourceAnimals[id])]),
@@ -668,10 +816,24 @@ export async function createBackup(selection?: BackupSelection): Promise<File> {
           ([, record]) => all || selected.has(record.animalId),
         ),
       );
+    data.documents = {};
+    for (const document of Object.values(documents$.peek())) {
+      if (!isBackupableDocument(document) || !data.animals[document.animalId])
+        continue;
+      const bytes = await readAnimalDocumentBytes(document.file);
+      if (!bytes) throw new Error("An animal document file is missing.");
+      if (bytes.byteLength > MAX_DOCUMENT_BYTES)
+        throw new Error("An animal document is too large to back up.");
+      const record = documentForBackup(document, bytes);
+      contents[record.file] = bytes;
+      data.documents[document.id] = record as unknown as Record<
+        string,
+        unknown
+      >;
+    }
   }
   if (scopes.preferences === "present")
     Object.assign(data, preferencesForBackup());
-  const contents: Record<string, Uint8Array> = {};
   for (const animal of Object.values(data.animals ?? {})) {
     if (!animal.photo) continue;
     const source = new File(getAnimalPhotoUri(sourceAnimals[animal.id].photo!));
@@ -692,6 +854,7 @@ export async function createBackup(selection?: BackupSelection): Promise<File> {
         photos: Object.keys(contents).filter((path) =>
           path.startsWith("photos/"),
         ).length,
+        documents: documentCount(data),
       },
     }),
   );
@@ -699,7 +862,17 @@ export async function createBackup(selection?: BackupSelection): Promise<File> {
   directory.create({ intermediates: true });
   const archive = new File(directory, backupName());
   try {
-    archive.write(zipSync(contents, { level: 6 }));
+    archive.write(
+      zipSync(
+        Object.fromEntries(
+          Object.entries(contents).map(([path, bytes]) => [
+            path,
+            path.endsWith(".json") ? bytes : [bytes, { level: 0 }],
+          ]),
+        ) as Zippable,
+        { level: 6 },
+      ),
+    );
     await parseBackup(archive);
     return archive;
   } catch (error) {
@@ -728,6 +901,15 @@ export async function parseBackup(file: File): Promise<ParsedBackup> {
   const entries = unzipSync(bytes);
   const manifest = parseJson(entries["manifest.json"]);
   const data = parseJson(entries["data.json"]) as BackupData;
+  const documents: Record<string, DocumentEntry> = {};
+  for (const [path, content] of Object.entries(entries)) {
+    if (!path.startsWith(DOCUMENT_PREFIX)) continue;
+    const name = path.slice(DOCUMENT_PREFIX.length);
+    const dot = name.lastIndexOf(".");
+    const id = name.slice(0, dot);
+    if (documents[id]) throw new Error("Backup has a duplicate document.");
+    documents[id] = { extension: name.slice(dot + 1), bytes: content };
+  }
   const parsed = {
     manifest: manifest as ParsedBackup["manifest"],
     data,
@@ -736,6 +918,7 @@ export async function parseBackup(file: File): Promise<ParsedBackup> {
         .filter(([path]) => path.startsWith("photos/"))
         .map(([path, content]) => [path.slice(7, -5), content]),
     ),
+    documents,
   };
   validate(parsed);
   return parsed;
@@ -744,9 +927,10 @@ export async function parseBackup(file: File): Promise<ParsedBackup> {
 export async function restoreBackup(file: File): Promise<RestoredBackup> {
   await waitForHydration();
   const parsed = await parseBackup(file);
-  const { data, manifest, photos } = parsed;
+  const { data, manifest, photos, documents } = parsed;
   const old = {
     animals: animals$.peek(),
+    documents: documents$.peek(),
     settings: settings$.peek(),
     defaults: defaults$.peek(),
     reminders: reminders$.peek(),
@@ -758,6 +942,8 @@ export async function restoreBackup(file: File): Promise<RestoredBackup> {
   const staging = cacheDirectory();
   staging.create({ intermediates: true });
   const oldPhotos: { uri: string; bytes: Uint8Array }[] = [];
+  const oldDocuments: { document: AnimalDocument; bytes: Uint8Array }[] = [];
+  const writtenDocumentUris: string[] = [];
   try {
     for (const animal of Object.values(old.animals))
       if (animal.photo) {
@@ -765,6 +951,18 @@ export async function restoreBackup(file: File): Promise<RestoredBackup> {
         if (photo.exists)
           oldPhotos.push({ uri: animal.photo, bytes: await photo.bytes() });
       }
+    for (const document of Object.values(old.documents)) {
+      const bytes = await readAnimalDocumentBytes(document.file);
+      if (bytes) oldDocuments.push({ document, bytes });
+    }
+    for (const [id, entry] of Object.entries(documents))
+      writtenDocumentUris.push(
+        writeAnimalDocument(
+          id,
+          entry.extension as DocumentExtension,
+          entry.bytes,
+        ),
+      );
     for (const [id, bytes] of Object.entries(photos)) {
       const staged = new File(staging, `${id}.webp`);
       staged.write(bytes);
@@ -790,6 +988,22 @@ export async function restoreBackup(file: File): Promise<RestoredBackup> {
         );
         for (const name of activityNames)
           replaceActivityTable(name, data[name] ?? {});
+        documents$.set(
+          Object.fromEntries(
+            Object.entries(
+              (data.documents ?? {}) as unknown as Record<
+                string,
+                AnimalDocument
+              >,
+            ).map(([id, document]) => [
+              id,
+              {
+                ...document,
+                file: managedAnimalDocumentUri(id, document.extension),
+              },
+            ]),
+          ),
+        );
       }
       if (manifest.scopes.preferences === "present") {
         settings$.set(data.settings as never);
@@ -798,20 +1012,33 @@ export async function restoreBackup(file: File): Promise<RestoredBackup> {
         careSchedules$.set(data.careSchedules as never);
       }
     });
-    if (manifest.scopes.husbandry !== "absent")
+    if (manifest.scopes.husbandry !== "absent") {
       for (const animal of Object.values(old.animals))
         if (animal.photo && !photos[animal.id])
           deleteManagedAnimalPhoto(animal.photo);
+      for (const document of Object.values(old.documents))
+        if (
+          !documents[document.id] ||
+          document.file !==
+            managedAnimalDocumentUri(
+              document.id,
+              documents[document.id].extension as DocumentExtension,
+            )
+        )
+          deleteManagedAnimalDocument(document.file);
+    }
     if (manifest.scopes.preferences === "present")
       setLanguage(data.settings!.language as "system" | "en" | "pt-BR");
     return {
       scopes: manifest.scopes,
       animals: Object.keys(data.animals ?? {}).length,
       records: recordCount(data),
+      documents: documentCount(data),
     };
   } catch (error) {
     batch(() => {
       animals$.set(old.animals);
+      documents$.set(old.documents);
       settings$.set(old.settings);
       defaults$.set(old.defaults);
       reminders$.set(old.reminders);
@@ -822,6 +1049,7 @@ export async function restoreBackup(file: File): Promise<RestoredBackup> {
     for (const animal of Object.values(data.animals ?? {}))
       if (animal.photo && !old.animals[animal.id]?.photo)
         deleteManagedAnimalPhoto(managedAnimalPhotoUri(animal.id));
+    for (const uri of writtenDocumentUris) deleteManagedAnimalDocument(uri);
     for (const photo of oldPhotos) {
       const destination = new File(getAnimalPhotoUri(photo.uri));
       destination.parentDirectory.create({
@@ -830,6 +1058,8 @@ export async function restoreBackup(file: File): Promise<RestoredBackup> {
       });
       destination.write(photo.bytes);
     }
+    for (const { document, bytes } of oldDocuments)
+      writeAnimalDocument(document.id, document.extension, bytes);
     setLanguage(old.settings.language);
     throw error;
   } finally {
