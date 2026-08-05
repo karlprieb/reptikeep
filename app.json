@@ -8,7 +8,12 @@
     "userInterfaceStyle": "automatic",
     "ios": {
       "icon": "./assets/ios.icon",
-      "bundleIdentifier": "app.reptikeep"
+      "bundleIdentifier": "app.reptikeep",
+      "appleTeamId": "3K9KUB8992",
+      "buildNumber": "1",
+      "config": {
+        "usesNonExemptEncryption": false
+      }
     },
     "plugins": [
       "expo-router",
