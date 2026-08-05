@@ -14,6 +14,15 @@ I'm building this app around my own needs as a reptile keeper. That means it's o
 
 Right now the app is fully local. Eventually I plan to offer an optional, paid sync server for people who want to access their data from multiple devices or the web and keep everything in sync — or for households where more than one person takes care of the same animals.
 
+## Screenshots
+
+<p align="center">
+  <img src="assets/screenshots/reptiles.webp" alt="The Reptiles tab listing each animal with a photo and how long since it last ate" width="195">
+  <img src="assets/screenshots/animal.webp" alt="A reptile's profile showing birth date, acquisition date, current weight and last feeding" width="195">
+  <img src="assets/screenshots/add-record.webp" alt="The Add a record sheet offering feeding, growth, shed, poop and habitat" width="195">
+  <img src="assets/screenshots/reminders.webp" alt="The Reminders tab grouping care into overdue and upcoming" width="195">
+</p>
+
 ## What it does
 
 - A profile for each reptile: species, sex, photo, birth date, and when you got them
