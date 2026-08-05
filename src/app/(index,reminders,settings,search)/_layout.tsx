@@ -50,6 +50,13 @@ export default function TabStackLayout({ segment }: { segment: string }) {
     >
       <Stack.Screen name={screenName} />
       <Stack.Screen
+        name="about"
+        options={{
+          title: t("about.title"),
+          headerBackButtonDisplayMode: "minimal",
+        }}
+      />
+      <Stack.Screen
         name="add-reptile"
         options={{ ...FORM_SHEET_OPTIONS, title: t("newReptile.title") }}
       />

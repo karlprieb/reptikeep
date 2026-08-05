@@ -19,6 +19,7 @@ import {
   tint,
 } from "@expo/ui/swift-ui/modifiers";
 import { useValue } from "@legendapp/state/react";
+import { router } from "expo-router";
 import { useMemo, useState } from "react";
 import { StyleSheet } from "react-native";
 import { useTranslation } from "react-i18next";
@@ -240,6 +241,18 @@ export default function SettingsScreen() {
                 datePickerStyle("compact"),
                 listRowBackground(theme.surface),
                 accessibilityHint(t("a11y.reminders.time.hint")),
+              ]}
+            />
+          </Section>
+
+          <Section>
+            <Button
+              label={t("about.title")}
+              systemImage="info.circle"
+              onPress={() => router.push("/about")}
+              modifiers={[
+                listRowBackground(theme.surface),
+                accessibilityHint(t("a11y.about.openHint")),
               ]}
             />
           </Section>

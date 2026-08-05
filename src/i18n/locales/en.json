@@ -24,6 +24,13 @@
     "resetConfirm": "Reset data",
     "cancel": "Cancel"
   },
+  "about": {
+    "title": "About",
+    "tagline": "Feed. Shed. Repeat.",
+    "version": "Version {{version}}",
+    "repository": "GitHub repository",
+    "logoLabel": "ReptiKeep app logo"
+  },
   "defaults": {
     "section": "Logging defaults",
     "globalFooter": "What a new log sheet opens on, and how weights are shown everywhere. Each reptile follows these unless it overrides them.",
@@ -368,6 +375,10 @@
     },
     "advancedSettings": {
       "hint": "Shows or hides advanced settings"
+    },
+    "about": {
+      "openHint": "Opens information about ReptiKeep",
+      "repositoryHint": "Opens the ReptiKeep repository in GitHub or your browser"
     },
     "reptileForm": {
       "speciesSuggestion": {

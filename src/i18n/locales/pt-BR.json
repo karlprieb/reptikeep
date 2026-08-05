@@ -24,6 +24,13 @@
     "resetConfirm": "Apagar dados",
     "cancel": "Cancelar"
   },
+  "about": {
+    "title": "Sobre",
+    "tagline": "Feed. Shed. Repeat.",
+    "version": "Versão {{version}}",
+    "repository": "Repositório no GitHub",
+    "logoLabel": "Logo do aplicativo ReptiKeep"
+  },
   "defaults": {
     "section": "Padrões de registro",
     "globalFooter": "Como um novo registro abre, e como os pesos aparecem em todo o app. Cada réptil segue estes valores, a menos que os substitua.",
@@ -368,6 +375,10 @@
     },
     "advancedSettings": {
       "hint": "Mostra ou oculta os ajustes avançados"
+    },
+    "about": {
+      "openHint": "Abre informações sobre o ReptiKeep",
+      "repositoryHint": "Abre o repositório do ReptiKeep no GitHub ou no navegador"
     },
     "reptileForm": {
       "speciesSuggestion": {
