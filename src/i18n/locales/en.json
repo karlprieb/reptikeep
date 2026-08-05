@@ -24,6 +24,32 @@
     "resetConfirm": "Reset data",
     "cancel": "Cancel"
   },
+  "backup": {
+    "title": "Backup & restore",
+    "exportSection": "Export",
+    "exportFooter": "Backups are standard ZIP files containing your selected data and WebP photos.",
+    "exportAll": "Export all data",
+    "includePreferences": "Include preferences",
+    "animalsNone": "Animals: none",
+    "animalsOne": "Animals: {{animalName}}",
+    "animalsSelected_one": "Animals: {{count}} selected",
+    "animalsSelected_other": "Animals: {{count}} selected",
+    "animalsEmpty": "No animals to include",
+    "export": "Export backup",
+    "working": "Working…",
+    "restoreSection": "Restore",
+    "restoreFooter": "Restoring a backup replaces its included data. A reptiles-and-records backup replaces your current reptiles and records; a preferences-only backup keeps them.",
+    "restore": "Restore from backup",
+    "restoring": "Restoring…",
+    "restoreTitle": "Replace data from this backup?",
+    "restoreConfirm": "Replace current data",
+    "restoreMessage_one": "This backup has {{animals}} reptile and {{records}} record. It will replace your current reptiles and records.",
+    "restoreMessage_other": "This backup has {{animals}} reptiles and {{records}} records. It will replace your current reptiles and records.",
+    "success_one": "Restored {{animals}} reptile and {{records}} record.",
+    "success_other": "Restored {{animals}} reptiles and {{records}} records.",
+    "error": "Could not prepare this backup.",
+    "restoreError": "Could not restore this backup. Please try again."
+  },
   "about": {
     "title": "About",
     "tagline": "Feed. Shed. Repeat.",
@@ -372,6 +398,15 @@
     },
     "resetData": {
       "hint": "Opens a confirmation before deleting all app data"
+    },
+    "backup": {
+      "open": "Opens backup and restore",
+      "exportAll": "Exports every reptile, record, photo, and preference",
+      "animal": "Includes {{animalName}} in this backup",
+      "animals": "Opens the animal selection menu",
+      "preferences": "Includes app preferences in this backup",
+      "export": "Creates a ZIP backup and opens sharing options",
+      "restore": "Chooses a ZIP backup to validate before restoring"
     },
     "advancedSettings": {
       "hint": "Shows or hides advanced settings"

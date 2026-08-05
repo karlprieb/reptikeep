@@ -14,6 +14,13 @@ function getManagedDirectory(): Directory {
   return new Directory(Paths.document, MANAGED_DIRECTORY_NAME);
 }
 
+export function managedAnimalPhotoUri(animalId: string): string {
+  return new File(
+    getManagedDirectory(),
+    `${getSafeAnimalId(animalId)}${MANAGED_EXTENSION}`,
+  ).uri;
+}
+
 function getSafeAnimalId(animalId: string): string {
   const safeAnimalId = animalId.replace(/[^a-z0-9_-]/gi, "");
   if (!safeAnimalId) throw new Error("Animal id cannot be used as a file name");

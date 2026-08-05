@@ -24,6 +24,32 @@
     "resetConfirm": "Apagar dados",
     "cancel": "Cancelar"
   },
+  "backup": {
+    "title": "Backup e restauração",
+    "exportSection": "Exportar",
+    "exportFooter": "Os backups são arquivos ZIP padrão com os dados selecionados e fotos WebP.",
+    "exportAll": "Exportar todos os dados",
+    "includePreferences": "Incluir preferências",
+    "animalsNone": "Répteis: nenhum",
+    "animalsOne": "Répteis: {{animalName}}",
+    "animalsSelected_one": "Répteis: {{count}} selecionado",
+    "animalsSelected_other": "Répteis: {{count}} selecionados",
+    "animalsEmpty": "Não há répteis para incluir",
+    "export": "Exportar backup",
+    "working": "Preparando…",
+    "restoreSection": "Restaurar",
+    "restoreFooter": "A restauração substitui os dados incluídos no backup. Um backup de répteis e registros substitui os répteis e registros atuais; um backup somente de preferências os mantém.",
+    "restore": "Restaurar de backup",
+    "restoring": "Restaurando…",
+    "restoreTitle": "Substituir dados deste backup?",
+    "restoreConfirm": "Substituir dados atuais",
+    "restoreMessage_one": "Este backup tem {{animals}} réptil e {{records}} registro. Ele substituirá seus répteis e registros atuais.",
+    "restoreMessage_other": "Este backup tem {{animals}} répteis e {{records}} registros. Ele substituirá seus répteis e registros atuais.",
+    "success_one": "{{animals}} réptil e {{records}} registro restaurados.",
+    "success_other": "{{animals}} répteis e {{records}} registros restaurados.",
+    "error": "Não foi possível preparar este backup.",
+    "restoreError": "Não foi possível restaurar este backup. Tente novamente."
+  },
   "about": {
     "title": "Sobre",
     "tagline": "Feed. Shed. Repeat.",
@@ -372,6 +398,15 @@
     },
     "resetData": {
       "hint": "Abre uma confirmação antes de excluir todos os dados do app"
+    },
+    "backup": {
+      "open": "Abre backup e restauração",
+      "exportAll": "Exporta cada réptil, registro, foto e preferência",
+      "animal": "Inclui {{animalName}} neste backup",
+      "animals": "Abre o menu de seleção de répteis",
+      "preferences": "Inclui preferências do app neste backup",
+      "export": "Cria um backup ZIP e abre as opções de compartilhamento",
+      "restore": "Escolhe um backup ZIP para validar antes de restaurar"
     },
     "advancedSettings": {
       "hint": "Mostra ou oculta os ajustes avançados"

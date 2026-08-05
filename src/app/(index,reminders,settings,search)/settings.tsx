@@ -292,6 +292,15 @@ export default function SettingsScreen() {
                 </Text>
               }
             >
+              <Button
+                label={t("backup.title")}
+                systemImage="arrow.triangle.2.circlepath"
+                onPress={() => router.push("/backup-restore" as never)}
+                modifiers={[
+                  listRowBackground(theme.surface),
+                  accessibilityHint(t("a11y.backup.open")),
+                ]}
+              />
               <ConfirmationDialog
                 title={t("settings.resetTitle")}
                 titleVisibility="visible"

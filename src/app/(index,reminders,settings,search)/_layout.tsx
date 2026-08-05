@@ -57,6 +57,13 @@ export default function TabStackLayout({ segment }: { segment: string }) {
         }}
       />
       <Stack.Screen
+        name="backup-restore"
+        options={{
+          title: t("backup.title"),
+          headerBackButtonDisplayMode: "minimal",
+        }}
+      />
+      <Stack.Screen
         name="add-reptile"
         options={{ ...FORM_SHEET_OPTIONS, title: t("newReptile.title") }}
       />
