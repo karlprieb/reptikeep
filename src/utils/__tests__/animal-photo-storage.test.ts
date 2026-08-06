@@ -27,9 +27,9 @@ const mockCopyCalls: {
   overwrite?: boolean;
 }[] = [];
 const mockDeleteCalls: string[] = [];
-const mockRenameCalls: { from: string; to: string }[] = [];
+const mockMoveCalls: { from: string; to: string }[] = [];
 let mockCopyError: Error | undefined;
-let mockRenameError: Error | undefined;
+let mockMoveError: Error | undefined;
 
 jest.mock("expo-file-system", () => {
   const joinUri = (parts: ({ uri: string } | string)[]) => {
@@ -93,13 +93,14 @@ jest.mock("expo-file-system", () => {
       mockFiles.add(destination.uri);
     }
 
-    rename(newName: string) {
-      mockRenameCalls.push({ from: this.uri, to: newName });
-      if (mockRenameError) throw mockRenameError;
-      const dirUri = this.uri.substring(0, this.uri.lastIndexOf("/"));
-      const newUri = `${dirUri}/${newName}`;
+    async move(destination: MockFile, options?: { overwrite?: boolean }) {
+      mockMoveCalls.push({ from: this.uri, to: destination.uri });
+      if (mockMoveError) throw mockMoveError;
+      if (mockFiles.has(destination.uri) && !options?.overwrite)
+        throw new Error(`destination already exists: ${destination.uri}`);
       mockFiles.delete(this.uri);
-      mockFiles.add(newUri);
+      mockFiles.add(destination.uri);
+      this.uri = destination.uri;
     }
 
     delete() {
@@ -131,15 +132,15 @@ beforeEach(() => {
   mockDirectories.clear();
   mockCopyCalls.length = 0;
   mockDeleteCalls.length = 0;
-  mockRenameCalls.length = 0;
+  mockMoveCalls.length = 0;
   mockCopyError = undefined;
-  mockRenameError = undefined;
+  mockMoveError = undefined;
   mockProcessError = undefined;
   mockProcessedUri = "file:///cache/processed-animal-photo.webp";
 });
 
 describe("importAnimalPhoto", () => {
-  it("processes source, stages, renames atomically, deletes cache", async () => {
+  it("processes source, stages, commits atomically, deletes cache", async () => {
     mockProcessedUri = `${CACHE_DIR}/processed-animal-photo.webp`;
     mockFiles.add(mockProcessedUri);
 
@@ -161,10 +162,10 @@ describe("importAnimalPhoto", () => {
       },
     ]);
 
-    expect(mockRenameCalls).toEqual([
+    expect(mockMoveCalls).toEqual([
       {
         from: `${MANAGED_DIRECTORY}/animal-123.webp.staging`,
-        to: "animal-123.webp",
+        to: `${MANAGED_DIRECTORY}/animal-123.webp`,
       },
     ]);
 
@@ -173,6 +174,22 @@ describe("importAnimalPhoto", () => {
     );
 
     expect(uri).toBe(`${MANAGED_DIRECTORY}/animal-123.webp`);
+  });
+
+  it("replaces the photo already stored for the animal", async () => {
+    const existingPhoto = `${MANAGED_DIRECTORY}/animal-123.webp`;
+    mockFiles.add(existingPhoto);
+    mockProcessedUri = `${CACHE_DIR}/processed.webp`;
+    mockFiles.add(mockProcessedUri);
+
+    const uri = await importAnimalPhoto(
+      { uri: "file:///picker/newer.jpg" },
+      "animal-123",
+    );
+
+    expect(uri).toBe(existingPhoto);
+    expect(mockFiles).toContain(existingPhoto);
+    expect(mockFiles).not.toContain(`${existingPhoto}.staging`);
   });
 
   it("always stores with a .webp extension regardless of source format", async () => {
@@ -206,14 +223,14 @@ describe("importAnimalPhoto", () => {
     expect(mockCopyCalls).toHaveLength(0);
   });
 
-  it("deletes the staging file and cache when rename fails", async () => {
+  it("deletes the staging file and cache when the commit fails", async () => {
     mockProcessedUri = `${CACHE_DIR}/processed.webp`;
     mockFiles.add(mockProcessedUri);
-    mockRenameError = new Error("rename failed");
+    mockMoveError = new Error("move failed");
 
     await expect(
       importAnimalPhoto({ uri: "file:///picker/photo.png" }, "animal-789"),
-    ).rejects.toThrow("rename failed");
+    ).rejects.toThrow("move failed");
 
     expect(mockFiles).not.toContain(
       `${MANAGED_DIRECTORY}/animal-789.webp.staging`,

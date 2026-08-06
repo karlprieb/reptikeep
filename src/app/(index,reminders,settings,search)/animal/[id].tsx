@@ -75,6 +75,12 @@ export default function AnimalDetailScreen() {
           accessibilityHint={t("animal.actionsHint")}
         >
           <Stack.Toolbar.MenuAction
+            icon="doc.text"
+            onPress={() => router.push(`/animal/${id}/documents`)}
+          >
+            {t("documents.title")}
+          </Stack.Toolbar.MenuAction>
+          <Stack.Toolbar.MenuAction
             icon="square.and.pencil"
             onPress={() => router.push(`/animal/${id}/edit`)}
           >

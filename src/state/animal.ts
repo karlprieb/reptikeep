@@ -8,9 +8,11 @@ import {
 } from "@/utils/animal-photo-storage";
 
 import { toCalendarDate } from "@/utils/format-date";
+import { clampTextFields } from "@/utils/text-limits";
 
 import { persistedAsWritten, persistPlugin } from "./persist";
 import { removeActivitiesForAnimal } from "./activity-stores";
+import { removeDocumentsForAnimal } from "./document";
 import type { AnimalSchedule, CareSchedule } from "./care-schedule";
 import type { AnimalLoggingDefaults } from "./logging-defaults";
 
@@ -49,7 +51,8 @@ export function createAnimal(input: CreateAnimalInput): Animal {
 export const animals$ = observable<Record<string, Animal>>({});
 
 export function addAnimal(animal: Animal): void {
-  animals$.set({ ...animals$.peek(), [animal.id]: animal });
+  const clamped = clampTextFields(animal);
+  animals$.set({ ...animals$.peek(), [clamped.id]: clamped });
 }
 
 export function clearAnimals(): void {
@@ -64,6 +67,7 @@ export function removeAnimal(id: string): void {
     const { [id]: _, ...rest } = animals$.peek();
     animals$.set(rest);
     removeActivitiesForAnimal(id);
+    removeDocumentsForAnimal(id);
   });
 
   deleteManagedAnimalPhoto(photoUri);

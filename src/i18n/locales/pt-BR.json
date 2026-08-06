@@ -27,7 +27,7 @@
   "backup": {
     "title": "Backup e restauração",
     "exportSection": "Exportar",
-    "exportFooter": "Os backups são arquivos ZIP padrão com os dados selecionados e fotos WebP.",
+    "exportFooter": "Os backups são arquivos ZIP padrão com os dados selecionados, fotos WebP e os documentos anexados.",
     "exportAll": "Exportar todos os dados",
     "includePreferences": "Incluir preferências",
     "animalsNone": "Répteis: nenhum",
@@ -47,6 +47,10 @@
     "restoreMessage_other": "Este backup tem {{animals}} répteis e {{records}} registros. Ele substituirá seus répteis e registros atuais.",
     "success_one": "{{animals}} réptil e {{records}} registro restaurados.",
     "success_other": "{{animals}} répteis e {{records}} registros restaurados.",
+    "documentsIncluded_one": "Ele também inclui {{count}} documento.",
+    "documentsIncluded_other": "Ele também inclui {{count}} documentos.",
+    "documentsRestored_one": "{{count}} documento também restaurado.",
+    "documentsRestored_other": "{{count}} documentos também restaurados.",
     "error": "Não foi possível preparar este backup.",
     "restoreError": "Não foi possível restaurar este backup. Tente novamente."
   },
@@ -154,9 +158,60 @@
     "edit": "Editar réptil",
     "delete": "Excluir réptil",
     "deleteTitle": "Excluir {{animalName}}?",
-    "deleteMessage": "Isto também exclui todos os registros de alimentação, crescimento, muda e fezes de {{animalName}}. Não há como desfazer.",
+    "deleteMessage": "Isto também exclui todos os registros de alimentação, crescimento, muda, fezes e documentos de {{animalName}}. Não há como desfazer.",
     "deleteConfirm": "Excluir",
     "cancel": "Cancelar"
+  },
+  "documents": {
+    "title": "Documentos",
+    "add": "Adicionar documento",
+    "empty": {
+      "title": "Nenhum documento ainda",
+      "description": "Notas fiscais, certificados e licenças deste réptil ficam aqui."
+    },
+    "kind": {
+      "invoice": "Nota fiscal",
+      "authenticity": "Certificado de autenticidade",
+      "origin": "Certificado de origem",
+      "permit": "Licença ou autorização",
+      "other": "Outro"
+    },
+    "swipe": {
+      "edit": "Editar",
+      "delete": "Excluir"
+    },
+    "deleteTitle": "Excluir {{title}}?",
+    "deleteMessage": "Isto remove o arquivo deste dispositivo. Não há como desfazer.",
+    "deleteConfirm": "Excluir",
+    "cancel": "Cancelar",
+    "form": {
+      "title": "Novo documento",
+      "editTitle": "Editar documento",
+      "cancel": "Cancelar",
+      "cancelHint": "Descarta sem salvar",
+      "save": "Salvar",
+      "saveHint": "Adiciona este documento aos registros de {{animalName}}",
+      "editSaveHint": "Salva estas alterações neste documento",
+      "chooseFile": "Escolher um documento",
+      "source": {
+        "files": "Arquivos",
+        "photos": "Fotos",
+        "camera": "Câmera"
+      },
+      "details": "Detalhes",
+      "titleField": "Título",
+      "kindField": "Tipo",
+      "knownIssueDate": "Data de emissão conhecida",
+      "issueDate": "Data de emissão",
+      "tooLarge": "Documentos devem ter no máximo {{limit}}. Este tem {{size}}.",
+      "unsupportedType": "Este tipo de arquivo não é aceito. Escolha um PDF, JPG, PNG ou HEIC.",
+      "saveError": "Não foi possível salvar este documento. Tente novamente."
+    },
+    "preview": {
+      "share": "Compartilhar",
+      "missingTitle": "Documento indisponível",
+      "missingDescription": "Este arquivo não foi encontrado. Ele pode ter sido removido deste dispositivo."
+    }
   },
   "addRecord": {
     "title": "Adicionar registro",
@@ -478,6 +533,37 @@
       },
       "openSettings": {
         "hint": "Abre o ReptiKeep no app Ajustes do iOS"
+      }
+    },
+    "documents": {
+      "add": {
+        "hint": "Adiciona um novo documento para este réptil"
+      },
+      "row": {
+        "hint": "Abre este documento"
+      },
+      "fileWell": {
+        "hint": "Abre opções para adicionar um arquivo de Arquivos, Fotos ou Câmera"
+      },
+      "source": {
+        "files": {
+          "hint": "Escolhe um arquivo do app Arquivos"
+        },
+        "photos": {
+          "hint": "Escolhe uma foto da sua biblioteca"
+        },
+        "camera": {
+          "hint": "Tira uma foto com a câmera"
+        }
+      },
+      "kindPicker": {
+        "hint": "Abre um menu para escolher o tipo de documento"
+      },
+      "issueDateToggle": {
+        "hint": "Mostra um seletor de data para quando este documento foi emitido"
+      },
+      "share": {
+        "hint": "Compartilha este documento"
       }
     }
   },

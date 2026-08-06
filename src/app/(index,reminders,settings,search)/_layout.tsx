@@ -80,6 +80,21 @@ export default function TabStackLayout({ segment }: { segment: string }) {
         options={{ headerBackButtonDisplayMode: "minimal" }}
       />
       <Stack.Screen
+        name="animal/[id]/documents"
+        options={{
+          title: t("documents.title"),
+          headerBackButtonDisplayMode: "minimal",
+        }}
+      />
+      <Stack.Screen
+        name="animal/[id]/document"
+        options={{ ...FORM_SHEET_OPTIONS, title: t("documents.form.title") }}
+      />
+      <Stack.Screen
+        name="animal/[id]/document-preview"
+        options={{ headerBackButtonDisplayMode: "minimal" }}
+      />
+      <Stack.Screen
         name="animal/[id]/edit"
         options={{ ...FORM_SHEET_OPTIONS, title: t("editReptile.title") }}
       />

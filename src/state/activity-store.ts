@@ -1,6 +1,8 @@
 import { observable, type Observable } from "@legendapp/state";
 import { syncObservable } from "@legendapp/state/sync";
 
+import { clampTextFields } from "@/utils/text-limits";
+
 import { persistedAsWritten, persistPlugin } from "./persist";
 
 export interface ActivityRecord {
@@ -25,7 +27,8 @@ export function createActivityStore<T extends ActivityRecord>(name: string) {
     $: records$ as unknown as Observable<Record<string, T>>,
 
     add(record: T): void {
-      records$.set({ ...records$.peek(), [record.id]: record });
+      const clamped = clampTextFields(record);
+      records$.set({ ...records$.peek(), [clamped.id]: clamped });
     },
 
     remove(id: string): void {
