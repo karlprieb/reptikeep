@@ -7,6 +7,7 @@ import { Image, ScrollView, StyleSheet, View } from "react-native";
 import PdfRendererView from "react-native-pdf-renderer";
 import { useTranslation } from "react-i18next";
 
+import { useAnimalRoute } from "@/components/animal-route";
 import { EmptyState } from "@/components/empty-state";
 import { Spacing, Typography } from "@/constants/theme";
 import { useTheme } from "@/hooks/use-theme";
@@ -22,8 +23,10 @@ export default function DocumentPreviewScreen() {
   const theme = useTheme();
   const { t } = useTranslation();
   const { documentId } = useLocalSearchParams<{ documentId?: string }>();
+  const { animal } = useAnimalRoute();
   const documents = useValue(documents$);
-  const document = documentId ? documents[documentId] : undefined;
+  const candidate = documentId ? documents[documentId] : undefined;
+  const document = candidate?.animalId === animal?.id ? candidate : undefined;
 
   const uri = document ? getAnimalDocumentUri(document.file) : undefined;
   const fileExists = useMemo(() => Boolean(uri && new File(uri).exists), [uri]);

@@ -4,22 +4,49 @@ import {
   UnsupportedDocumentError,
   clearManagedAnimalDocuments,
   deleteManagedAnimalDocument,
-  documentExtension,
   documentMimeType,
   getAnimalDocumentUri,
   importAnimalDocument,
   inspectDocumentSource,
   isManagedAnimalDocument,
+  sniffDocumentExtension,
   writeAnimalDocument,
 } from "@/utils/animal-document-storage";
 
-const mockFiles = new Map<string, number>();
+type MockEntry = { bytes: Uint8Array; size: number };
+
+const mockFiles = new Map<string, MockEntry>();
 const mockDirectories = new Set<string>();
 const mockCopyCalls: { source: string; destination: string }[] = [];
 const mockDeleteCalls: string[] = [];
-const mockRenameCalls: { from: string; to: string }[] = [];
+const mockMoveCalls: { from: string; to: string }[] = [];
 let mockCopyError: Error | undefined;
-let mockRenameError: Error | undefined;
+let mockMoveError: Error | undefined;
+
+const PDF_BYTES = new Uint8Array([
+  0x25, 0x50, 0x44, 0x46, 0x2d, 0x31, 0x2e, 0x34,
+]);
+const JPG_BYTES = new Uint8Array([0xff, 0xd8, 0xff, 0xe0, 0x00, 0x10]);
+const PNG_BYTES = new Uint8Array([
+  0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a,
+]);
+
+function isoBmff(major: string, ...compatible: string[]): Uint8Array {
+  const brands = [major, "\0\0\0\0", ...compatible].join("");
+  const header = `\0\0\0${String.fromCharCode(8 + brands.length)}ftyp${brands}`;
+  return Uint8Array.from(header, (character) => character.charCodeAt(0));
+}
+
+const HEIC_BYTES = isoBmff("heic", "mif1");
+const MP4_BYTES = isoBmff("isom", "iso2", "avc1", "mp41");
+
+function setFile(
+  uri: string,
+  bytes: Uint8Array,
+  size = bytes.byteLength,
+): void {
+  mockFiles.set(uri, { bytes, size });
+}
 
 jest.mock("expo-file-system", () => {
   const joinUri = (parts: ({ uri: string } | string)[]) =>
@@ -65,7 +92,7 @@ jest.mock("expo-file-system", () => {
     }
 
     get size() {
-      return mockFiles.get(this.uri);
+      return mockFiles.get(this.uri)?.size;
     }
 
     get parentDirectory() {
@@ -75,20 +102,31 @@ jest.mock("expo-file-system", () => {
     async copy(destination: MockFile) {
       mockCopyCalls.push({ source: this.uri, destination: destination.uri });
       if (mockCopyError) throw mockCopyError;
-      mockFiles.set(destination.uri, mockFiles.get(this.uri) ?? 0);
+      const entry = mockFiles.get(this.uri);
+      if (entry) mockFiles.set(destination.uri, entry);
     }
 
-    rename(newName: string) {
-      mockRenameCalls.push({ from: this.uri, to: newName });
-      if (mockRenameError) throw mockRenameError;
-      const directory = this.uri.slice(0, this.uri.lastIndexOf("/"));
-      const size = mockFiles.get(this.uri) ?? 0;
+    async move(destination: MockFile, options?: { overwrite?: boolean }) {
+      mockMoveCalls.push({ from: this.uri, to: destination.uri });
+      if (mockMoveError) throw mockMoveError;
+      if (mockFiles.has(destination.uri) && !options?.overwrite)
+        throw new Error(`destination already exists: ${destination.uri}`);
+      const entry = mockFiles.get(this.uri);
       mockFiles.delete(this.uri);
-      mockFiles.set(`${directory}/${newName}`, size);
+      if (entry) mockFiles.set(destination.uri, entry);
+      this.uri = destination.uri;
+    }
+
+    open() {
+      const bytes = mockFiles.get(this.uri)?.bytes ?? new Uint8Array();
+      return {
+        readBytes: (length: number) => bytes.subarray(0, length),
+        close: () => {},
+      };
     }
 
     write(bytes: Uint8Array) {
-      mockFiles.set(this.uri, bytes.byteLength);
+      mockFiles.set(this.uri, { bytes, size: bytes.byteLength });
     }
 
     delete() {
@@ -100,6 +138,7 @@ jest.mock("expo-file-system", () => {
   return {
     Directory: MockDirectory,
     File: MockFile,
+    FileMode: { ReadOnly: "r" },
     Paths: { document: { uri: "file:///documents" } },
   };
 });
@@ -111,23 +150,27 @@ beforeEach(() => {
   mockDirectories.clear();
   mockCopyCalls.length = 0;
   mockDeleteCalls.length = 0;
-  mockRenameCalls.length = 0;
+  mockMoveCalls.length = 0;
   mockCopyError = undefined;
-  mockRenameError = undefined;
+  mockMoveError = undefined;
 });
 
-describe("documentExtension", () => {
-  it("accepts the supported types and normalises aliases", () => {
-    expect(documentExtension("nota-fiscal.pdf")).toBe("pdf");
-    expect(documentExtension("scan.JPEG")).toBe("jpg");
-    expect(documentExtension("file:///picker/IMG_0001.HEIF")).toBe("heic");
-    expect(documentExtension("file:///picker/a.png?width=200")).toBe("png");
+describe("sniffDocumentExtension", () => {
+  it("recognizes the supported types by their bytes", () => {
+    expect(sniffDocumentExtension(PDF_BYTES)).toBe("pdf");
+    expect(sniffDocumentExtension(JPG_BYTES)).toBe("jpg");
+    expect(sniffDocumentExtension(PNG_BYTES)).toBe("png");
+    expect(sniffDocumentExtension(HEIC_BYTES)).toBe("heic");
+    expect(sniffDocumentExtension(isoBmff("mif1", "heic"))).toBe("heic");
   });
 
-  it("rejects anything else", () => {
-    expect(documentExtension("contract.docx")).toBeUndefined();
-    expect(documentExtension("archive.zip")).toBeUndefined();
-    expect(documentExtension("no-extension")).toBeUndefined();
+  it("rejects other ISO-BMFF files and unknown bytes", () => {
+    expect(sniffDocumentExtension(MP4_BYTES)).toBeUndefined();
+    expect(sniffDocumentExtension(isoBmff("qt  "))).toBeUndefined();
+    expect(sniffDocumentExtension(new Uint8Array([0x50, 0x4b, 3, 4]))).toBe(
+      undefined,
+    );
+    expect(sniffDocumentExtension(new Uint8Array())).toBeUndefined();
   });
 
   it("maps types for the share sheet", () => {
@@ -137,15 +180,26 @@ describe("documentExtension", () => {
 });
 
 describe("inspectDocumentSource", () => {
-  it("prefers the picker-supplied name over an extensionless uri", () => {
-    mockFiles.set("file:///picker/ABCD-1234", 2048);
+  it("classifies by content, ignoring an extensionless uri", () => {
+    setFile("file:///picker/ABCD-1234", PDF_BYTES, 2048);
 
-    expect(
-      inspectDocumentSource("file:///picker/ABCD-1234", "nota fiscal.pdf"),
-    ).toEqual({ extension: "pdf", size: 2048 });
+    expect(inspectDocumentSource("file:///picker/ABCD-1234")).toEqual({
+      extension: "pdf",
+      size: 2048,
+    });
   });
 
-  it("rejects an unsupported type before touching the file system", () => {
+  it("rejects a file whose bytes do not match its name", () => {
+    setFile("file:///picker/renamed.pdf", MP4_BYTES);
+
+    expect(() => inspectDocumentSource("file:///picker/renamed.pdf")).toThrow(
+      UnsupportedDocumentError,
+    );
+  });
+
+  it("rejects an unsupported type", () => {
+    setFile("file:///picker/contract.docx", new Uint8Array([0x50, 0x4b, 3, 4]));
+
     expect(() => inspectDocumentSource("file:///picker/contract.docx")).toThrow(
       UnsupportedDocumentError,
     );
@@ -153,7 +207,7 @@ describe("inspectDocumentSource", () => {
 
   it("rejects a file over the size limit and reports its size", () => {
     const oversized = MAX_DOCUMENT_BYTES + 1;
-    mockFiles.set("file:///picker/huge.pdf", oversized);
+    setFile("file:///picker/huge.pdf", PDF_BYTES, oversized);
 
     try {
       inspectDocumentSource("file:///picker/huge.pdf");
@@ -172,8 +226,8 @@ describe("inspectDocumentSource", () => {
 });
 
 describe("importAnimalDocument", () => {
-  it("stages, renames atomically and reports the size", async () => {
-    mockFiles.set("file:///picker/nota.pdf", 4096);
+  it("stages, commits atomically and reports the size", async () => {
+    setFile("file:///picker/nota.pdf", PDF_BYTES, 4096);
 
     const result = await importAnimalDocument(
       "file:///picker/nota.pdf",
@@ -188,10 +242,10 @@ describe("importAnimalDocument", () => {
         destination: `${MANAGED_DIRECTORY}/doc-123.pdf.staging`,
       },
     ]);
-    expect(mockRenameCalls).toEqual([
+    expect(mockMoveCalls).toEqual([
       {
         from: `${MANAGED_DIRECTORY}/doc-123.pdf.staging`,
-        to: "doc-123.pdf",
+        to: `${MANAGED_DIRECTORY}/doc-123.pdf`,
       },
     ]);
     expect(result).toEqual({
@@ -200,8 +254,24 @@ describe("importAnimalDocument", () => {
     });
   });
 
+  it("replaces a document stored under the same name", async () => {
+    const destination = `${MANAGED_DIRECTORY}/doc-123.pdf`;
+    setFile(destination, PDF_BYTES, 4096);
+    setFile("file:///picker/newer.pdf", PDF_BYTES, 128);
+
+    const result = await importAnimalDocument(
+      "file:///picker/newer.pdf",
+      "doc-123",
+      "pdf",
+    );
+
+    expect(result).toEqual({ uri: destination, size: 128 });
+    expect(mockFiles.get(destination)?.size).toBe(128);
+    expect(mockFiles.has(`${destination}.staging`)).toBe(false);
+  });
+
   it("keeps the original format rather than re-encoding", async () => {
-    mockFiles.set("file:///picker/scan.png", 128);
+    setFile("file:///picker/scan.png", PNG_BYTES, 128);
 
     const result = await importAnimalDocument(
       "file:///picker/scan.png",
@@ -213,7 +283,7 @@ describe("importAnimalDocument", () => {
   });
 
   it("sanitises the document id in the filename", async () => {
-    mockFiles.set("file:///picker/a.pdf", 10);
+    setFile("file:///picker/a.pdf", PDF_BYTES, 10);
 
     const result = await importAnimalDocument(
       "file:///picker/a.pdf",
@@ -225,7 +295,7 @@ describe("importAnimalDocument", () => {
   });
 
   it("refuses an oversized file without copying anything", async () => {
-    mockFiles.set("file:///picker/huge.pdf", MAX_DOCUMENT_BYTES + 1);
+    setFile("file:///picker/huge.pdf", PDF_BYTES, MAX_DOCUMENT_BYTES + 1);
 
     await expect(
       importAnimalDocument("file:///picker/huge.pdf", "doc-big", "pdf"),
@@ -235,13 +305,13 @@ describe("importAnimalDocument", () => {
     expect(mockFiles.has(`${MANAGED_DIRECTORY}/doc-big.pdf`)).toBe(false);
   });
 
-  it("deletes the staging file when the rename fails", async () => {
-    mockFiles.set("file:///picker/a.pdf", 10);
-    mockRenameError = new Error("rename failed");
+  it("deletes the staging file when the commit fails", async () => {
+    setFile("file:///picker/a.pdf", PDF_BYTES, 10);
+    mockMoveError = new Error("move failed");
 
     await expect(
       importAnimalDocument("file:///picker/a.pdf", "doc-fail", "pdf"),
-    ).rejects.toThrow("rename failed");
+    ).rejects.toThrow("move failed");
 
     expect(mockFiles.has(`${MANAGED_DIRECTORY}/doc-fail.pdf.staging`)).toBe(
       false,
@@ -253,15 +323,15 @@ describe("importAnimalDocument", () => {
 
   it("retains a previously stored document when the replacement fails", async () => {
     const existing = `${MANAGED_DIRECTORY}/doc-keep.pdf`;
-    mockFiles.set(existing, 99);
-    mockFiles.set("file:///picker/new.pdf", 10);
+    setFile(existing, PDF_BYTES, 99);
+    setFile("file:///picker/new.pdf", PDF_BYTES, 10);
     mockCopyError = new Error("copy failed");
 
     await expect(
       importAnimalDocument("file:///picker/new.pdf", "doc-keep", "pdf"),
     ).rejects.toThrow("copy failed");
 
-    expect(mockFiles.get(existing)).toBe(99);
+    expect(mockFiles.get(existing)?.size).toBe(99);
   });
 });
 
@@ -289,7 +359,7 @@ describe("managed document cleanup", () => {
 
   it("deletes through a stale container path", () => {
     const managed = `${MANAGED_DIRECTORY}/doc-1.pdf`;
-    mockFiles.set(managed, 10);
+    setFile(managed, PDF_BYTES, 10);
 
     deleteManagedAnimalDocument(
       "file:///old-container/Documents/animal-documents/doc-1.pdf",
@@ -308,8 +378,8 @@ describe("managed document cleanup", () => {
 
   it("clears the complete managed directory when it exists", () => {
     mockDirectories.add(MANAGED_DIRECTORY);
-    mockFiles.set(`${MANAGED_DIRECTORY}/doc-1.pdf`, 1);
-    mockFiles.set(`${MANAGED_DIRECTORY}/doc-2.jpg`, 2);
+    setFile(`${MANAGED_DIRECTORY}/doc-1.pdf`, PDF_BYTES, 1);
+    setFile(`${MANAGED_DIRECTORY}/doc-2.jpg`, JPG_BYTES, 2);
 
     clearManagedAnimalDocuments();
 
@@ -329,6 +399,6 @@ describe("writeAnimalDocument", () => {
 
     expect(uri).toBe(`${MANAGED_DIRECTORY}/doc-restored.pdf`);
     expect(mockDirectories).toContain(MANAGED_DIRECTORY);
-    expect(mockFiles.get(uri)).toBe(4);
+    expect(mockFiles.get(uri)?.size).toBe(4);
   });
 });

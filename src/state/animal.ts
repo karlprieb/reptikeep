@@ -8,6 +8,7 @@ import {
 } from "@/utils/animal-photo-storage";
 
 import { toCalendarDate } from "@/utils/format-date";
+import { clampTextFields } from "@/utils/text-limits";
 
 import { persistedAsWritten, persistPlugin } from "./persist";
 import { removeActivitiesForAnimal } from "./activity-stores";
@@ -50,7 +51,8 @@ export function createAnimal(input: CreateAnimalInput): Animal {
 export const animals$ = observable<Record<string, Animal>>({});
 
 export function addAnimal(animal: Animal): void {
-  animals$.set({ ...animals$.peek(), [animal.id]: animal });
+  const clamped = clampTextFields(animal);
+  animals$.set({ ...animals$.peek(), [clamped.id]: clamped });
 }
 
 export function clearAnimals(): void {

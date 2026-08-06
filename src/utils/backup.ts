@@ -19,8 +19,10 @@ import {
   DOCUMENT_EXTENSIONS,
   MAX_DOCUMENT_BYTES,
   deleteManagedAnimalDocument,
+  getAnimalDocumentUri,
   managedAnimalDocumentUri,
   readAnimalDocumentBytes,
+  sniffDocumentExtension,
   writeAnimalDocument,
   type DocumentExtension,
 } from "@/utils/animal-document-storage";
@@ -29,6 +31,7 @@ import {
   getAnimalPhotoUri,
   managedAnimalPhotoUri,
 } from "@/utils/animal-photo-storage";
+import { TEXT_LIMITS, clampTextFields } from "@/utils/text-limits";
 
 const FORMAT = "app.reptikeep.backup";
 const VERSION = 2;
@@ -401,31 +404,6 @@ function validActivity(
     );
   return typeof record.water === "boolean";
 }
-function hasDocumentMagic(entry: DocumentEntry): boolean {
-  const { bytes, extension } = entry;
-  if (extension === "pdf")
-    return (
-      bytes[0] === 0x25 &&
-      bytes[1] === 0x50 &&
-      bytes[2] === 0x44 &&
-      bytes[3] === 0x46
-    );
-  if (extension === "jpg")
-    return bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff;
-  if (extension === "png")
-    return (
-      bytes[0] === 0x89 &&
-      bytes[1] === 0x50 &&
-      bytes[2] === 0x4e &&
-      bytes[3] === 0x47
-    );
-  return (
-    bytes[4] === 0x66 &&
-    bytes[5] === 0x74 &&
-    bytes[6] === 0x79 &&
-    bytes[7] === 0x70
-  );
-}
 function validDocument(
   record: unknown,
   id: string,
@@ -451,7 +429,7 @@ function validDocument(
     !animals[record.animalId] ||
     !validInstant(record.createdAt) ||
     typeof record.title !== "string" ||
-    record.title.length > 200 ||
+    record.title.length > TEXT_LIMITS.title ||
     !DOCUMENT_KINDS.includes(record.kind as DocumentKind) ||
     (record.issuedDate !== undefined && !validCalendarDate(record.issuedDate))
   )
@@ -467,7 +445,7 @@ function validDocument(
     entry.extension === record.extension &&
     entry.bytes.byteLength <= MAX_DOCUMENT_BYTES &&
     record.size === entry.bytes.byteLength &&
-    hasDocumentMagic(entry)
+    sniffDocumentExtension(entry.bytes) === entry.extension
   );
 }
 function validate(parsed: ParsedBackup): void {
@@ -717,11 +695,11 @@ export function documentForBackup(
   document: AnimalDocument,
   bytes: Uint8Array,
 ): AnimalDocument {
-  return {
+  return clampTextFields({
     id: document.id,
     animalId: document.animalId,
     createdAt: document.createdAt,
-    title: document.title.trim().slice(0, 200),
+    title: document.title,
     kind: DOCUMENT_KINDS.includes(document.kind) ? document.kind : "other",
     issuedDate: validCalendarDate(document.issuedDate)
       ? document.issuedDate
@@ -729,7 +707,7 @@ export function documentForBackup(
     file: `${DOCUMENT_PREFIX}${document.id}.${document.extension}`,
     extension: document.extension,
     size: bytes.byteLength,
-  };
+  });
 }
 export function preferencesForBackup() {
   const settings = settings$.peek();
@@ -1019,7 +997,7 @@ export async function restoreBackup(file: File): Promise<RestoredBackup> {
       for (const document of Object.values(old.documents))
         if (
           !documents[document.id] ||
-          document.file !==
+          getAnimalDocumentUri(document.file) !==
             managedAnimalDocumentUri(
               document.id,
               documents[document.id].extension as DocumentExtension,

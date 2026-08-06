@@ -7,6 +7,7 @@ import {
   deleteManagedAnimalDocument,
   type DocumentExtension,
 } from "@/utils/animal-document-storage";
+import { clampTextFields } from "@/utils/text-limits";
 
 import { persistedAsWritten, persistPlugin } from "./persist";
 
@@ -41,7 +42,8 @@ export function newDocumentId(): string {
 }
 
 export function addDocument(document: AnimalDocument): void {
-  documents$.set({ ...documents$.peek(), [document.id]: document });
+  const clamped = clampTextFields(document);
+  documents$.set({ ...documents$.peek(), [clamped.id]: clamped });
 }
 
 export function removeDocument(id: string): void {

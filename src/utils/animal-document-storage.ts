@@ -1,4 +1,4 @@
-import { Directory, File, Paths } from "expo-file-system";
+import { Directory, File, FileMode, Paths } from "expo-file-system";
 
 export const DOCUMENT_EXTENSIONS = ["pdf", "jpg", "png", "heic"] as const;
 export type DocumentExtension = (typeof DOCUMENT_EXTENSIONS)[number];
@@ -12,11 +12,20 @@ export interface DocumentSource {
 
 const MANAGED_DIRECTORY_NAME = "animal-documents";
 const STAGING_SUFFIX = ".staging";
+const HEAD_BYTES = 32;
 
-const ALIASES: Record<string, DocumentExtension> = {
-  jpeg: "jpg",
-  heif: "heic",
-};
+const HEIF_BRANDS = [
+  "heic",
+  "heix",
+  "heim",
+  "heis",
+  "hevc",
+  "hevx",
+  "hevm",
+  "hevs",
+  "mif1",
+  "msf1",
+];
 
 const MIME_TYPES: Record<DocumentExtension, string> = {
   pdf: "application/pdf",
@@ -61,15 +70,33 @@ export function managedAnimalDocumentUri(
   ).uri;
 }
 
-export function documentExtension(
-  nameOrUri: string,
-): DocumentExtension | undefined {
-  const name = nameOrUri.split(/[?#]/)[0].split("/").pop() ?? "";
-  const suffix = name.includes(".") ? name.split(".").pop()!.toLowerCase() : "";
-  const extension = ALIASES[suffix] ?? suffix;
+function ascii(bytes: Uint8Array, offset: number, length: number): string {
+  return String.fromCharCode(...bytes.subarray(offset, offset + length));
+}
 
-  return DOCUMENT_EXTENSIONS.includes(extension as DocumentExtension)
-    ? (extension as DocumentExtension)
+export function sniffDocumentExtension(
+  head: Uint8Array,
+): DocumentExtension | undefined {
+  if (ascii(head, 0, 4) === "%PDF") return "pdf";
+  if (head[0] === 0xff && head[1] === 0xd8 && head[2] === 0xff) return "jpg";
+  if (
+    head[0] === 0x89 &&
+    head[1] === 0x50 &&
+    head[2] === 0x4e &&
+    head[3] === 0x47
+  )
+    return "png";
+  if (ascii(head, 4, 4) !== "ftyp") return undefined;
+
+  const boxSize =
+    ((head[0] << 24) | (head[1] << 16) | (head[2] << 8) | head[3]) >>> 0;
+  const end = Math.min(head.length, boxSize || head.length);
+  const brands = [ascii(head, 8, 4)];
+  for (let offset = 16; offset + 4 <= end; offset += 4)
+    brands.push(ascii(head, offset, 4));
+
+  return brands.some((brand) => HEIF_BRANDS.includes(brand))
+    ? "heic"
     : undefined;
 }
 
@@ -91,14 +118,21 @@ function measureSource(uri: string): number {
   return size;
 }
 
-export function inspectDocumentSource(
-  uri: string,
-  name?: string,
-): DocumentSource {
-  const extension = documentExtension(name ?? uri) ?? documentExtension(uri);
+function readHead(uri: string): Uint8Array {
+  const handle = new File(uri).open(FileMode.ReadOnly);
+  try {
+    return handle.readBytes(HEAD_BYTES);
+  } finally {
+    handle.close();
+  }
+}
+
+export function inspectDocumentSource(uri: string): DocumentSource {
+  const size = measureSource(uri);
+  const extension = sniffDocumentExtension(readHead(uri));
   if (!extension) throw new UnsupportedDocumentError("Unsupported file type");
 
-  return { extension, size: measureSource(uri) };
+  return { extension, size };
 }
 
 export async function importAnimalDocument(
@@ -116,7 +150,7 @@ export async function importAnimalDocument(
 
   try {
     await new File(sourceUri).copy(stagingFile, { overwrite: true });
-    stagingFile.rename(filename);
+    await stagingFile.move(destination, { overwrite: true });
     return { uri: destination.uri, size };
   } catch (error) {
     if (stagingFile.exists) stagingFile.delete();

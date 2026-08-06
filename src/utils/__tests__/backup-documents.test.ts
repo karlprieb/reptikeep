@@ -3,8 +3,9 @@ import { zipSync } from "fflate";
 
 import { animals$, type Animal } from "@/state/animal";
 import { activityStores } from "@/state/activity-stores";
-import { documents$, type AnimalDocument } from "@/state/document";
+import { addDocument, documents$, type AnimalDocument } from "@/state/document";
 import { createBackup, parseBackup, restoreBackup } from "@/utils/backup";
+import { TEXT_LIMITS } from "@/utils/text-limits";
 
 const mockFiles = new Map<string, Uint8Array>();
 const mockDirectories = new Set<string>();
@@ -119,6 +120,15 @@ const JPG_BYTES = new Uint8Array([0xff, 0xd8, 0xff, 0xe0, 0x00, 0x10]);
 const WEBP_BYTES = new Uint8Array([
   0x52, 0x49, 0x46, 0x46, 0, 0, 0, 0, 0x57, 0x45, 0x42, 0x50,
 ]);
+
+function isoBmff(major: string, ...compatible: string[]): Uint8Array {
+  const brands = [major, "\0\0\0\0", ...compatible].join("");
+  const header = `\0\0\0${String.fromCharCode(8 + brands.length)}ftyp${brands}`;
+  return Uint8Array.from(header, (character) => character.charCodeAt(0));
+}
+
+const HEIC_BYTES = isoBmff("heic", "mif1");
+const MP4_BYTES = isoBmff("isom", "iso2", "avc1", "mp41");
 
 const animal: Animal = {
   id: "animal-1",
@@ -302,6 +312,20 @@ describe("backup restore", () => {
     );
   });
 
+  it("keeps an over-long title identical across a round trip", async () => {
+    seed();
+    addDocument({ ...invoice, title: "N".repeat(TEXT_LIMITS.title + 40) });
+    const stored = documents$.peek()[invoice.id].title;
+    expect(stored).toHaveLength(TEXT_LIMITS.title);
+
+    const archive = await createBackup();
+    documents$.set({});
+
+    await restoreBackup(archive);
+
+    expect(documents$.peek()[invoice.id].title).toBe(stored);
+  });
+
   it("clears documents and their files when restoring a v1 backup", async () => {
     seed();
     const archive = writeArchive({
@@ -315,6 +339,21 @@ describe("backup restore", () => {
     expect(documents$.peek()).toEqual({});
     expect(mockFiles.has(invoice.file)).toBe(false);
     expect(mockFiles.has(certificate.file)).toBe(false);
+  });
+
+  it("keeps a restored file when the replaced record has a stale container path", async () => {
+    seed();
+    const archive = await createBackup();
+    documents$.set({
+      [invoice.id]: {
+        ...invoice,
+        file: `file:///old-container/Documents/animal-documents/${invoice.id}.pdf`,
+      },
+    });
+
+    await restoreBackup(archive);
+
+    expect(mockFiles.get(invoice.file)).toEqual(PDF_BYTES);
   });
 
   it("removes documents whose animals the backup replaces", async () => {
@@ -383,6 +422,43 @@ describe("backup validation", () => {
     });
 
     await expect(parseBackup(archive)).rejects.toThrow("invalid document");
+  });
+
+  it("accepts a real HEIC but rejects a video renamed to .heic", async () => {
+    const heic = {
+      file: `documents/${invoice.id}.heic`,
+      extension: "heic",
+      size: HEIC_BYTES.byteLength,
+    };
+
+    await expect(
+      parseBackup(
+        writeArchive({
+          "manifest.json": json(manifest(2, inventory)),
+          "data.json": json(
+            husbandryOnly({ [invoice.id]: exportedDocument(heic) }),
+          ),
+          [`documents/${invoice.id}.heic`]: HEIC_BYTES,
+        }),
+      ),
+    ).resolves.toBeTruthy();
+
+    await expect(
+      parseBackup(
+        writeArchive({
+          "manifest.json": json(manifest(2, inventory)),
+          "data.json": json(
+            husbandryOnly({
+              [invoice.id]: exportedDocument({
+                ...heic,
+                size: MP4_BYTES.byteLength,
+              }),
+            }),
+          ),
+          [`documents/${invoice.id}.heic`]: MP4_BYTES,
+        }),
+      ),
+    ).rejects.toThrow("invalid document");
   });
 
   it("rejects a document file with no matching record", async () => {

@@ -56,6 +56,7 @@ import {
 import {
   deleteManagedAnimalDocument,
   DocumentTooLargeError,
+  getAnimalDocumentUri,
   importAnimalDocument,
   inspectDocumentSource,
   MAX_DOCUMENT_BYTES,
@@ -144,7 +145,7 @@ function DocumentFormSheet({
   const handlePicked = (uri: string, name?: string) => {
     setFileError(undefined);
     try {
-      const { extension, size } = inspectDocumentSource(uri, name);
+      const { extension, size } = inspectDocumentSource(uri);
       const displayName = name ?? uri.split("/").pop() ?? "";
       setPickedFile({ uri, name: displayName, extension, size });
       if (title.trim().length === 0) {
@@ -217,6 +218,9 @@ function DocumentFormSheet({
       let extension: DocumentExtension;
       let size: number;
 
+      const previousUri = document
+        ? getAnimalDocumentUri(document.file)
+        : undefined;
       const previousBytes =
         pickedFile && document
           ? await readAnimalDocumentBytes(document.file)
@@ -253,14 +257,14 @@ function DocumentFormSheet({
       try {
         addDocument(record);
       } catch (error) {
-        if (pickedFile && document?.file === fileUri && previousBytes)
-          writeAnimalDocument(document.id, document.extension, previousBytes);
+        if (pickedFile && previousUri === fileUri && previousBytes)
+          writeAnimalDocument(document!.id, document!.extension, previousBytes);
         else if (pickedFile) deleteManagedAnimalDocument(fileUri);
         throw error;
       }
 
-      if (pickedFile && document && document.file !== fileUri) {
-        deleteManagedAnimalDocument(document.file);
+      if (pickedFile && previousUri && previousUri !== fileUri) {
+        deleteManagedAnimalDocument(previousUri);
       }
 
       router.back();
@@ -474,7 +478,8 @@ export default function DocumentFormScreen() {
   const { animal } = useAnimalRoute();
   const { documentId } = useLocalSearchParams<{ documentId?: string }>();
   const documents = useValue(documents$);
-  const document = documentId ? documents[documentId] : undefined;
+  const candidate = documentId ? documents[documentId] : undefined;
+  const document = candidate?.animalId === animal?.id ? candidate : undefined;
 
   if (!animal) return <AnimalNotFound />;
 

@@ -47,7 +47,7 @@ export async function importAnimalPhoto(
 
   try {
     await new File(processedUri).copy(stagingFile, { overwrite: true });
-    stagingFile.rename(filename);
+    await stagingFile.move(destination, { overwrite: true });
     return destination.uri;
   } catch (error) {
     if (stagingFile.exists) stagingFile.delete();
