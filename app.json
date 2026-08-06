@@ -2,7 +2,7 @@
   "expo": {
     "name": "ReptiKeep",
     "slug": "ReptiKeep",
-    "version": "0.2.0",
+    "version": "0.3.0",
     "orientation": "portrait",
     "scheme": "reptikeep",
     "userInterfaceStyle": "automatic",
@@ -10,7 +10,7 @@
       "icon": "./assets/ios.icon",
       "bundleIdentifier": "app.reptikeep",
       "appleTeamId": "3K9KUB8992",
-      "buildNumber": "1",
+      "buildNumber": "2",
       "config": {
         "usesNonExemptEncryption": false
       }

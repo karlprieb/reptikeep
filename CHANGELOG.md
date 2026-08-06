@@ -7,6 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-08-06
+
+### Added
+
+- Documents: keep invoices, certificates of authenticity, origin papers
+  and permits with the reptile they belong to. Attach a PDF or a photo from
+  Files, your photo library or the camera, give it a title, type and issue
+  date, and find it later under the reptile's ⋯ menu → Documents.
+- Document preview: open an attachment in the app, zoom into a scanned
+  page, flip through a multi-page PDF, and share it out through the usual
+  share sheet.
+- Documents in backups: exports now carry your attachments alongside
+  reptiles, records and photos. Backups made by earlier versions still
+  restore as before.
+
+### Fixed
+
+- Changing the photo of a reptile that already had one failed to save. The
+  new photo now replaces the old one.
+
 ## [0.2.0] - 2026-08-05
 
 ### Added
@@ -49,7 +69,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Reset app data** in Settings, which permanently clears every reptile and
   record on the device.
 
-[Unreleased]: https://github.com/karlprieb/reptikeep/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/karlprieb/reptikeep/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/karlprieb/reptikeep/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/karlprieb/reptikeep/compare/v0.1.0...v0.2.0
 [0.1.1]: https://github.com/karlprieb/reptikeep/compare/v0.1.0...349df00
 [0.1.0]: https://github.com/karlprieb/reptikeep/releases/tag/v0.1.0
