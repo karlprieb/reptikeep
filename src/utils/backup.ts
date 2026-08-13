@@ -515,14 +515,16 @@ function validDocument(
   const hasActivityType = record.activityType !== undefined;
   const hasActivityId = record.activityId !== undefined;
   if (hasActivityType !== hasActivityId) return false;
+  if (hasActivityId && !safeId(record.activityId)) return false;
   if (hasActivityType) {
     if (
       schemaVersion < 4 ||
       record.activityType !== "medical" ||
-      record.kind !== "medical"
+      record.kind !== "medical" ||
+      !safeId(record.activityId)
     )
       return false;
-    const activity = (activities.medical ?? {})[record.activityId as string];
+    const activity = (activities.medical ?? {})[record.activityId];
     if (!activity || activity.animalId !== record.animalId) return false;
   }
 
@@ -807,10 +809,15 @@ function isBackupableDocument(document: unknown): document is AnimalDocument {
   const hasActivityType = document.activityType !== undefined;
   const hasActivityId = document.activityId !== undefined;
   if (hasActivityType !== hasActivityId) return false;
+  if (hasActivityId && !safeId(document.activityId)) return false;
   if (hasActivityType) {
-    if (document.activityType !== "medical") return false;
-    const activity =
-      activityStores.medical.$.peek()[document.activityId as string];
+    if (
+      document.activityType !== "medical" ||
+      document.kind !== "medical" ||
+      !safeId(document.activityId)
+    )
+      return false;
+    const activity = activityStores.medical.$.peek()[document.activityId];
     if (!activity || activity.animalId !== document.animalId) return false;
   }
 

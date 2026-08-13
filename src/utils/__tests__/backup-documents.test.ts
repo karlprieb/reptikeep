@@ -470,6 +470,8 @@ describe("backup validation", () => {
     { activityType: "medical" },
     { activityId: "medical-1" },
     { activityType: "medical", activityId: "missing" },
+    { activityType: "medical", activityId: 1 },
+    { activityType: "medical", activityId: true },
   ])("rejects malformed v4 document links: %p", async (link) => {
     const archive = writeArchive({
       "manifest.json": json(manifest(4, inventory)),
