@@ -176,6 +176,7 @@
       "authenticity": "Certificate of authenticity",
       "origin": "Certificate of origin",
       "permit": "Permit or licence",
+      "medical": "Medical",
       "other": "Other"
     },
     "swipe": {
@@ -203,6 +204,7 @@
       "details": "Details",
       "titleField": "Title",
       "kindField": "Kind",
+      "linkedMedicalKind": "Medical document · Edit from its medical record",
       "knownIssueDate": "Known issue date",
       "issueDate": "Issue date",
       "tooLarge": "Documents must be {{limit}} or smaller. This one is {{size}}.",
@@ -239,6 +241,10 @@
     "habitat": {
       "title": "Habitat",
       "description": "Water & cleaning"
+    },
+    "medical": {
+      "title": "Medical",
+      "description": "Log care or treatment"
     }
   },
   "feedingForm": {
@@ -275,6 +281,31 @@
     "refused": "Refused",
     "notes": "Notes",
     "notesPlaceholder": "Add an observation"
+  },
+  "medicalForm": {
+    "title": "Log medical record",
+    "editTitle": "Edit medical record",
+    "cancel": "Cancel",
+    "cancelHint": "Dismisses without saving",
+    "save": "Save",
+    "saveHint": "Adds this medical record to {{animalName}}'s history",
+    "editSaveHint": "Saves these changes to this medical record",
+    "timing": "Timing",
+    "when": "When",
+    "timingHint": "Logging for {{animalName}}. Backdate this to when it happened.",
+    "summary": "Summary",
+    "summaryPlaceholder": "What happened?",
+    "notes": "Notes",
+    "notesPlaceholder": "Add an observation",
+    "documents": "Documents",
+    "addDocument": "Add document",
+    "removeDocument": "Remove document",
+    "removeDocumentTitle": "Remove {{title}}?",
+    "removeDocumentMessage": "This removes the document when you save this medical record.",
+    "removeDocumentConfirm": "Remove",
+    "documentTooLarge": "This document is {{size}}. Choose one smaller than {{limit}}.",
+    "unsupportedDocument": "That file type isn't supported. Choose a PDF, JPG, PNG, or HEIC.",
+    "saveError": "We couldn't save this medical record. Try again."
   },
   "weightForm": {
     "title": "Log weight",
@@ -598,7 +629,8 @@
       "shed": "Shed",
       "poop": "Poop",
       "weight": "Growth",
-      "habitat": "Habitat"
+      "habitat": "Habitat",
+      "medical": "Medical"
     }
   },
   "activityDetail": {
@@ -611,6 +643,7 @@
     "delete": "Delete record",
     "deleteTitle": "Delete this {{activityType}} record?",
     "deleteMessage": "This record is the only account of what happened. There is no way to undo it.",
+    "deleteMedicalMessage": "This also deletes every linked document from this device. There is no way to undo it.",
     "deleteConfirm": "Delete",
     "cancel": "Cancel",
     "meal": "Meal",

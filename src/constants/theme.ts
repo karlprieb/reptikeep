@@ -86,7 +86,8 @@ export type ThemeColor = keyof typeof Colors.light & keyof typeof Colors.dark;
 
 export type Theme = (typeof Colors)[keyof typeof Colors];
 
-export type ActivityType = "feed" | "shed" | "poop" | "weight" | "habitat";
+export type ActivityType =
+  "feed" | "shed" | "poop" | "weight" | "habitat" | "medical";
 
 export const CategoryColors: Record<ActivityType, string> = {
   feed: "#C98A4B",
@@ -94,6 +95,7 @@ export const CategoryColors: Record<ActivityType, string> = {
   poop: "#8A6844",
   weight: "#7FB2B6",
   habitat: "#5F7E42",
+  medical: "#C76D7A",
 } as const;
 
 export type SFSymbolName = NonNullable<
@@ -106,6 +108,7 @@ export const ActivitySymbols: Record<ActivityType, SFSymbolName> = {
   poop: "drop",
   weight: "scalemass",
   habitat: "leaf",
+  medical: "cross.case",
 };
 
 const SYSTEM_FACE = undefined;

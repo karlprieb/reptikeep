@@ -1,6 +1,7 @@
 import type { DefecationActivity } from "@/state/defecation";
 import type { FeedingActivity } from "@/state/feeding";
 import type { HabitatActivity } from "@/state/habitat";
+import type { MedicalActivity } from "@/state/medical";
 import type { ShedActivity } from "@/state/shed";
 import type { WeightActivity } from "@/state/weight";
 import {
@@ -70,6 +71,16 @@ function habitat(over: Partial<HabitatActivity> & Pick<HabitatActivity, "id">) {
   } satisfies HabitatActivity;
 }
 
+function medical(over: Partial<MedicalActivity> & Pick<MedicalActivity, "id">) {
+  return {
+    animalId: ANIMAL,
+    createdAt: "2026-07-01T00:00:00.000Z",
+    occurredAt: "2026-07-01T00:00:00.000Z",
+    summary: "Checkup",
+    ...over,
+  } satisfies MedicalActivity;
+}
+
 function stores(over: Partial<ActivityStores> = {}): ActivityStores {
   return {
     feedings: {},
@@ -77,6 +88,7 @@ function stores(over: Partial<ActivityStores> = {}): ActivityStores {
     sheds: {},
     defecations: {},
     habitats: {},
+    medical: {},
     ...over,
   };
 }
@@ -103,11 +115,15 @@ describe("animalActivityFeed", () => {
         habitats: {
           h: habitat({ id: "h", occurredAt: "2026-07-18T00:00:00.000Z" }),
         },
+        medical: {
+          m: medical({ id: "m", occurredAt: "2026-07-25T00:00:00.000Z" }),
+        },
       }),
     );
 
     expect(feed.map((entry) => entry.type)).toEqual([
       "poop",
+      "medical",
       "feed",
       "habitat",
       "weight",

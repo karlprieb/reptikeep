@@ -5,6 +5,7 @@ export const TEXT_LIMITS = {
   scientificName: 200,
   foodType: 100,
   amount: 100,
+  summary: 200,
   notes: 2000,
   note: 2000,
 } as const;

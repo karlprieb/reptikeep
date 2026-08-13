@@ -166,6 +166,7 @@ export function AnimalDetail({ animal, onAddActivity }: AnimalDetailProps) {
     weights: useValue(activityStores.weight.$),
     sheds: useValue(activityStores.shed.$),
     defecations: useValue(activityStores.poop.$),
+    medical: useValue(activityStores.medical.$),
   });
 
   const { weightUnit } = useAnimalDefaults(animal.id);

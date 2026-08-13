@@ -115,6 +115,8 @@ function describeActivity(
 
       return { detail: parts.join(" · "), flagged: issues };
     }
+    case "medical":
+      return { detail: entry.record.summary, flagged: false };
     case "habitat": {
       const parts = [
         entry.record.water ? t("timeline.waterChanged") : null,
@@ -140,7 +142,7 @@ function describeChange(
   t: TFunction,
   unit: WeightUnit,
 ): RowChange | null {
-  if (!previous) return null;
+  if (!previous || entry.type === "medical") return null;
 
   if (entry.type === "weight" && previous.type === "weight") {
     const { deltaGrams, percent } = weightChange(
@@ -215,8 +217,11 @@ function ActivityRow({
     router.push(`/animal/${animalId}/${entry.type}?activityId=${entry.id}`);
 
   const confirmDelete = () =>
-    confirmDeleteActivity(t, typeName, () =>
-      removeActivity(entry.type, entry.id),
+    confirmDeleteActivity(
+      t,
+      typeName,
+      () => removeActivity(entry.type, entry.id),
+      entry.type === "medical",
     );
 
   const title = (

@@ -132,6 +132,26 @@ describe("ActivityDetailSheet content", () => {
 });
 
 describe("ActivityDetailSheet actions", () => {
+  it("warns that linked documents are deleted with medical records", () => {
+    const alert = jest.spyOn(Alert, "alert").mockImplementation();
+    const record = {
+      id: "medical-1",
+      animalId: ANIMAL_ID,
+      createdAt: "2026-07-25T18:00:00.000Z",
+      occurredAt: "2026-07-25T18:00:00.000Z",
+      summary: "Annual exam",
+    };
+
+    const screen = renderDetail(toActivity("medical", record));
+    fireEvent.press(screen.getByLabelText("Delete record"));
+
+    expect(alert).toHaveBeenCalledWith(
+      expect.any(String),
+      expect.stringContaining("linked document"),
+      expect.any(Array),
+    );
+  });
+
   it("replaces itself with the record's own form sheet on edit", () => {
     act(() => feedingStore.$.set({ [FEEDING.id]: FEEDING }));
 

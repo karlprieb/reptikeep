@@ -24,6 +24,7 @@ describe("sheetScrolls", () => {
     const rows = cardRows(2).length;
 
     expect(rows).toBe(3);
+    expect(cardRows(1)).toHaveLength(6);
     expect(sheetScrolls(2, rows, TALL, 1)).toBe(false);
     expect(sheetScrolls(2, rows, SHORT, 1)).toBe(true);
   });

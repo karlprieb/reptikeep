@@ -19,6 +19,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - "Last clean" on the reptile's detail screen, beside the last water change,
   and a "Cleaning overdue" badge on the Reptiles list next to the feeding
   and water ones.
+- **Medical records** — log vet visits, care and treatment with a required
+  summary, optional notes and the date and time they happened. Medical records
+  appear in the reptile's activity timeline but never create reminders.
+- Attach multiple PDFs or photos to a medical record. Linked files also appear
+  under the reptile's Documents area as medical documents, can be previewed and
+  edited there, and are removed with the medical record after confirmation.
 
 ### Changed
 
@@ -35,9 +41,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Habitat records logged before this update say nothing either way about
   cleaning, so their detail screen leaves that line out rather than claiming
   the enclosure was not cleaned.
-- Backups are now schema version 3. Backups from earlier versions still
-  restore as before, but a backup made now will not restore on 0.3.0 or
-  older.
+- Backups are now schema version 4 to include medical records and their linked
+  documents. Backups from schema versions 1–3 still restore as before, but a
+  backup made now will not restore on 0.3.0 or older.
 - Habitat records are now moss green wherever they appear — the timeline,
   the record picker and the reminder rows.
 

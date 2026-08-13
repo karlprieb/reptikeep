@@ -176,6 +176,7 @@
       "authenticity": "Certificado de autenticidade",
       "origin": "Certificado de origem",
       "permit": "Licença ou autorização",
+      "medical": "Médico",
       "other": "Outro"
     },
     "swipe": {
@@ -203,6 +204,7 @@
       "details": "Detalhes",
       "titleField": "Título",
       "kindField": "Tipo",
+      "linkedMedicalKind": "Documento médico · Edite pelo atendimento médico",
       "knownIssueDate": "Data de emissão conhecida",
       "issueDate": "Data de emissão",
       "tooLarge": "Documentos devem ter no máximo {{limit}}. Este tem {{size}}.",
@@ -239,6 +241,10 @@
     "habitat": {
       "title": "Habitat",
       "description": "Água e limpeza"
+    },
+    "medical": {
+      "title": "Médico",
+      "description": "Registrar cuidado ou tratamento"
     }
   },
   "feedingForm": {
@@ -275,6 +281,31 @@
     "refused": "Recusou",
     "notes": "Observações",
     "notesPlaceholder": "Adicione uma observação"
+  },
+  "medicalForm": {
+    "title": "Registrar atendimento médico",
+    "editTitle": "Editar atendimento médico",
+    "cancel": "Cancelar",
+    "cancelHint": "Descarta sem salvar",
+    "save": "Salvar",
+    "saveHint": "Adiciona este atendimento médico ao histórico de {{animalName}}",
+    "editSaveHint": "Salva estas alterações neste atendimento médico",
+    "timing": "Quando",
+    "when": "Data e hora",
+    "timingHint": "Registrando para {{animalName}}. Ajuste para quando aconteceu.",
+    "summary": "Resumo",
+    "summaryPlaceholder": "O que aconteceu?",
+    "notes": "Notas",
+    "notesPlaceholder": "Adicione uma observação",
+    "documents": "Documentos",
+    "addDocument": "Adicionar documento",
+    "removeDocument": "Remover documento",
+    "removeDocumentTitle": "Remover {{title}}?",
+    "removeDocumentMessage": "Isto remove o documento quando você salvar este atendimento médico.",
+    "removeDocumentConfirm": "Remover",
+    "documentTooLarge": "Este documento tem {{size}}. Escolha um menor que {{limit}}.",
+    "unsupportedDocument": "Este tipo de arquivo não é aceito. Escolha um PDF, JPG, PNG ou HEIC.",
+    "saveError": "Não foi possível salvar este atendimento médico. Tente novamente."
   },
   "weightForm": {
     "title": "Registrar peso",
@@ -598,7 +629,8 @@
       "shed": "Muda",
       "poop": "Fezes",
       "weight": "Crescimento",
-      "habitat": "Habitat"
+      "habitat": "Habitat",
+      "medical": "Médico"
     }
   },
   "activityDetail": {
@@ -611,6 +643,7 @@
     "delete": "Excluir registro",
     "deleteTitle": "Excluir este registro de {{activityType}}?",
     "deleteMessage": "Este registro é o único relato do que aconteceu. Não há como desfazer.",
+    "deleteMedicalMessage": "Isto também exclui deste dispositivo todos os documentos vinculados. Não há como desfazer.",
     "deleteConfirm": "Excluir",
     "cancel": "Cancelar",
     "meal": "Refeição",

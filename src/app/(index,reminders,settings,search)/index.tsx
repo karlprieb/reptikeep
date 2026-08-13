@@ -51,14 +51,16 @@ export default function ReptilesScreen() {
   const sheds = useValue(activityStores.shed.$);
   const poops = useValue(activityStores.poop.$);
   const habitats = useValue(activityStores.habitat.$);
+  const medical = useValue(activityStores.medical.$);
   const sort = useValue(settings$.reptileSort);
   const view = useValue(settings$.reptileView);
 
   const lastFed = useMemo(() => lastFedByAnimal(feedings), [feedings]);
   const lastCare = useMemo(() => lastCareByAnimal(habitats), [habitats]);
   const lastActivity = useMemo(
-    () => lastActivityByAnimal(feedings, weights, sheds, poops, habitats),
-    [feedings, weights, sheds, poops, habitats],
+    () =>
+      lastActivityByAnimal(feedings, weights, sheds, poops, habitats, medical),
+    [feedings, weights, sheds, poops, habitats, medical],
   );
   const animals = useMemo(
     () => sortAnimals(Object.values(animalsRecord), sort, lastActivity),

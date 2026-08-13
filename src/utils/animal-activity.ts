@@ -4,6 +4,7 @@ import { CARE_ROUTINES, type CareRoutine } from "@/state/care-schedule";
 import type { DefecationActivity } from "@/state/defecation";
 import type { FeedingActivity } from "@/state/feeding";
 import type { HabitatActivity } from "@/state/habitat";
+import type { MedicalActivity } from "@/state/medical";
 import type { ShedActivity } from "@/state/shed";
 import type { WeightActivity } from "@/state/weight";
 
@@ -22,6 +23,12 @@ export type AnimalActivity =
       type: "habitat";
       occurredAt: string;
       record: HabitatActivity;
+    }
+  | {
+      id: string;
+      type: "medical";
+      occurredAt: string;
+      record: MedicalActivity;
     };
 
 export function toActivity(
@@ -31,7 +38,8 @@ export function toActivity(
     | WeightActivity
     | ShedActivity
     | DefecationActivity
-    | HabitatActivity,
+    | HabitatActivity
+    | MedicalActivity,
 ): AnimalActivity {
   return {
     id: record.id,
@@ -164,11 +172,12 @@ export type ActivityStores = {
   sheds: Record<string, ShedActivity>;
   defecations: Record<string, DefecationActivity>;
   habitats: Record<string, HabitatActivity>;
+  medical: Record<string, MedicalActivity>;
 };
 
 export function animalActivityFeed(
   animalId: string,
-  { feedings, weights, sheds, defecations, habitats }: ActivityStores,
+  { feedings, weights, sheds, defecations, habitats, medical }: ActivityStores,
 ): AnimalActivity[] {
   const byType = {
     feed: feedings,
@@ -176,6 +185,7 @@ export function animalActivityFeed(
     shed: sheds,
     poop: defecations,
     habitat: habitats,
+    medical,
   };
 
   return (
