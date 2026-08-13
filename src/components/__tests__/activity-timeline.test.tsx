@@ -47,7 +47,7 @@ describe("ActivityPanel row navigation", () => {
   it("opens the record's detail sheet when the row is tapped", () => {
     const screen = renderTimeline();
 
-    fireEvent.press(screen.getByLabelText("Shed, Jul 21 2026"));
+    fireEvent.press(screen.getByLabelText("Shed, Jul 21, 2026"));
 
     expect(router.push).toHaveBeenCalledWith(
       `/animal/${ANIMAL_ID}/activity?type=shed&activityId=${SHED.id}`,

@@ -48,7 +48,7 @@ describe("ActivityDetailSheet content", () => {
 
     const screen = renderDetail(toActivity("feed", FEEDING));
 
-    expect(screen.getByText("Jul 21 2026")).toBeTruthy();
+    expect(screen.getByText("Jul 21, 2026")).toBeTruthy();
     expect(screen.getByText("Small rat")).toBeTruthy();
     expect(screen.getByText("Frozen/thawed food")).toBeTruthy();
     expect(screen.getByText("Refused")).toBeTruthy();
@@ -126,7 +126,7 @@ describe("ActivityDetailSheet content", () => {
 
     expect(screen.getByText("Feces & urate")).toBeTruthy();
     expect(
-      screen.getByText("Logged on Jul 24 2026, after the fact."),
+      screen.getByText("Logged on Jul 24, 2026, after the fact."),
     ).toBeTruthy();
   });
 });

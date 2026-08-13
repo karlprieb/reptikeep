@@ -38,12 +38,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Backups are now schema version 3. Backups from earlier versions still
   restore as before, but a backup made now will not restore on 0.3.0 or
   older.
+- Habitat records are now moss green wherever they appear — the timeline,
+  the record picker and the reminder rows.
 
 ### Fixed
 
 - A reptile with a water change schedule and nothing logged yet showed up as
   overdue on the Reminders tab while its card and detail screen said only
   "No water change logged". All three now agree.
+- At larger text sizes the icon on an overdue badge ran into the first
+  character of its label, so "16 days overdue" read as "6 days overdue".
+  The icon now grows with the text instead of staying a fixed width.
 
 ## [0.3.0] - 2026-08-06
 

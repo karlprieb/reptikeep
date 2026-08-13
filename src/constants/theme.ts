@@ -93,7 +93,7 @@ export const CategoryColors: Record<ActivityType, string> = {
   shed: "#B9AED6",
   poop: "#8A6844",
   weight: "#7FB2B6",
-  habitat: "#5C7FA6",
+  habitat: "#5F7E42",
 } as const;
 
 export type SFSymbolName = NonNullable<

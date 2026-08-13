@@ -32,7 +32,7 @@ describe("processAnimalPhoto", () => {
     expect(mockResize).toHaveBeenCalledWith({ width: 2048 });
     expect(mockSaveAsync).toHaveBeenCalledWith({
       format: "webp",
-      compress: 0.82,
+      compress: 0.8,
     });
     expect(uri).toBe("file:///cache/processed.webp");
   });
@@ -53,7 +53,7 @@ describe("processAnimalPhoto", () => {
     expect(mockResize).not.toHaveBeenCalled();
     expect(mockSaveAsync).toHaveBeenCalledWith({
       format: "webp",
-      compress: 0.82,
+      compress: 0.8,
     });
     expect(uri).toBe("file:///cache/processed.webp");
   });

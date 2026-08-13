@@ -1,6 +1,6 @@
 import type { Animal } from "@/state/animal";
 
-export function normalizeAnimalSearchText(value: string): string {
+function normalizeAnimalSearchText(value: string): string {
   return value.normalize("NFD").replace(/\p{M}/gu, "").toLocaleLowerCase();
 }
 

@@ -47,20 +47,9 @@ describe("locale key parity", () => {
     const keys = getKeys(locale);
     const missing = enKeys.filter((key) => !keys.includes(key));
     const extra = keys.filter((key) => !enKeys.includes(key));
-    const mismatched = missing.length > 0 || extra.length > 0;
 
-    it(`${name} has identical key set to en${mismatched ? " (key mismatch — see warning)" : ""}`, () => {
-      if (mismatched) {
-        console.warn(
-          [
-            `${name} translation keys differ from en (${missing.length} missing, ${extra.length} extra):`,
-            ...missing.map((key) => `  missing: ${key}`),
-            ...extra.map((key) => `  extra: ${key}`),
-          ].join("\n"),
-        );
-      } else {
-        expect(keys).toEqual(enKeys);
-      }
+    it(`${name} has identical key set to en`, () => {
+      expect({ missing, extra }).toEqual({ missing: [], extra: [] });
     });
 
     it(`no empty values in ${name}`, () => {

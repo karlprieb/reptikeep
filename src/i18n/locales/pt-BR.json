@@ -599,11 +599,6 @@
       "poop": "Fezes",
       "weight": "Crescimento",
       "habitat": "Habitat"
-    },
-    "status": {
-      "success": "Alimentado",
-      "danger": "Atrasado",
-      "neutral": "Sem dados"
     }
   },
   "activityDetail": {

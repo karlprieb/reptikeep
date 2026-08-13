@@ -599,11 +599,6 @@
       "poop": "Poop",
       "weight": "Growth",
       "habitat": "Habitat"
-    },
-    "status": {
-      "success": "Fed",
-      "danger": "Overdue",
-      "neutral": "No data"
     }
   },
   "activityDetail": {

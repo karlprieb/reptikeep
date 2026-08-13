@@ -788,7 +788,7 @@ function isBackupableDocument(document: unknown): document is AnimalDocument {
   );
 }
 
-export function documentForBackup(
+function documentForBackup(
   document: AnimalDocument,
   bytes: Uint8Array,
 ): AnimalDocument {

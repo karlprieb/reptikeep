@@ -24,7 +24,7 @@ import {
   padding,
   resizable,
 } from "@expo/ui/swift-ui/modifiers";
-import { Pressable, StyleSheet } from "react-native";
+import { Pressable, StyleSheet, useWindowDimensions } from "react-native";
 import { useTranslation } from "react-i18next";
 
 import {
@@ -52,6 +52,7 @@ export const CARD_ASPECT_RATIO = 0.8;
 const SCRIM_GRADIENT_COLORS = ["rgba(14, 9, 4, 1)", "rgba(14, 9, 4, 0)"];
 const ON_PHOTO_TEXT = "#FFFFFF";
 const ON_PHOTO_TEXT_SECONDARY = "rgba(255, 255, 255, 0.82)";
+const ICON_MAX_SCALE = 2;
 
 type OverdueTask = {
   id: "feed" | "water" | "cleaning";
@@ -68,7 +69,7 @@ export type OverdueInput = {
   lastCleanAt?: string;
 };
 
-export function overdueRoutines(input: OverdueInput) {
+function overdueRoutines(input: OverdueInput) {
   return {
     feed: scheduleDaysOverdue(input.lastFedAt, input.feedingSchedule) !== null,
     water:
@@ -111,6 +112,8 @@ export function AnimalCard({
   onPress,
 }: AnimalCardProps) {
   const { t } = useTranslation();
+  const { fontScale } = useWindowDimensions();
+  const iconWidth = Spacing.md * Math.min(fontScale, ICON_MAX_SCALE);
   const isPlaceholder = !animal.photo;
   const monogram = animal.name.trim().slice(0, 1).toLocaleUpperCase();
   const symbol = SEX_SYMBOLS[animal.sex];
@@ -282,7 +285,7 @@ export function AnimalCard({
                       modifiers={[
                         typeFont("bodyS"),
                         foregroundStyle(theme.danger),
-                        frame({ width: Spacing.md, alignment: "leading" }),
+                        frame({ width: iconWidth, alignment: "leading" }),
                       ]}
                     />
                     <Text
@@ -308,7 +311,7 @@ export function AnimalCard({
                   modifiers={[
                     typeFont("bodyS"),
                     foregroundStyle(feedingColor),
-                    frame({ width: Spacing.md, alignment: "leading" }),
+                    frame({ width: iconWidth, alignment: "leading" }),
                   ]}
                 />
                 <Text
