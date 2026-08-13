@@ -195,7 +195,7 @@ describe("ReptileFormSheet water schedule", () => {
   it("says the collection has none when no cadence is set", () => {
     const screen = render(<ReptileFormSheet />);
 
-    expect(screen.getByText("Follow global · Off")).toBeTruthy();
+    expect(screen.getAllByText("Follow global · Off")).toHaveLength(2);
   });
 
   it("stores an explicit opt-out, which absence could not express", async () => {

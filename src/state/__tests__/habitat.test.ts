@@ -1,4 +1,8 @@
-import { createHabitatActivity } from "@/state/habitat";
+import { createHabitatActivity, type HabitatActivity } from "@/state/habitat";
+import {
+  lastCareByAnimal,
+  latestEnclosureClean,
+} from "@/utils/animal-activity";
 
 describe("createHabitatActivity", () => {
   it("generates distinct ids across calls", () => {
@@ -50,5 +54,41 @@ describe("createHabitatActivity", () => {
     expect(
       createHabitatActivity({ animalId: "animal-1" }).notes,
     ).toBeUndefined();
+  });
+
+  it("defaults cleaning to false", () => {
+    expect(createHabitatActivity({ animalId: "animal-1" }).cleaning).toBe(
+      false,
+    );
+  });
+
+  it("honors cleaning when set to true", () => {
+    const h = createHabitatActivity({
+      animalId: "animal-1",
+      cleaning: true,
+    });
+    expect(h.cleaning).toBe(true);
+  });
+});
+
+describe("legacy habitat records without a cleaning key", () => {
+  const legacy: HabitatActivity = {
+    id: "legacy-1",
+    animalId: "animal-1",
+    createdAt: "2024-01-01T00:00:00.000Z",
+    occurredAt: "2024-01-01T00:00:00.000Z",
+    water: true,
+  };
+
+  it("reads as not-cleaned through latestEnclosureClean", () => {
+    expect(
+      latestEnclosureClean({ [legacy.id]: legacy }, "animal-1"),
+    ).toBeUndefined();
+  });
+
+  it("does not appear in lastCareByAnimal().cleaning", () => {
+    const byRoutine = lastCareByAnimal({ [legacy.id]: legacy });
+    expect(byRoutine.cleaning["animal-1"]).toBeUndefined();
+    expect(byRoutine.water["animal-1"]).toBe(legacy.occurredAt);
   });
 });

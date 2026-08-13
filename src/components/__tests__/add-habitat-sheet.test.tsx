@@ -18,10 +18,11 @@ describe("AddHabitatSheet", () => {
 
     expect(screen.getByText("Log habitat")).toBeTruthy();
     expect(screen.getByLabelText("Water changed")).toBeTruthy();
+    expect(screen.getByLabelText("Enclosure cleaned")).toBeTruthy();
     expect(screen.getByPlaceholderText("Add an observation")).toBeTruthy();
   });
 
-  it("saves an untouched record as a water change", () => {
+  it("saves an untouched record as a water change only", () => {
     const screen = render(
       <AddHabitatSheet animalId={ANIMAL_ID} animalName="Willow" />,
     );
@@ -29,18 +30,90 @@ describe("AddHabitatSheet", () => {
     fireEvent.press(screen.getByLabelText("Save"));
 
     const [habitat] = Object.values(habitatStore.$.peek());
-    expect(habitat).toMatchObject({ animalId: ANIMAL_ID, water: true });
+    expect(habitat).toMatchObject({
+      animalId: ANIMAL_ID,
+      water: true,
+      cleaning: false,
+    });
     expect(habitat.notes).toBeUndefined();
     expect(router.back).toHaveBeenCalledTimes(1);
   });
 
-  it("saves upkeep with the water left alone, and says so", () => {
+  it("opens on the cleaning routine when a reminder sent it there", () => {
+    const screen = render(
+      <AddHabitatSheet
+        animalId={ANIMAL_ID}
+        animalName="Willow"
+        routine="cleaning"
+      />,
+    );
+
+    fireEvent.press(screen.getByLabelText("Save"));
+
+    expect(Object.values(habitatStore.$.peek())[0]).toMatchObject({
+      water: false,
+      cleaning: true,
+    });
+  });
+
+  it("opens on the water routine when a reminder sent it there", () => {
+    const screen = render(
+      <AddHabitatSheet
+        animalId={ANIMAL_ID}
+        animalName="Willow"
+        routine="water"
+      />,
+    );
+
+    fireEvent.press(screen.getByLabelText("Save"));
+
+    expect(Object.values(habitatStore.$.peek())[0]).toMatchObject({
+      water: true,
+      cleaning: false,
+    });
+  });
+
+  it("saves both toggles on together as one record", () => {
+    const screen = render(
+      <AddHabitatSheet animalId={ANIMAL_ID} animalName="Willow" />,
+    );
+
+    fireEvent.press(screen.getByLabelText("Enclosure cleaned"));
+    fireEvent.press(screen.getByLabelText("Save"));
+
+    const [habitat] = Object.values(habitatStore.$.peek());
+    expect(habitat).toMatchObject({
+      animalId: ANIMAL_ID,
+      water: true,
+      cleaning: true,
+    });
+  });
+
+  it("saves cleaning alone with water turned off, and says each switch counts", () => {
     const screen = render(
       <AddHabitatSheet animalId={ANIMAL_ID} animalName="Willow" />,
     );
 
     fireEvent.press(screen.getByLabelText("Water changed"));
-    expect(screen.getByText(/will not count this/)).toBeTruthy();
+    fireEvent.press(screen.getByLabelText("Enclosure cleaned"));
+    expect(screen.getByText(/counts toward its own schedule/)).toBeTruthy();
+    fireEvent.press(screen.getByLabelText("Save"));
+
+    const [habitat] = Object.values(habitatStore.$.peek());
+    expect(habitat).toMatchObject({
+      animalId: ANIMAL_ID,
+      water: false,
+      cleaning: true,
+    });
+  });
+
+  it("saves both toggles off as a note-only record", () => {
+    const screen = render(
+      <AddHabitatSheet animalId={ANIMAL_ID} animalName="Willow" />,
+    );
+
+    fireEvent.press(screen.getByLabelText("Water changed"));
+    expect(screen.getByText(/no schedule counts this/)).toBeTruthy();
 
     fireEvent.changeText(
       screen.getByPlaceholderText("Add an observation"),
@@ -52,6 +125,7 @@ describe("AddHabitatSheet", () => {
     expect(habitat).toMatchObject({
       animalId: ANIMAL_ID,
       water: false,
+      cleaning: false,
       notes: "Replaced the substrate",
     });
   });
@@ -64,6 +138,7 @@ describe("AddHabitatSheet editing an existing record", () => {
     createdAt: "2026-07-20T09:00:00.000Z",
     occurredAt: "2026-07-21T10:00:00.000Z",
     water: false,
+    cleaning: true,
     notes: "Scrubbed the glass",
   };
 
@@ -81,6 +156,9 @@ describe("AddHabitatSheet editing an existing record", () => {
     expect(
       screen.getByLabelText("Water changed").props.accessibilityState,
     ).toEqual({ checked: false });
+    expect(
+      screen.getByLabelText("Enclosure cleaned").props.accessibilityState,
+    ).toEqual({ checked: true });
   });
 
   it("writes over the record rather than logging a second one", () => {
@@ -103,6 +181,7 @@ describe("AddHabitatSheet editing an existing record", () => {
       createdAt: EXISTING.createdAt,
       occurredAt: EXISTING.occurredAt,
       water: true,
+      cleaning: true,
       notes: "Scrubbed the glass",
     });
   });

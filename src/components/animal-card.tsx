@@ -54,10 +54,34 @@ const ON_PHOTO_TEXT = "#FFFFFF";
 const ON_PHOTO_TEXT_SECONDARY = "rgba(255, 255, 255, 0.82)";
 
 type OverdueTask = {
-  id: "feed" | "water";
+  id: "feed" | "water" | "cleaning";
   icon: SFSymbolName;
   label: string;
 };
+
+export type OverdueInput = {
+  feedingSchedule?: CareSchedule;
+  lastFedAt?: string;
+  waterSchedule?: CareSchedule;
+  lastWaterChangeAt?: string;
+  cleaningSchedule?: CareSchedule;
+  lastCleanAt?: string;
+};
+
+export function overdueRoutines(input: OverdueInput) {
+  return {
+    feed: scheduleDaysOverdue(input.lastFedAt, input.feedingSchedule) !== null,
+    water:
+      scheduleDaysOverdue(input.lastWaterChangeAt, input.waterSchedule) !==
+      null,
+    cleaning:
+      scheduleDaysOverdue(input.lastCleanAt, input.cleaningSchedule) !== null,
+  };
+}
+
+export function overdueCount(input: OverdueInput): number {
+  return Object.values(overdueRoutines(input)).filter(Boolean).length;
+}
 
 export type AnimalCardProps = {
   animal: Animal;
@@ -67,6 +91,8 @@ export type AnimalCardProps = {
   lastFedAt?: string;
   waterSchedule?: CareSchedule;
   lastWaterChangeAt?: string;
+  cleaningSchedule?: CareSchedule;
+  lastCleanAt?: string;
   placeholderLayout?: "compact" | "grid";
   onPress: () => void;
 };
@@ -79,6 +105,8 @@ export function AnimalCard({
   lastFedAt,
   waterSchedule,
   lastWaterChangeAt,
+  cleaningSchedule,
+  lastCleanAt,
   placeholderLayout = "grid",
   onPress,
 }: AnimalCardProps) {
@@ -94,8 +122,14 @@ export function AnimalCard({
     : ON_PHOTO_TEXT_SECONDARY;
 
   const feeding = feedingStatus(t, lastFedAt, animal.feedingSchedule);
-  const waterOverdue =
-    scheduleDaysOverdue(lastWaterChangeAt, waterSchedule) !== null;
+  const { water: waterOverdue, cleaning: cleaningOverdue } = overdueRoutines({
+    feedingSchedule: animal.feedingSchedule,
+    lastFedAt,
+    waterSchedule,
+    lastWaterChangeAt,
+    cleaningSchedule,
+    lastCleanAt,
+  });
   const overdueTasks: OverdueTask[] = [
     ...(feeding.overdue
       ? [
@@ -112,6 +146,15 @@ export function AnimalCard({
             id: "water" as const,
             icon: "drop.fill" as SFSymbolName,
             label: t("water.overdue"),
+          },
+        ]
+      : []),
+    ...(cleaningOverdue
+      ? [
+          {
+            id: "cleaning" as const,
+            icon: "sparkles" as SFSymbolName,
+            label: t("cleaning.overdue"),
           },
         ]
       : []),

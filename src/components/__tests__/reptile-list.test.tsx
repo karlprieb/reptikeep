@@ -3,6 +3,7 @@ import { router } from "expo-router";
 
 import { AnimalCard } from "@/components/animal-card";
 import {
+  cardBadgeAllowance,
   NO_PHOTO_SINGLE_COLUMN_HEIGHT,
   ReptileEmptyState,
   ReptileList,
@@ -359,6 +360,20 @@ describe("selectColumnCount", () => {
     expect(selectColumnCount("grid", 1.75)).toBe(1);
     expect(selectColumnCount("grid", 3.1)).toBe(1);
     expect(selectColumnCount("single", 1.75)).toBe(1);
+  });
+});
+
+describe("cardBadgeAllowance", () => {
+  it("sizes every grid card for the busiest one so the row stays even", () => {
+    expect(cardBadgeAllowance(2, [0, 3, 1])).toEqual([3, 3, 3]);
+  });
+
+  it("lets a single column size each card for its own badges", () => {
+    expect(cardBadgeAllowance(1, [0, 3, 1])).toEqual([0, 3, 1]);
+  });
+
+  it("copes with an empty collection", () => {
+    expect(cardBadgeAllowance(2, [])).toEqual([]);
   });
 });
 

@@ -115,11 +115,14 @@ function describeActivity(
 
       return { detail: parts.join(" · "), flagged: issues };
     }
-    case "habitat":
-      return {
-        detail: entry.record.water ? t("timeline.waterChanged") : null,
-        flagged: false,
-      };
+    case "habitat": {
+      const parts = [
+        entry.record.water ? t("timeline.waterChanged") : null,
+        entry.record.cleaning ? t("timeline.enclosureCleaned") : null,
+      ].filter((part): part is string => Boolean(part));
+
+      return { detail: parts.join(" · ") || null, flagged: false };
+    }
   }
 }
 

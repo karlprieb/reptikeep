@@ -5,12 +5,16 @@ import { AppState } from "react-native";
 import i18n from "@/i18n";
 import { activityStores } from "@/state/activity-stores";
 import { animals$ } from "@/state/animal";
-import { careSchedules$ } from "@/state/care-schedule";
+import { CARE_ROUTINES, careSchedules$ } from "@/state/care-schedule";
 import { reminders$ } from "@/state/reminders";
 import { settings$ } from "@/state/settings";
-import { lastWaterChangeByAnimal } from "@/utils/animal-activity";
+import { lastCareByAnimal } from "@/utils/animal-activity";
+import {
+  careReminders,
+  reminderDigest,
+  type ReminderDay,
+} from "@/utils/care-reminders";
 import { atClockTime, fromCalendarDate } from "@/utils/format-date";
-import { reminderDigest, waterReminders } from "@/utils/water-reminders";
 
 const HORIZON_DAYS = 14;
 
@@ -37,20 +41,24 @@ export async function requestReminderPermission(): Promise<ReminderPermission> {
   return toPermission(await Notifications.requestPermissionsAsync());
 }
 
-function notificationBody(names: string[]): string {
-  const shown = names.slice(0, NAMES_SHOWN).join(", ");
-  const rest = names.length - NAMES_SHOWN;
+function notificationBody(routines: ReminderDay["routines"]): string {
+  return routines
+    .map(({ routine, names }) => {
+      const shown = names.slice(0, NAMES_SHOWN).join(", ");
+      const rest = names.length - NAMES_SHOWN;
 
-  return i18n.t("reminders.notification.body", {
-    count: names.length,
-    names:
-      rest > 0
-        ? i18n.t("reminders.notification.overflow", {
-            names: shown,
-            count: rest,
-          })
-        : shown,
-  });
+      return i18n.t("reminders.notification.line", {
+        routine: i18n.t(`reminders.routine.${routine}`),
+        names:
+          rest > 0
+            ? i18n.t("reminders.notification.overflow", {
+                names: shown,
+                count: rest,
+              })
+            : shown,
+      });
+    })
+    .join("\n");
 }
 
 let generation = 0;
@@ -60,10 +68,10 @@ async function reschedule(): Promise<void> {
   const run = (generation += 1);
 
   const days = reminderDigest(
-    waterReminders(
+    careReminders(
       animals$.peek(),
-      careSchedules$.water.peek(),
-      lastWaterChangeByAnimal(activityStores.habitat.$.peek()),
+      careSchedules$.peek(),
+      lastCareByAnimal(activityStores.habitat.$.peek()),
     ),
     new Date(),
     HORIZON_DAYS,
@@ -87,10 +95,10 @@ async function reschedule(): Promise<void> {
     if (at.getTime() <= Date.now()) continue;
 
     await Notifications.scheduleNotificationAsync({
-      identifier: `water-${day.date}`,
+      identifier: `care-${day.date}`,
       content: {
         title: i18n.t("reminders.notification.title"),
-        body: notificationBody(day.names),
+        body: notificationBody(day.routines),
         data: { url: "/reminders" },
       },
       trigger: {
@@ -123,7 +131,7 @@ export function startReminderScheduler(): () => void {
 
   const stopObserving = observe(() => {
     animals$.get();
-    careSchedules$.water.get();
+    for (const routine of CARE_ROUTINES) careSchedules$[routine].get();
     activityStores.habitat.$.get();
     reminders$.get();
     settings$.language.get();

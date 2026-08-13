@@ -61,17 +61,17 @@ import { EmptyState } from "@/components/empty-state";
 import { IOSPageHeader } from "@/components/page-header";
 import { ThemedText } from "@/components/themed-text";
 import {
-  ActivitySymbols,
   CategoryColors,
   Radius,
   Spacing,
+  type SFSymbolName,
   type Theme,
 } from "@/constants/theme";
 import { typeFont } from "@/constants/type-font";
 import { useTheme } from "@/hooks/use-theme";
 import { activityStores } from "@/state/activity-stores";
 import { addAnimal, animals$, type Animal } from "@/state/animal";
-import { careSchedules$ } from "@/state/care-schedule";
+import { careSchedules$, type CareRoutine } from "@/state/care-schedule";
 import { createHabitatActivity, habitatStore } from "@/state/habitat";
 import {
   reminderPermission,
@@ -79,7 +79,8 @@ import {
   type ReminderPermission,
 } from "@/state/notifications";
 import { reminders$ } from "@/state/reminders";
-import { lastWaterChangeByAnimal } from "@/utils/animal-activity";
+import { lastCareByAnimal } from "@/utils/animal-activity";
+import { careReminders, type CareReminder } from "@/utils/care-reminders";
 import {
   daysSince,
   formatAbsoluteDate,
@@ -87,7 +88,11 @@ import {
   fromCalendarDate,
   toCalendarDate,
 } from "@/utils/format-date";
-import { waterReminders, type WaterReminder } from "@/utils/water-reminders";
+
+const ROUTINE_SYMBOLS: Record<CareRoutine, SFSymbolName> = {
+  water: "drop.fill",
+  cleaning: "sparkles",
+};
 
 const BADGE_SIZE = 28;
 const BADGE_MAX_SCALE = 2;
@@ -116,16 +121,25 @@ function panelModifiers(theme: Theme) {
   ];
 }
 
-function markWaterChanged(animalId: string): void {
-  habitatStore.add(createHabitatActivity({ animalId }));
+function markRoutineDone(animalId: string, routine: CareRoutine): void {
+  habitatStore.add(
+    createHabitatActivity({
+      animalId,
+      water: routine === "water",
+      cleaning: routine === "cleaning",
+    }),
+  );
 }
 
-function stopReminding(animal: Animal): void {
-  addAnimal({ ...animal, reminders: { ...animal.reminders, water: false } });
+function stopReminding(animal: Animal, routine: CareRoutine): void {
+  addAnimal({
+    ...animal,
+    reminders: { ...animal.reminders, [routine]: false },
+  });
 }
 
 type ReminderRowProps = {
-  reminder: WaterReminder;
+  reminder: CareReminder;
   state: DueState;
   theme: Theme;
   badgeSize: number;
@@ -152,7 +166,7 @@ function ReminderRow({
   onStopReminding,
 }: ReminderRowProps) {
   const { t } = useTranslation();
-  const routine = t("reminders.waterChange");
+  const routine = t(`reminders.routine.${reminder.routine}`);
   const due = formatAbsoluteDate(reminder.dueOn);
 
   const name = (
@@ -228,7 +242,9 @@ function ReminderRow({
               frame({ maxWidth: Infinity, maxHeight: Infinity }),
               contentShape(shapes.rectangle()),
               onTapGesture(() =>
-                router.push(`/animal/${reminder.animalId}/habitat`),
+                router.push(
+                  `/animal/${reminder.animalId}/habitat?routine=${reminder.routine}`,
+                ),
               ),
               accessibilityElement("combine"),
               accessibilityAddTraits(["isButton"]),
@@ -243,7 +259,7 @@ function ReminderRow({
             >
               <Circle modifiers={[foregroundStyle(CategoryColors.habitat)]} />
               <Image
-                systemName={ActivitySymbols.habitat}
+                systemName={ROUTINE_SYMBOLS[reminder.routine]}
                 modifiers={[
                   font({
                     size: Math.round(badgeSize * SYMBOL_RATIO),
@@ -300,17 +316,19 @@ function ReminderRow({
           </HStack>
 
           <Button
-            onPress={() => markWaterChanged(reminder.animalId)}
+            onPress={() => markRoutineDone(reminder.animalId, reminder.routine)}
             modifiers={[
               buttonStyle("borderless"),
               frame({ width: checkboxSize, height: checkboxSize }),
               contentShape(shapes.rectangle()),
               accessibilityLabel(
-                t("a11y.reminders.done.label", {
+                t(`a11y.reminders.done.${reminder.routine}.label`, {
                   animalName: reminder.animalName,
                 }),
               ),
-              accessibilityHint(t("a11y.reminders.done.hint")),
+              accessibilityHint(
+                t(`a11y.reminders.done.${reminder.routine}.hint`),
+              ),
             ]}
           >
             <Image
@@ -350,14 +368,14 @@ function ReminderRow({
 }
 
 type ReminderPanelProps = {
-  items: WaterReminder[];
-  dueState: (reminder: WaterReminder) => DueState;
+  items: CareReminder[];
+  dueState: (reminder: CareReminder) => DueState;
   theme: Theme;
   badgeSize: number;
   checkboxSize: number;
   stacked: boolean;
   textInset: number;
-  onStopReminding: (animalId: string) => void;
+  onStopReminding: (animalId: string, routine: CareRoutine) => void;
 };
 
 function ReminderPanel({
@@ -379,7 +397,7 @@ function ReminderPanel({
   );
   const rowHeight =
     uniformRowHeight(
-      items.map((item) => item.animalId),
+      items.map((item) => `${item.animalId}:${item.routine}`),
       heights,
       floor,
     ) ?? estimate;
@@ -401,7 +419,7 @@ function ReminderPanel({
       >
         {items.map((reminder, index) => (
           <ReminderRow
-            key={reminder.animalId}
+            key={`${reminder.animalId}:${reminder.routine}`}
             reminder={reminder}
             state={dueState(reminder)}
             theme={theme}
@@ -411,8 +429,10 @@ function ReminderPanel({
             divided={index > 0}
             textInset={textInset}
             rowHeight={rowHeight}
-            onMeasure={measure(reminder.animalId)}
-            onStopReminding={() => onStopReminding(reminder.animalId)}
+            onMeasure={measure(`${reminder.animalId}:${reminder.routine}`)}
+            onStopReminding={() =>
+              onStopReminding(reminder.animalId, reminder.routine)
+            }
           />
         ))}
       </List>
@@ -505,6 +525,7 @@ export default function RemindersScreen() {
 
   const animals = useValue(animals$);
   const collectionWater = useValue(careSchedules$.water);
+  const collectionCleaning = useValue(careSchedules$.cleaning);
   const habitats = useValue(activityStores.habitat.$);
   const reminderTime = useValue(reminders$);
   const [permission, setPermission] = useState<ReminderPermission>();
@@ -520,19 +541,19 @@ export default function RemindersScreen() {
     return () => subscription.remove();
   }, []);
 
-  const handleStopReminding = (animalId: string) => {
+  const handleStopReminding = (animalId: string, routine: CareRoutine) => {
     const animal = animals[animalId];
-    if (animal) stopReminding(animal);
+    if (animal) stopReminding(animal, routine);
   };
 
   const today = toCalendarDate(new Date());
-  const reminders = waterReminders(
+  const reminders = careReminders(
     animals,
-    collectionWater,
-    lastWaterChangeByAnimal(habitats),
+    { water: collectionWater, cleaning: collectionCleaning },
+    lastCareByAnimal(habitats),
   );
 
-  const dueState = (reminder: WaterReminder): DueState => {
+  const dueState = (reminder: CareReminder): DueState => {
     if (reminder.dueOn < today) {
       return {
         text: t("schedule.overdue", { count: daysSince(reminder.dueOn) ?? 0 }),

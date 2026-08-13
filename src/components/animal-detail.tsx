@@ -42,6 +42,7 @@ import { useAnimalDefaults } from "@/state/logging-defaults";
 import {
   animalActivityFeed,
   latestAcceptedFeeding,
+  latestEnclosureClean,
   latestWaterChange,
 } from "@/utils/animal-activity";
 import { getAnimalPhotoUri } from "@/utils/animal-photo-storage";
@@ -181,8 +182,18 @@ export function AnimalDetail({ animal, onAddActivity }: AnimalDetailProps) {
   );
   const latestWater = latestWaterChange(habitats, animal.id);
   const waterOverdueDays = scheduleDaysOverdue(
-    latestWater?.occurredAt,
+    latestWater?.occurredAt ?? animal.createdAt,
     waterSchedule,
+  );
+
+  const cleaningSchedule = resolveSchedule(
+    useValue(careSchedules$.cleaning),
+    animal.cleaningSchedule,
+  );
+  const latestClean = latestEnclosureClean(habitats, animal.id);
+  const cleaningOverdueDays = scheduleDaysOverdue(
+    latestClean?.occurredAt ?? animal.createdAt,
+    cleaningSchedule,
   );
 
   const gradientBand = width * GRADIENT_BAND_FRACTION;
@@ -250,12 +261,29 @@ export function AnimalDetail({ animal, onAddActivity }: AnimalDetailProps) {
             value: latestWater
               ? formatAbsoluteDate(latestWater.occurredAt)
               : t("detail.unknownValue"),
-            secondary: latestWater
-              ? waterOverdueDays
-                ? t("schedule.overdue", { count: waterOverdueDays })
-                : relativeLine(latestWater.occurredAt, "ago", t)
-              : t("water.noneLogged"),
+            secondary: waterOverdueDays
+              ? t("schedule.overdue", { count: waterOverdueDays })
+              : latestWater
+                ? relativeLine(latestWater.occurredAt, "ago", t)
+                : t("water.noneLogged"),
             secondaryColor: waterOverdueDays ? theme.danger : undefined,
+          },
+        ]
+      : []),
+    ...(cleaningSchedule || latestClean
+      ? [
+          {
+            key: "cleaning",
+            label: t("detail.lastClean"),
+            value: latestClean
+              ? formatAbsoluteDate(latestClean.occurredAt)
+              : t("detail.unknownValue"),
+            secondary: cleaningOverdueDays
+              ? t("schedule.overdue", { count: cleaningOverdueDays })
+              : latestClean
+                ? relativeLine(latestClean.occurredAt, "ago", t)
+                : t("cleaning.noneLogged"),
+            secondaryColor: cleaningOverdueDays ? theme.danger : undefined,
           },
         ]
       : []),

@@ -18,8 +18,8 @@ import {
 } from "@/state/settings";
 import {
   lastActivityByAnimal,
+  lastCareByAnimal,
   lastFedByAnimal,
-  lastWaterChangeByAnimal,
 } from "@/utils/animal-activity";
 import type { AnimalSortField, SortDirection } from "@/utils/animal-sort";
 import { sortAnimals } from "@/utils/animal-sort";
@@ -55,10 +55,7 @@ export default function ReptilesScreen() {
   const view = useValue(settings$.reptileView);
 
   const lastFed = useMemo(() => lastFedByAnimal(feedings), [feedings]);
-  const lastWaterChange = useMemo(
-    () => lastWaterChangeByAnimal(habitats),
-    [habitats],
-  );
+  const lastCare = useMemo(() => lastCareByAnimal(habitats), [habitats]);
   const lastActivity = useMemo(
     () => lastActivityByAnimal(feedings, weights, sheds, poops, habitats),
     [feedings, weights, sheds, poops, habitats],
@@ -86,7 +83,8 @@ export default function ReptilesScreen() {
         <ReptileList
           animals={animals}
           lastFed={lastFed}
-          lastWaterChange={lastWaterChange}
+          lastWaterChange={lastCare.water}
+          lastClean={lastCare.cleaning}
           viewMode={view}
           onAddPress={handleAdd}
         />

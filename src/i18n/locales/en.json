@@ -103,12 +103,15 @@
   },
   "reminders": {
     "title": "Reminders",
-    "waterChange": "Water change",
     "enabled": "Remind me",
     "dueToday": "Due today",
     "dueIn_one": "In {{count}} day",
     "dueIn_other": "In {{count}} days",
     "timeFooter": "Reminders arrive at {{time}}.",
+    "routine": {
+      "water": "Water change",
+      "cleaning": "Enclosure cleaning"
+    },
     "section": {
       "overdue": "Overdue",
       "today": "Today",
@@ -120,7 +123,7 @@
     },
     "empty": {
       "title": "Nothing due",
-      "subtitle": "Set a water change schedule in Settings, or on a reptile's own profile, and what's coming up shows here."
+      "subtitle": "Set a water change or enclosure cleaning schedule in Settings, or on a reptile's own profile, and what's coming up shows here."
     },
     "settings": {
       "section": "Reminders",
@@ -135,9 +138,8 @@
       "openSettings": "Open Settings"
     },
     "notification": {
-      "title": "Water change due",
-      "body_one": "{{names}} needs fresh water today.",
-      "body_other": "{{names}} need fresh water today.",
+      "title": "Today's care",
+      "line": "{{routine}}: {{names}}",
       "overflow": "{{names}} and {{count}} more"
     }
   },
@@ -236,7 +238,7 @@
     },
     "habitat": {
       "title": "Habitat",
-      "description": "Water & upkeep"
+      "description": "Water & cleaning"
     }
   },
   "feedingForm": {
@@ -407,7 +409,8 @@
       "yearsMonthsAgo_one": "{{years}} yr {{count}} mo ago",
       "yearsMonthsAgo_other": "{{years}} yr {{count}} mo ago"
     },
-    "lastWaterChange": "Last water change"
+    "lastWaterChange": "Last water change",
+    "lastClean": "Last clean"
   },
   "timeline": {
     "title": "Recent activity",
@@ -434,7 +437,8 @@
       "edit": "Edit",
       "delete": "Delete"
     },
-    "waterChanged": "Water changed"
+    "waterChanged": "Water changed",
+    "enclosureCleaned": "Enclosure cleaned"
   },
   "feeding": {
     "noFeedingLogged": "No feeding logged",
@@ -501,7 +505,8 @@
       }
     },
     "habitatForm": {
-      "water": "Turn off to log enclosure upkeep without a water change"
+      "water": "Turn off to log enclosure upkeep without a water change",
+      "cleaning": "Turn on to count this toward the enclosure cleaning schedule"
     },
     "waterSchedule": {
       "enabled": {
@@ -514,19 +519,39 @@
         "hint": "Enter the number of days between water changes"
       }
     },
+    "cleaningSchedule": {
+      "enabled": {
+        "hint": "Sets one enclosure cleaning cadence for every reptile in the collection"
+      },
+      "frequency": {
+        "hint": "Opens a menu to choose how often the enclosure is cleaned"
+      },
+      "customDays": {
+        "hint": "Enter the number of days between enclosure cleanings"
+      }
+    },
     "reminders": {
       "water": {
         "hint": "Sends a notification when this reptile's water change comes due"
+      },
+      "cleaning": {
+        "hint": "Sends a notification when this reptile's enclosure cleaning comes due"
       },
       "time": {
         "hint": "Opens a picker to choose what time the day's reminders arrive"
       },
       "row": {
-        "hint": "Opens a water change record you can backdate or annotate"
+        "hint": "Opens a care record you can backdate or annotate"
       },
       "done": {
-        "label": "Water changed for {{animalName}}",
-        "hint": "Logs a water change now and moves this to its next due date"
+        "water": {
+          "label": "Water changed for {{animalName}}",
+          "hint": "Logs a water change now and moves this to its next due date"
+        },
+        "cleaning": {
+          "label": "Enclosure cleaned for {{animalName}}",
+          "hint": "Logs an enclosure cleaning now and moves this to its next due date"
+        }
       },
       "allow": {
         "hint": "Asks iOS for permission to send reminders"
@@ -629,9 +654,20 @@
     "animalFooter": "Applies to {{animalName}} only. Left on Follow global, it tracks your Settings.",
     "animalFooterNew": "Applies to this reptile only. Left on Follow global, it tracks your Settings."
   },
+  "cleaningSchedule": {
+    "section": "Enclosure cleaning schedule",
+    "enabled": "Use a collection schedule",
+    "globalFooter": "Off unless you turn it on. With it on, every reptile follows this cadence unless its own profile says otherwise.",
+    "animalFooter": "Applies to {{animalName}} only. Left on Follow global, it tracks your Settings.",
+    "animalFooterNew": "Applies to this reptile only. Left on Follow global, it tracks your Settings."
+  },
   "water": {
     "overdue": "Water overdue",
     "noneLogged": "No water change logged"
+  },
+  "cleaning": {
+    "overdue": "Cleaning overdue",
+    "noneLogged": "No cleaning logged"
   },
   "habitatForm": {
     "title": "Log habitat",
@@ -646,8 +682,9 @@
     "timingHint": "Logging for {{animalName}}. Backdate this to when you did the work.",
     "upkeep": "Upkeep",
     "water": "Water changed",
-    "waterHint": "This is the record the water change schedule counts from.",
-    "noWaterHint": "Logged as enclosure upkeep only — the water change schedule will not count this.",
+    "cleaning": "Enclosure cleaned",
+    "upkeepHint": "Each switch counts toward its own schedule.",
+    "noTaskHint": "Logged as a note only — no schedule counts this.",
     "notes": "Notes",
     "notesPlaceholder": "Add an observation"
   }

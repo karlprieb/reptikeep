@@ -13,7 +13,11 @@ import { clampTextFields } from "@/utils/text-limits";
 import { persistedAsWritten, persistPlugin } from "./persist";
 import { removeActivitiesForAnimal } from "./activity-stores";
 import { removeDocumentsForAnimal } from "./document";
-import type { AnimalSchedule, CareSchedule } from "./care-schedule";
+import type {
+  AnimalSchedule,
+  CareRoutine,
+  CareSchedule,
+} from "./care-schedule";
 import type { AnimalLoggingDefaults } from "./logging-defaults";
 
 export interface Animal {
@@ -32,7 +36,8 @@ export interface Animal {
   defaults?: AnimalLoggingDefaults;
   feedingSchedule?: CareSchedule;
   waterSchedule?: AnimalSchedule;
-  reminders?: { water?: boolean };
+  cleaningSchedule?: AnimalSchedule;
+  reminders?: Partial<Record<CareRoutine, boolean>>;
 }
 
 export type CreateAnimalInput = Omit<Animal, "id" | "createdAt" | "sex"> & {
