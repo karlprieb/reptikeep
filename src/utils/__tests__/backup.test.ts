@@ -96,6 +96,19 @@ describe("backup archive validation", () => {
     });
   });
 
+  it("normalizes a cleaning schedule and reminder alongside water", () => {
+    expect(
+      animalForBackup({
+        ...animal,
+        cleaningSchedule: { frequency: "monthly" },
+        reminders: { water: true, cleaning: false },
+      } as never),
+    ).toMatchObject({
+      cleaningSchedule: { frequency: "monthly" },
+      reminders: { water: true, cleaning: false },
+    });
+  });
+
   it("normalizes persisted preferences to the current backup schema", () => {
     settings$.set({
       language: "legacy",
@@ -129,6 +142,18 @@ describe("backup archive validation", () => {
       },
       reminders: { hour: 9, minute: 0 },
       careSchedules: {},
+    });
+  });
+
+  it("round-trips a cleaning schedule alongside water in preferences", () => {
+    careSchedules$.set({
+      water: { frequency: "weekly" },
+      cleaning: { frequency: "monthly" },
+    });
+
+    expect(preferencesForBackup().careSchedules).toEqual({
+      water: { frequency: "weekly" },
+      cleaning: { frequency: "monthly" },
     });
   });
 
@@ -172,6 +197,33 @@ describe("backup archive validation", () => {
           ...husbandry,
           [table]: { [record.id]: { ...record, occurredAt: "2026-1-01" } },
         }),
+      ),
+    ).rejects.toThrow("activity");
+  });
+
+  it("restores a legacy habitat record that has no cleaning key at all", async () => {
+    const record = activity("habitat", { water: true });
+    await expect(
+      parseBackup(
+        archive(manifest, { ...husbandry, habitats: { [record.id]: record } }),
+      ),
+    ).resolves.toMatchObject({ data: { habitats: { [record.id]: record } } });
+  });
+
+  it("accepts a habitat record with an explicit cleaning boolean", async () => {
+    const record = activity("habitat", { water: true, cleaning: true });
+    await expect(
+      parseBackup(
+        archive(manifest, { ...husbandry, habitats: { [record.id]: record } }),
+      ),
+    ).resolves.toMatchObject({ data: { habitats: { [record.id]: record } } });
+  });
+
+  it("rejects a habitat record with an unrecognized key", async () => {
+    const record = activity("habitat", { water: true, extra: true });
+    await expect(
+      parseBackup(
+        archive(manifest, { ...husbandry, habitats: { [record.id]: record } }),
       ),
     ).rejects.toThrow("activity");
   });
@@ -221,6 +273,43 @@ describe("backup archive validation", () => {
         }),
       ),
     ).rejects.toThrow("photo");
+  });
+
+  it("rejects an animal with an unrecognized reminders key", async () => {
+    const withAnimal = {
+      ...husbandry,
+      animals: {
+        "willow-1": { ...animal, reminders: { water: true, extra: true } },
+      },
+    };
+    await expect(parseBackup(archive(manifest, withAnimal))).rejects.toThrow(
+      "animal",
+    );
+  });
+
+  it("rejects preferences with an unrecognized care schedule key", async () => {
+    const preferences = {
+      settings: {
+        language: "en",
+        reptileSort: { field: "name", direction: "asc" },
+        reptileView: "single",
+      },
+      loggingDefaults: {
+        mealMeasure: "weight",
+        frozen: false,
+        weightUnit: "g",
+        poopType: "both",
+      },
+      reminders: { hour: 9, minute: 0 },
+      careSchedules: { water: { frequency: "weekly" }, extra: true },
+    };
+    const preferenceManifest = {
+      ...manifest,
+      scopes: { husbandry: "absent", preferences: "present" },
+    };
+    await expect(
+      parseBackup(archive(preferenceManifest, preferences)),
+    ).rejects.toThrow("preferences");
   });
 
   it("rejects invalid preference objects", async () => {

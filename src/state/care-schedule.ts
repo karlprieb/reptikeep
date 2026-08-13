@@ -20,7 +20,12 @@ export type CareSchedule =
 
 export type AnimalSchedule = CareSchedule | { frequency: "off" };
 
-export const careSchedules$ = observable<{ water?: CareSchedule }>({});
+export const CARE_ROUTINES = ["water", "cleaning"] as const;
+export type CareRoutine = (typeof CARE_ROUTINES)[number];
+
+export const careSchedules$ = observable<
+  Partial<Record<CareRoutine, CareSchedule>>
+>({});
 
 syncObservable(careSchedules$, {
   persist: {

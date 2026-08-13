@@ -213,6 +213,15 @@ function habitatDetail(
         label: t("habitatForm.water"),
         value: yesNo(t, entry.record.water),
       },
+      ...(entry.record.cleaning === undefined
+        ? []
+        : [
+            {
+              key: "cleaning",
+              label: t("habitatForm.cleaning"),
+              value: yesNo(t, entry.record.cleaning),
+            },
+          ]),
     ],
   };
 }

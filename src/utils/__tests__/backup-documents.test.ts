@@ -234,12 +234,12 @@ beforeEach(() => {
 });
 
 describe("backup export", () => {
-  it("carries every document of an exported animal at schema v2", async () => {
+  it("carries every document of an exported animal at the current schema", async () => {
     seed();
 
     const parsed = await parseBackup(await createBackup());
 
-    expect(parsed.manifest.schemaVersion).toBe(2);
+    expect(parsed.manifest.schemaVersion).toBe(3);
     expect(parsed.manifest.inventory.documents).toBe(2);
     expect(Object.keys(parsed.documents).sort()).toEqual([
       "doc-invoice",

@@ -103,12 +103,15 @@
   },
   "reminders": {
     "title": "Lembretes",
-    "waterChange": "Troca de água",
     "enabled": "Me lembrar",
     "dueToday": "Vence hoje",
     "dueIn_one": "Em {{count}} dia",
     "dueIn_other": "Em {{count}} dias",
     "timeFooter": "Os lembretes chegam às {{time}}.",
+    "routine": {
+      "water": "Troca de água",
+      "cleaning": "Limpeza do terrário"
+    },
     "section": {
       "overdue": "Atrasados",
       "today": "Hoje",
@@ -120,7 +123,7 @@
     },
     "empty": {
       "title": "Nada por vencer",
-      "subtitle": "Defina uma rotina de troca de água nos Ajustes, ou no perfil de um réptil, e o que estiver por vir aparece aqui."
+      "subtitle": "Defina uma rotina de troca de água ou de limpeza do terrário nos Ajustes, ou no perfil de um réptil, e o que estiver por vir aparece aqui."
     },
     "settings": {
       "section": "Lembretes",
@@ -135,9 +138,8 @@
       "openSettings": "Abrir Ajustes"
     },
     "notification": {
-      "title": "Troca de água",
-      "body_one": "{{names}} precisa de água fresca hoje.",
-      "body_other": "{{names}} precisam de água fresca hoje.",
+      "title": "Cuidados de hoje",
+      "line": "{{routine}}: {{names}}",
       "overflow": "{{names}} e mais {{count}}"
     }
   },
@@ -236,7 +238,7 @@
     },
     "habitat": {
       "title": "Habitat",
-      "description": "Água e manutenção"
+      "description": "Água e limpeza"
     }
   },
   "feedingForm": {
@@ -407,7 +409,8 @@
       "yearsMonthsAgo_one": "há $t(detail.relative.yearUnit, {\"count\": {{years}} }) e {{count}} mês",
       "yearsMonthsAgo_other": "há $t(detail.relative.yearUnit, {\"count\": {{years}} }) e {{count}} meses"
     },
-    "lastWaterChange": "Última troca de água"
+    "lastWaterChange": "Última troca de água",
+    "lastClean": "Última limpeza"
   },
   "timeline": {
     "title": "Atividades recentes",
@@ -434,7 +437,8 @@
       "edit": "Editar",
       "delete": "Excluir"
     },
-    "waterChanged": "Água trocada"
+    "waterChanged": "Água trocada",
+    "enclosureCleaned": "Terrário limpo"
   },
   "feeding": {
     "noFeedingLogged": "Nenhuma alimentação registrada",
@@ -501,7 +505,8 @@
       }
     },
     "habitatForm": {
-      "water": "Desative para registrar manutenção do terrário sem troca de água"
+      "water": "Desative para registrar manutenção do terrário sem troca de água",
+      "cleaning": "Ative para contar isto na rotina de limpeza do terrário"
     },
     "waterSchedule": {
       "enabled": {
@@ -514,19 +519,39 @@
         "hint": "Insira o número de dias entre as trocas de água"
       }
     },
+    "cleaningSchedule": {
+      "enabled": {
+        "hint": "Define uma frequência de limpeza do terrário para todos os répteis da coleção"
+      },
+      "frequency": {
+        "hint": "Abre um menu para escolher com que frequência o terrário é limpo"
+      },
+      "customDays": {
+        "hint": "Insira o número de dias entre as limpezas do terrário"
+      }
+    },
     "reminders": {
       "water": {
         "hint": "Envia uma notificação quando a troca de água deste réptil vencer"
+      },
+      "cleaning": {
+        "hint": "Envia uma notificação quando a limpeza do terrário deste réptil vencer"
       },
       "time": {
         "hint": "Abre um seletor para escolher a que horas os lembretes do dia chegam"
       },
       "row": {
-        "hint": "Abre um registro de troca de água que você pode retroagir ou comentar"
+        "hint": "Abre um registro de cuidado que você pode retroagir ou comentar"
       },
       "done": {
-        "label": "Água trocada de {{animalName}}",
-        "hint": "Registra a troca de água agora e move isto para o próximo vencimento"
+        "water": {
+          "label": "Água trocada de {{animalName}}",
+          "hint": "Registra a troca de água agora e move isto para o próximo vencimento"
+        },
+        "cleaning": {
+          "label": "Terrário limpo de {{animalName}}",
+          "hint": "Registra a limpeza do terrário agora e move isto para o próximo vencimento"
+        }
       },
       "allow": {
         "hint": "Pede ao iOS permissão para enviar lembretes"
@@ -629,9 +654,20 @@
     "animalFooter": "Vale só para {{animalName}}. Em Seguir global, acompanha seus Ajustes.",
     "animalFooterNew": "Vale só para este réptil. Em Seguir global, acompanha seus Ajustes."
   },
+  "cleaningSchedule": {
+    "section": "Rotina de limpeza do terrário",
+    "enabled": "Usar rotina da coleção",
+    "globalFooter": "Desativada até você ligar. Com ela ligada, todos os répteis seguem esta frequência, a menos que o perfil de cada um diga outra coisa.",
+    "animalFooter": "Vale só para {{animalName}}. Em Seguir global, acompanha seus Ajustes.",
+    "animalFooterNew": "Vale só para este réptil. Em Seguir global, acompanha seus Ajustes."
+  },
   "water": {
     "overdue": "Água atrasada",
     "noneLogged": "Nenhuma troca de água registrada"
+  },
+  "cleaning": {
+    "overdue": "Limpeza atrasada",
+    "noneLogged": "Nenhuma limpeza registrada"
   },
   "habitatForm": {
     "title": "Registrar habitat",
@@ -646,8 +682,9 @@
     "timingHint": "Registro para {{animalName}}. Ajuste para o momento em que você fez o trabalho.",
     "upkeep": "Manutenção",
     "water": "Água trocada",
-    "waterHint": "Este é o registro que a rotina de troca de água usa como referência.",
-    "noWaterHint": "Registrado apenas como manutenção do terrário — a rotina de troca de água não vai contar isto.",
+    "cleaning": "Terrário limpo",
+    "upkeepHint": "Cada opção conta para sua própria rotina.",
+    "noTaskHint": "Registrado apenas como observação — nenhuma rotina conta isto.",
     "notes": "Observações",
     "notesPlaceholder": "Adicione uma observação"
   }

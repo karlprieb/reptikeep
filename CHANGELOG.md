@@ -7,6 +7,44 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **Enclosure cleaning** — habitat records now track a cleaning separately
+  from a water change, so a round where you do both is still one record.
+  Log it under the reptile's ＋ menu → Habitat, where "Water changed" and
+  "Enclosure cleaned" are independent switches.
+- Enclosure cleaning schedule, with its own reminders. Set one cadence for
+  the whole collection under Settings → Enclosure cleaning schedule, or give
+  a reptile its own in its profile. Off until you turn it on.
+- "Last clean" on the reptile's detail screen, beside the last water change,
+  and a "Cleaning overdue" badge on the Reptiles list next to the feeding
+  and water ones.
+
+### Changed
+
+- The Reminders tab lists one row per routine, so a reptile that needs both
+  fresh water and a clean enclosure appears twice, each with its own icon,
+  due date and done button. Marking one done leaves the other alone, and
+  muting one routine keeps the other.
+- Tapping a reminder opens the habitat form already set to that routine, so
+  saving logs the work you were reminded about.
+- The day's notification covers both routines in one message, a line each.
+- A routine that has never been logged now counts as overdue from the day
+  you added the reptile, so the Reptiles list, the reptile's detail screen
+  and the Reminders tab always agree on what is due.
+- Habitat records logged before this update say nothing either way about
+  cleaning, so their detail screen leaves that line out rather than claiming
+  the enclosure was not cleaned.
+- Backups are now schema version 3. Backups from earlier versions still
+  restore as before, but a backup made now will not restore on 0.3.0 or
+  older.
+
+### Fixed
+
+- A reptile with a water change schedule and nothing logged yet showed up as
+  overdue on the Reminders tab while its card and detail screen said only
+  "No water change logged". All three now agree.
+
 ## [0.3.0] - 2026-08-06
 
 ### Added

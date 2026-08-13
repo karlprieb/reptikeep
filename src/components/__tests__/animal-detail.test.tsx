@@ -196,16 +196,39 @@ describe("AnimalDetail stat boxes", () => {
   });
 
   it("shows the water box once the collection has a cadence", () => {
+    jest.useFakeTimers().setSystemTime(new Date("2026-03-10T12:00:00.000Z"));
     act(() => {
       careSchedules$.water.set({ frequency: "weekly" });
     });
 
     const { getByText } = renderDetail(
-      makeAnimal({ id: ANIMAL_ID, name: "Iggy" }),
+      makeAnimal({
+        id: ANIMAL_ID,
+        name: "Iggy",
+        createdAt: "2026-03-08T12:00:00.000Z",
+      }),
     );
 
     expect(getByText("LAST WATER CHANGE")).toBeTruthy();
     expect(getByText("No water change logged")).toBeTruthy();
+  });
+
+  it("counts a never-logged routine overdue from the day the animal was added", () => {
+    jest.useFakeTimers().setSystemTime(new Date("2026-03-10T12:00:00.000Z"));
+    act(() => {
+      careSchedules$.water.set({ frequency: "weekly" });
+    });
+
+    const { getByText, queryByText } = renderDetail(
+      makeAnimal({
+        id: ANIMAL_ID,
+        name: "Iggy",
+        createdAt: "2026-03-01T12:00:00.000Z",
+      }),
+    );
+
+    expect(getByText("2 days overdue")).toBeTruthy();
+    expect(queryByText("No water change logged")).toBeNull();
   });
 
   it("counts water overdue from the last record that changed water", () => {

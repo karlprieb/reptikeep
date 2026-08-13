@@ -1,5 +1,6 @@
 import type { ActivityType } from "@/constants/theme";
 import type { ActivityRecord } from "@/state/activity-store";
+import { CARE_ROUTINES, type CareRoutine } from "@/state/care-schedule";
 import type { DefecationActivity } from "@/state/defecation";
 import type { FeedingActivity } from "@/state/feeding";
 import type { HabitatActivity } from "@/state/habitat";
@@ -90,6 +91,8 @@ function occurredAtByAnimal<T extends ActivityRecord>(
 
 const wasAccepted = (feeding: FeedingActivity) => !feeding.refused;
 const changedWater = (habitat: HabitatActivity) => habitat.water;
+const cleanedEnclosure = (habitat: HabitatActivity) =>
+  habitat.cleaning === true;
 
 export function latestAcceptedFeeding(
   feedings: Record<string, FeedingActivity>,
@@ -111,10 +114,28 @@ export function latestWaterChange(
   return latestQualifying(habitats, changedWater)[animalId];
 }
 
-export function lastWaterChangeByAnimal(
+export function latestEnclosureClean(
   habitats: Record<string, HabitatActivity>,
-): Record<string, string> {
-  return occurredAtByAnimal(latestQualifying(habitats, changedWater));
+  animalId: string,
+): HabitatActivity | undefined {
+  return latestQualifying(habitats, cleanedEnclosure)[animalId];
+}
+
+export function lastCareByAnimal(
+  habitats: Record<string, HabitatActivity>,
+): Record<CareRoutine, Record<string, string>> {
+  return CARE_ROUTINES.reduce(
+    (byRoutine, routine) => {
+      byRoutine[routine] = occurredAtByAnimal(
+        latestQualifying(
+          habitats,
+          routine === "water" ? changedWater : cleanedEnclosure,
+        ),
+      );
+      return byRoutine;
+    },
+    {} as Record<CareRoutine, Record<string, string>>,
+  );
 }
 
 export function lastActivityByAnimal(

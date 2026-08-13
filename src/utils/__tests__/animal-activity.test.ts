@@ -6,8 +6,9 @@ import type { WeightActivity } from "@/state/weight";
 import {
   animalActivityFeed,
   lastActivityByAnimal,
+  lastCareByAnimal,
   lastFedByAnimal,
-  lastWaterChangeByAnimal,
+  latestEnclosureClean,
   latestWaterChange,
   previousOfSameType,
   type ActivityStores,
@@ -250,10 +251,105 @@ describe("water change lookups", () => {
 
   it("omits an animal whose only habitat records changed no water", () => {
     expect(latestWaterChange(records, "a3")).toBeUndefined();
-    expect(lastWaterChangeByAnimal(records)).toEqual({
+    expect(lastCareByAnimal(records).water).toEqual({
       [ANIMAL]: "2026-07-20T00:00:00.000Z",
       a2: "2026-06-02T00:00:00.000Z",
     });
+  });
+});
+
+describe("cleaning lookups", () => {
+  const records = {
+    old: habitat({
+      id: "old",
+      occurredAt: "2026-07-02T00:00:00.000Z",
+      cleaning: true,
+    }),
+    newest: habitat({
+      id: "newest",
+      occurredAt: "2026-07-20T00:00:00.000Z",
+      cleaning: true,
+    }),
+    waterOnly: habitat({
+      id: "waterOnly",
+      occurredAt: "2026-07-28T00:00:00.000Z",
+      cleaning: false,
+    }),
+    other: habitat({
+      id: "other",
+      animalId: "a2",
+      occurredAt: "2026-06-02T00:00:00.000Z",
+      cleaning: true,
+    }),
+    waterOnlyAnimal: habitat({
+      id: "waterOnlyAnimal",
+      animalId: "a3",
+      cleaning: false,
+    }),
+  };
+
+  it("takes the newest record that actually included a cleaning", () => {
+    expect(latestEnclosureClean(records, ANIMAL)?.id).toBe("newest");
+  });
+
+  it("omits an animal whose only habitat records left cleaning off", () => {
+    expect(latestEnclosureClean(records, "a3")).toBeUndefined();
+    expect(lastCareByAnimal(records).cleaning).toEqual({
+      [ANIMAL]: "2026-07-20T00:00:00.000Z",
+      a2: "2026-06-02T00:00:00.000Z",
+    });
+  });
+});
+
+describe("water and cleaning stay disjoint filters", () => {
+  it("a cleaning-only record does not move the water due date", () => {
+    const records = {
+      cleanOnly: habitat({
+        id: "cleanOnly",
+        occurredAt: "2026-07-28T00:00:00.000Z",
+        water: false,
+        cleaning: true,
+      }),
+    };
+
+    expect(latestWaterChange(records, ANIMAL)).toBeUndefined();
+    expect(latestEnclosureClean(records, ANIMAL)?.id).toBe("cleanOnly");
+    expect(lastCareByAnimal(records)).toEqual({
+      water: {},
+      cleaning: { [ANIMAL]: "2026-07-28T00:00:00.000Z" },
+    });
+  });
+
+  it("a water-only record does not move the cleaning due date", () => {
+    const records = {
+      waterOnly: habitat({
+        id: "waterOnly",
+        occurredAt: "2026-07-28T00:00:00.000Z",
+        water: true,
+        cleaning: false,
+      }),
+    };
+
+    expect(latestWaterChange(records, ANIMAL)?.id).toBe("waterOnly");
+    expect(latestEnclosureClean(records, ANIMAL)).toBeUndefined();
+    expect(lastCareByAnimal(records)).toEqual({
+      water: { [ANIMAL]: "2026-07-28T00:00:00.000Z" },
+      cleaning: {},
+    });
+  });
+
+  it("a single record with both true counts toward both schedules", () => {
+    const records = {
+      both: habitat({
+        id: "both",
+        occurredAt: "2026-07-28T00:00:00.000Z",
+        water: true,
+        cleaning: true,
+      }),
+    };
+
+    expect(latestWaterChange(records, ANIMAL)?.id).toBe("both");
+    expect(latestEnclosureClean(records, ANIMAL)?.id).toBe("both");
   });
 });
 

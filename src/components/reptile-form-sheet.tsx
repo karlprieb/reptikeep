@@ -116,6 +116,7 @@ type ReptileFields = {
   defaults?: AnimalLoggingDefaults;
   feedingSchedule?: CareSchedule;
   waterSchedule?: AnimalSchedule;
+  cleaningSchedule?: AnimalSchedule;
   reminders?: Animal["reminders"];
 };
 
@@ -217,8 +218,18 @@ export function ReptileFormSheet({ animal }: ReptileFormSheetProps) {
   const [waterReminder, setWaterReminder] = useState(
     animal?.reminders?.water !== false,
   );
+  const [cleaningSelection, setCleaningSelection] = useState<ScheduleSelection>(
+    scheduleSelection(animal?.cleaningSchedule, SCHEDULE_INHERIT),
+  );
+  const [cleaningDays, setCleaningDays] = useState(
+    scheduleCustomDays(animal?.cleaningSchedule),
+  );
+  const [cleaningReminder, setCleaningReminder] = useState(
+    animal?.reminders?.cleaning !== false,
+  );
   const globalDefaults = useValue(defaults$);
   const collectionWater = useValue(careSchedules$.water);
+  const collectionCleaning = useValue(careSchedules$.cleaning);
   const reminderTime = useValue(reminders$);
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState<string>();
@@ -232,8 +243,17 @@ export function ReptileFormSheet({ animal }: ReptileFormSheetProps) {
     waterSelection === SCHEDULE_INHERIT
       ? Boolean(collectionWater)
       : waterSelection !== "off";
+  const cleaningValid = isScheduleValid(cleaningSelection, cleaningDays);
+  const cleaningScheduled =
+    cleaningSelection === SCHEDULE_INHERIT
+      ? Boolean(collectionCleaning)
+      : cleaningSelection !== "off";
   const canSave =
-    name.trim().length > 0 && feedingValid && waterValid && !isSaving;
+    name.trim().length > 0 &&
+    feedingValid &&
+    waterValid &&
+    cleaningValid &&
+    !isSaving;
 
   const saveNew = async (fields: ReptileFields) => {
     const created = createAnimal(fields);
@@ -284,7 +304,8 @@ export function ReptileFormSheet({ animal }: ReptileFormSheetProps) {
           ? careScheduleFromFields(feedingSelection, feedingDays)
           : undefined,
         waterSchedule: scheduleFromFields(waterSelection, waterDays),
-        reminders: { water: waterReminder },
+        cleaningSchedule: scheduleFromFields(cleaningSelection, cleaningDays),
+        reminders: { water: waterReminder, cleaning: cleaningReminder },
       };
       if (animal) await saveEdit(animal, fields);
       else await saveNew(fields);
@@ -334,6 +355,11 @@ export function ReptileFormSheet({ animal }: ReptileFormSheetProps) {
     if (on) void requestReminderPermission();
   };
 
+  const handleCleaningReminder = (on: boolean) => {
+    setCleaningReminder(on);
+    if (on) void requestReminderPermission();
+  };
+
   const waterFooter = !waterValid
     ? t("schedule.invalidDays")
     : [
@@ -341,6 +367,21 @@ export function ReptileFormSheet({ animal }: ReptileFormSheetProps) {
           ? t("waterSchedule.animalFooter", { animalName: animal.name })
           : t("waterSchedule.animalFooterNew"),
         waterScheduled && waterReminder
+          ? t("reminders.timeFooter", {
+              time: formatClockTime(reminderTime.hour, reminderTime.minute),
+            })
+          : null,
+      ]
+        .filter((part): part is string => Boolean(part))
+        .join(" ");
+
+  const cleaningFooter = !cleaningValid
+    ? t("schedule.invalidDays")
+    : [
+        animal
+          ? t("cleaningSchedule.animalFooter", { animalName: animal.name })
+          : t("cleaningSchedule.animalFooterNew"),
+        cleaningScheduled && cleaningReminder
           ? t("reminders.timeFooter", {
               time: formatClockTime(reminderTime.hour, reminderTime.minute),
             })
@@ -612,7 +653,53 @@ export function ReptileFormSheet({ animal }: ReptileFormSheetProps) {
                   isOn={waterReminder}
                   onIsOnChange={handleWaterReminder}
                   modifiers={[
+                    accessibilityLabel(
+                      `${t("waterSchedule.section")}: ${t("reminders.enabled")}`,
+                    ),
                     accessibilityHint(t("a11y.reminders.water.hint")),
+                  ]}
+                />
+              ) : null}
+            </Section>
+
+            <Section
+              header={
+                <FormSectionHeader>
+                  {t("cleaningSchedule.section")}
+                </FormSectionHeader>
+              }
+              footer={
+                <FormSectionFooter
+                  color={cleaningValid ? undefined : theme.danger}
+                >
+                  {cleaningFooter}
+                </FormSectionFooter>
+              }
+              modifiers={modifiers.row}
+            >
+              <ScheduleFields
+                subject={t("cleaningSchedule.section")}
+                hint={t("a11y.cleaningSchedule.frequency.hint")}
+                daysHint={t("a11y.cleaningSchedule.customDays.hint")}
+                inheritedLabel={t("defaults.followGlobal", {
+                  value: describeSchedule(collectionCleaning, t),
+                })}
+                offLabel={t("schedule.off")}
+                selection={cleaningSelection}
+                onSelectionChange={setCleaningSelection}
+                customDays={cleaningDays}
+                onCustomDaysChange={setCleaningDays}
+              />
+              {cleaningScheduled ? (
+                <Toggle
+                  label={t("reminders.enabled")}
+                  isOn={cleaningReminder}
+                  onIsOnChange={handleCleaningReminder}
+                  modifiers={[
+                    accessibilityLabel(
+                      `${t("cleaningSchedule.section")}: ${t("reminders.enabled")}`,
+                    ),
+                    accessibilityHint(t("a11y.reminders.cleaning.hint")),
                   ]}
                 />
               ) : null}

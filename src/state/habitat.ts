@@ -4,15 +4,17 @@ import { createActivityStore, type ActivityRecord } from "./activity-store";
 
 export interface HabitatActivity extends ActivityRecord {
   water: boolean;
+  cleaning?: boolean;
   notes?: string;
 }
 
 export type CreateHabitatInput = Omit<
   HabitatActivity,
-  "id" | "createdAt" | "occurredAt" | "water"
+  "id" | "createdAt" | "occurredAt" | "water" | "cleaning"
 > & {
   occurredAt?: string;
   water?: boolean;
+  cleaning?: boolean;
 };
 
 export function createHabitatActivity(
@@ -24,6 +26,7 @@ export function createHabitatActivity(
     createdAt: new Date().toISOString(),
     occurredAt: input.occurredAt ?? new Date().toISOString(),
     water: input.water ?? true,
+    cleaning: input.cleaning ?? false,
   };
 }
 

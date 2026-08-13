@@ -29,6 +29,7 @@ import {
   useFormModifiers,
 } from "@/components/form-sheet";
 import { useTheme } from "@/hooks/use-theme";
+import { type CareRoutine } from "@/state/care-schedule";
 import {
   createHabitatActivity,
   habitatStore,
@@ -39,18 +40,24 @@ type AddHabitatSheetProps = {
   animalId: string;
   animalName: string;
   activity?: HabitatActivity;
+  routine?: CareRoutine;
 };
 
 type HabitatDraft = {
   occurredAt: Date;
   water: boolean;
+  cleaning: boolean;
   notes: string;
 };
 
-function createInitialDraft(activity?: HabitatActivity): HabitatDraft {
+function createInitialDraft(
+  activity?: HabitatActivity,
+  routine?: CareRoutine,
+): HabitatDraft {
   return {
     occurredAt: activity ? new Date(activity.occurredAt) : new Date(),
-    water: activity?.water ?? true,
+    water: activity?.water ?? (routine ? routine === "water" : true),
+    cleaning: activity?.cleaning ?? routine === "cleaning",
     notes: activity?.notes ?? "",
   };
 }
@@ -59,11 +66,14 @@ export function AddHabitatSheet({
   animalId,
   animalName,
   activity,
+  routine,
 }: AddHabitatSheetProps) {
   const theme = useTheme();
   const { t } = useTranslation();
   const modifiers = useFormModifiers();
-  const [draft, updateDraft] = useDraft(() => createInitialDraft(activity));
+  const [draft, updateDraft] = useDraft(() =>
+    createInitialDraft(activity, routine),
+  );
   const notesText = useNativeState(activity?.notes ?? "");
 
   const handleSave = () => {
@@ -71,6 +81,7 @@ export function AddHabitatSheet({
       animalId,
       occurredAt: draft.occurredAt.toISOString(),
       water: draft.water,
+      cleaning: draft.cleaning,
       notes: optionalText(draft.notes),
     });
 
@@ -123,9 +134,9 @@ export function AddHabitatSheet({
               }
               footer={
                 <FormSectionFooter>
-                  {draft.water
-                    ? t("habitatForm.waterHint")
-                    : t("habitatForm.noWaterHint")}
+                  {draft.water || draft.cleaning
+                    ? t("habitatForm.upkeepHint")
+                    : t("habitatForm.noTaskHint")}
                 </FormSectionFooter>
               }
               modifiers={modifiers.row}
@@ -135,6 +146,12 @@ export function AddHabitatSheet({
                 isOn={draft.water}
                 onIsOnChange={(water) => updateDraft({ water })}
                 modifiers={[accessibilityHint(t("a11y.habitatForm.water"))]}
+              />
+              <Toggle
+                label={t("habitatForm.cleaning")}
+                isOn={draft.cleaning}
+                onIsOnChange={(cleaning) => updateDraft({ cleaning })}
+                modifiers={[accessibilityHint(t("a11y.habitatForm.cleaning"))]}
               />
             </Section>
 
