@@ -190,7 +190,10 @@ function manifest(schemaVersion: number, inventory: Record<string, number>) {
   };
 }
 
-function husbandryOnly(documents?: Record<string, unknown>) {
+function husbandryOnly(
+  documents?: Record<string, unknown>,
+  medical?: Record<string, unknown>,
+) {
   return {
     animals: {
       [animal.id]: {
@@ -205,6 +208,7 @@ function husbandryOnly(documents?: Record<string, unknown>) {
     sheds: {},
     defecations: {},
     habitats: {},
+    ...(medical ? { medical } : {}),
     ...(documents ? { documents } : {}),
   };
 }
@@ -239,7 +243,7 @@ describe("backup export", () => {
 
     const parsed = await parseBackup(await createBackup());
 
-    expect(parsed.manifest.schemaVersion).toBe(3);
+    expect(parsed.manifest.schemaVersion).toBe(4);
     expect(parsed.manifest.inventory.documents).toBe(2);
     expect(Object.keys(parsed.documents).sort()).toEqual([
       "doc-invoice",
@@ -247,6 +251,34 @@ describe("backup export", () => {
     ]);
     expect(parsed.documents["doc-invoice"].bytes).toEqual(PDF_BYTES);
     expect(parsed.data.documents!["doc-invoice"]).toEqual(exportedDocument());
+  });
+
+  it("round-trips a medical activity link", async () => {
+    seed();
+    const medical = {
+      id: "medical-1",
+      animalId: animal.id,
+      createdAt: "2026-02-03T00:00:00.000Z",
+      occurredAt: "2026-02-03T00:00:00.000Z",
+      summary: "Annual exam",
+    };
+    activityStores.medical.add(medical);
+    documents$.set({
+      ...documents$.peek(),
+      [invoice.id]: {
+        ...invoice,
+        kind: "medical",
+        activityType: "medical",
+        activityId: medical.id,
+      },
+    });
+
+    const parsed = await parseBackup(await createBackup());
+    expect(parsed.data.medical).toEqual({ [medical.id]: medical });
+    expect(parsed.data.documents![invoice.id]).toMatchObject({
+      activityType: "medical",
+      activityId: medical.id,
+    });
   });
 
   it("leaves out documents of animals excluded from a selective export", async () => {
@@ -324,6 +356,26 @@ describe("backup restore", () => {
     await restoreBackup(archive);
 
     expect(documents$.peek()[invoice.id].title).toBe(stored);
+  });
+
+  it("explicitly clears medical state when restoring a v3 backup", async () => {
+    activityStores.medical.add({
+      id: "medical-current",
+      animalId: animal.id,
+      createdAt: "2026-02-03T00:00:00.000Z",
+      occurredAt: "2026-02-03T00:00:00.000Z",
+      summary: "Current exam",
+    });
+    const archive = writeArchive({
+      "manifest.json": json(
+        manifest(3, { animals: 1, records: 0, photos: 0, documents: 0 }),
+      ),
+      "data.json": json(husbandryOnly({})),
+    });
+
+    await restoreBackup(archive);
+
+    expect(activityStores.medical.$.peek()).toEqual({});
   });
 
   it("clears documents and their files when restoring a v1 backup", async () => {
@@ -413,6 +465,75 @@ describe("backup restore", () => {
 
 describe("backup validation", () => {
   const inventory = { animals: 1, records: 0, photos: 0, documents: 1 };
+
+  it.each([
+    { activityType: "medical" },
+    { activityId: "medical-1" },
+    { activityType: "medical", activityId: "missing" },
+    { activityType: "medical", activityId: 1 },
+    { activityType: "medical", activityId: true },
+  ])("rejects malformed v4 document links: %p", async (link) => {
+    const archive = writeArchive({
+      "manifest.json": json(manifest(4, inventory)),
+      "data.json": json({
+        ...husbandryOnly(
+          { [invoice.id]: exportedDocument(link) },
+          {
+            "medical-1": {
+              id: "medical-1",
+              animalId: animal.id,
+              createdAt: "2026-02-03T00:00:00.000Z",
+              occurredAt: "2026-02-03T00:00:00.000Z",
+              summary: "Exam",
+            },
+          },
+        ),
+      }),
+      [`documents/${invoice.id}.pdf`]: PDF_BYTES,
+    });
+
+    await expect(parseBackup(archive)).rejects.toThrow("invalid document");
+  });
+
+  it("rejects cross-animal and non-medical backup links", async () => {
+    for (const document of [
+      exportedDocument({
+        kind: "invoice",
+        activityType: "medical",
+        activityId: "medical-1",
+      }),
+      exportedDocument({
+        animalId: "animal-2",
+        activityType: "medical",
+        activityId: "medical-1",
+      }),
+    ]) {
+      const archive = writeArchive({
+        "manifest.json": json(manifest(4, inventory)),
+        "data.json": json({
+          ...husbandryOnly(
+            { [invoice.id]: document },
+            {
+              "medical-1": {
+                id: "medical-1",
+                animalId: animal.id,
+                createdAt: "2026-02-03T00:00:00.000Z",
+                occurredAt: "2026-02-03T00:00:00.000Z",
+                summary: "Exam",
+              },
+            },
+          ),
+          animals: {
+            ...husbandryOnly().animals,
+            "animal-2": { ...animal, id: "animal-2" },
+          },
+        }),
+        [`documents/${invoice.id}.pdf`]: PDF_BYTES,
+      });
+
+      await expect(parseBackup(archive)).rejects.toThrow("invalid document");
+    }
+  });
 
   it("rejects a document whose bytes do not match its declared type", async () => {
     const archive = writeArchive({

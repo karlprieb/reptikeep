@@ -112,7 +112,10 @@ function DocumentFormSheet({
 
   const titleText = useNativeState(document?.title ?? "");
   const [title, setTitle] = useState(document?.title ?? "");
-  const [kind, setKind] = useState<DocumentKind>(document?.kind ?? "invoice");
+  const linkedToMedical = document?.activityType === "medical";
+  const [kind, setKind] = useState<DocumentKind>(
+    linkedToMedical ? "medical" : (document?.kind ?? "invoice"),
+  );
   const [knownIssueDate, setKnownIssueDate] = useState(
     Boolean(document?.issuedDate),
   );
@@ -247,11 +250,13 @@ function DocumentFormSheet({
         animalId,
         createdAt: document?.createdAt ?? new Date().toISOString(),
         title: title.trim(),
-        kind,
+        kind: linkedToMedical ? "medical" : kind,
         issuedDate: knownIssueDate ? toCalendarDate(issueDate) : undefined,
         file: fileUri,
         extension,
         size,
+        activityType: document?.activityType,
+        activityId: document?.activityId,
       };
 
       try {
@@ -420,21 +425,25 @@ function DocumentFormSheet({
                   textInputAutocapitalization("sentences"),
                 ]}
               />
-              <Picker
-                label={t("documents.form.kindField")}
-                selection={kind}
-                onSelectionChange={(value) => setKind(value as DocumentKind)}
-                modifiers={[
-                  pickerStyle("menu"),
-                  accessibilityHint(t("a11y.documents.kindPicker.hint")),
-                ]}
-              >
-                {DOCUMENT_KINDS.map((value) => (
-                  <Text key={value} modifiers={[tag(value)]}>
-                    {kindLabels[value]}
-                  </Text>
-                ))}
-              </Picker>
+              {linkedToMedical ? (
+                <Text>{t("documents.form.linkedMedicalKind")}</Text>
+              ) : (
+                <Picker
+                  label={t("documents.form.kindField")}
+                  selection={kind}
+                  onSelectionChange={(value) => setKind(value as DocumentKind)}
+                  modifiers={[
+                    pickerStyle("menu"),
+                    accessibilityHint(t("a11y.documents.kindPicker.hint")),
+                  ]}
+                >
+                  {DOCUMENT_KINDS.map((value) => (
+                    <Text key={value} modifiers={[tag(value)]}>
+                      {kindLabels[value]}
+                    </Text>
+                  ))}
+                </Picker>
+              )}
               <Toggle
                 label={t("documents.form.knownIssueDate")}
                 isOn={knownIssueDate}

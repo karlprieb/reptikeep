@@ -139,6 +139,14 @@ export default function TabStackLayout({ segment }: { segment: string }) {
         }}
       />
       <Stack.Screen
+        name="animal/[id]/medical"
+        options={{
+          ...FORM_SHEET_OPTIONS,
+          ...ACTIVITY_SHEET_OPTIONS,
+          title: t("medicalForm.title"),
+        }}
+      />
+      <Stack.Screen
         name="animal/[id]/activity"
         options={{
           ...FORM_SHEET_OPTIONS,

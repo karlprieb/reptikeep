@@ -31,6 +31,7 @@ export default function AnimalHistoryScreen() {
   const sheds = useValue(activityStores.shed.$);
   const defecations = useValue(activityStores.poop.$);
   const habitats = useValue(activityStores.habitat.$);
+  const medical = useValue(activityStores.medical.$);
 
   const activity = useMemo(
     () =>
@@ -40,8 +41,9 @@ export default function AnimalHistoryScreen() {
         sheds,
         defecations,
         habitats,
+        medical,
       }),
-    [defecations, feedings, habitats, id, sheds, weights],
+    [defecations, feedings, habitats, id, medical, sheds, weights],
   );
   const previous = useMemo(() => previousOfSameType(activity), [activity]);
 

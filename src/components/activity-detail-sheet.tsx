@@ -1,5 +1,6 @@
 import { useSelector as useValue } from "@legendapp/state/react";
 import {
+  Button,
   Circle,
   Form,
   Host,
@@ -41,6 +42,7 @@ import {
 import { typeFont } from "@/constants/type-font";
 import { useTheme } from "@/hooks/use-theme";
 import { removeActivity } from "@/state/activity-stores";
+import { documents$, documentsForActivity } from "@/state/document";
 import { feedingStore, type FeedingActivity } from "@/state/feeding";
 import { useAnimalDefaults } from "@/state/logging-defaults";
 import { weightStore, type WeightActivity } from "@/state/weight";
@@ -226,6 +228,15 @@ function habitatDetail(
   };
 }
 
+function medicalDetail(
+  entry: Extract<AnimalActivity, { type: "medical" }>,
+): Detail {
+  return {
+    header: entry.record.summary,
+    rows: [],
+  };
+}
+
 function observationDetail(
   entry: Extract<AnimalActivity, { type: "shed" | "poop" }>,
   t: TFunction,
@@ -278,6 +289,7 @@ export function ActivityDetailSheet({
 
   const feedings = useValue(feedingStore.$);
   const weights = useValue(weightStore.$);
+  const documents = useValue(documents$);
 
   const typeName = t(`activity.type.${entry.type}`);
   const animalId = entry.record.animalId;
@@ -290,9 +302,15 @@ export function ActivityDetailSheet({
         ? weightDetail(entry, t, weights, weightUnit)
         : entry.type === "habitat"
           ? habitatDetail(entry, t)
-          : observationDetail(entry, t);
+          : entry.type === "medical"
+            ? medicalDetail(entry)
+            : observationDetail(entry, t);
 
   const notes = entry.type === "poop" ? entry.record.note : entry.record.notes;
+  const linkedDocuments =
+    entry.type === "medical"
+      ? documentsForActivity("medical", entry.id, documents)
+      : [];
   const occurredDate = formatAbsoluteDate(entry.occurredAt);
   const occurredTime = formatAbsoluteTime(entry.occurredAt);
   const recordedDate = formatAbsoluteDate(entry.record.createdAt);
@@ -306,10 +324,15 @@ export function ActivityDetailSheet({
     router.replace(`/animal/${animalId}/${entry.type}?activityId=${entry.id}`);
 
   const handleDelete = () =>
-    confirmDeleteActivity(t, typeName, () => {
-      removeActivity(entry.type, entry.id);
-      router.back();
-    });
+    confirmDeleteActivity(
+      t,
+      typeName,
+      () => {
+        removeActivity(entry.type, entry.id);
+        router.back();
+      },
+      entry.type === "medical",
+    );
 
   return (
     <>
@@ -425,30 +448,70 @@ export function ActivityDetailSheet({
             </Section>
 
             <Section
-              header={<FormSectionHeader>{detail.header}</FormSectionHeader>}
+              header={
+                detail.rows.length ? (
+                  <FormSectionHeader>{detail.header}</FormSectionHeader>
+                ) : undefined
+              }
               modifiers={modifiers.row}
             >
-              {detail.rows.map((row) => (
-                <LabeledContent
-                  key={row.key}
-                  label={row.label}
-                  modifiers={[listRowBackground(theme.surface)]}
-                >
-                  <Text
-                    modifiers={[
-                      typeFont(row.mono ? "data" : "body"),
-                      foregroundStyle(
-                        row.flagged ? theme.warning : theme.textSecondary,
-                      ),
-                      lineLimit(1),
-                      minimumScaleFactor(0.7),
-                    ]}
+              {detail.rows.length ? (
+                detail.rows.map((row) => (
+                  <LabeledContent
+                    key={row.key}
+                    label={row.label}
+                    modifiers={[listRowBackground(theme.surface)]}
                   >
-                    {row.value}
-                  </Text>
-                </LabeledContent>
-              ))}
+                    <Text
+                      modifiers={[
+                        typeFont(row.mono ? "data" : "body"),
+                        foregroundStyle(
+                          row.flagged ? theme.warning : theme.textSecondary,
+                        ),
+                        lineLimit(1),
+                        minimumScaleFactor(0.7),
+                      ]}
+                    >
+                      {row.value}
+                    </Text>
+                  </LabeledContent>
+                ))
+              ) : (
+                <Text
+                  modifiers={[
+                    typeFont("body"),
+                    foregroundStyle(theme.text),
+                    frame({ maxWidth: Infinity, alignment: "leading" }),
+                  ]}
+                >
+                  {detail.header}
+                </Text>
+              )}
             </Section>
+
+            {linkedDocuments.length ? (
+              <Section
+                header={
+                  <FormSectionHeader>
+                    {t("medicalForm.documents")}
+                  </FormSectionHeader>
+                }
+                modifiers={modifiers.row}
+              >
+                {linkedDocuments.map((document) => (
+                  <Button
+                    key={document.id}
+                    onPress={() =>
+                      router.push(
+                        `/animal/${animalId}/document-preview?documentId=${document.id}`,
+                      )
+                    }
+                  >
+                    <Text>{document.title}</Text>
+                  </Button>
+                ))}
+              </Section>
+            ) : null}
 
             {notes ? (
               <Section

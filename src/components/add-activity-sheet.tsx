@@ -96,6 +96,11 @@ const ACTIVITY_CARDS: ActivityCard[] = [
     titleKey: "addRecord.habitat.title",
     descriptionKey: "addRecord.habitat.description",
   },
+  {
+    type: "medical",
+    titleKey: "addRecord.medical.title",
+    descriptionKey: "addRecord.medical.description",
+  },
 ];
 
 export function cardRows(columns: 1 | 2): ActivityCard[][] {

@@ -20,7 +20,13 @@ export default function ActivityDetailScreen() {
       : undefined,
   );
 
-  if (!animal || !record || !isActivityType(type)) return <AnimalNotFound />;
+  if (
+    !animal ||
+    !record ||
+    !isActivityType(type) ||
+    record.animalId !== animal.id
+  )
+    return <AnimalNotFound />;
 
   return (
     <ActivityDetailSheet

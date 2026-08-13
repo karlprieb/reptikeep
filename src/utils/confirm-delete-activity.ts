@@ -5,10 +5,15 @@ export function confirmDeleteActivity(
   t: TFunction,
   activityType: string,
   onConfirm: () => void,
+  deletesLinkedDocuments = false,
 ): void {
   Alert.alert(
     t("activityDetail.deleteTitle", { activityType }),
-    t("activityDetail.deleteMessage"),
+    t(
+      deletesLinkedDocuments
+        ? "activityDetail.deleteMedicalMessage"
+        : "activityDetail.deleteMessage",
+    ),
     [
       { text: t("activityDetail.cancel"), style: "cancel" },
       {

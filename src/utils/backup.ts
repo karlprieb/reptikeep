@@ -34,8 +34,8 @@ import {
 import { TEXT_LIMITS, clampTextFields } from "@/utils/text-limits";
 
 const FORMAT = "app.reptikeep.backup";
-const VERSION = 3;
-const SUPPORTED_VERSIONS = [1, 2, 3];
+const VERSION = 4;
+const SUPPORTED_VERSIONS = [1, 2, 3, 4];
 // whole archive is decoded in memory, so these ceilings are RAM-bound; streaming zip is the upgrade path if keepers hit them.
 const MAX_ARCHIVE_BYTES = 80 * 1024 * 1024;
 const MAX_EXPANDED_BYTES = 160 * 1024 * 1024;
@@ -53,6 +53,7 @@ const activityTables = {
   sheds: activityStores.shed.$,
   defecations: activityStores.poop.$,
   habitats: activityStores.habitat.$,
+  medical: activityStores.medical.$,
 } as const;
 
 const activityNames = Object.keys(activityTables) as ActivityTable[];
@@ -80,6 +81,7 @@ type BackupData = {
   sheds?: Table;
   defecations?: Table;
   habitats?: Table;
+  medical?: Table;
   documents?: Table;
   settings?: Record<string, unknown>;
   loggingDefaults?: Record<string, unknown>;
@@ -418,6 +420,7 @@ function validActivity(
       "cleaning",
       "notes",
     ],
+    medical: ["id", "animalId", "createdAt", "occurredAt", "summary", "notes"],
   };
 
   if (!exactKeys(record, allowed[name])) return false;
@@ -455,6 +458,14 @@ function validActivity(
       ["poop", "urate", "both"].includes(record.type as string)
     );
 
+  if (name === "medical")
+    return (
+      typeof record.summary === "string" &&
+      record.summary.trim().length > 0 &&
+      record.summary.length <= TEXT_LIMITS.summary &&
+      (record.notes === undefined || typeof record.notes === "string")
+    );
+
   return (
     typeof record.water === "boolean" &&
     (record.cleaning === undefined || typeof record.cleaning === "boolean")
@@ -466,6 +477,8 @@ function validDocument(
   id: string,
   animals: Record<string, Animal>,
   entries: Record<string, DocumentEntry>,
+  schemaVersion: number,
+  activities: BackupData,
 ): boolean {
   if (
     !isPlainObject(record) ||
@@ -481,6 +494,7 @@ function validDocument(
       "file",
       "extension",
       "size",
+      ...(schemaVersion >= 4 ? ["activityType", "activityId"] : []),
     ]) ||
     !safeId(record.animalId) ||
     !animals[record.animalId] ||
@@ -497,6 +511,22 @@ function validDocument(
     record.file !== `${DOCUMENT_PREFIX}${id}.${record.extension}`
   )
     return false;
+
+  const hasActivityType = record.activityType !== undefined;
+  const hasActivityId = record.activityId !== undefined;
+  if (hasActivityType !== hasActivityId) return false;
+  if (hasActivityId && !safeId(record.activityId)) return false;
+  if (hasActivityType) {
+    if (
+      schemaVersion < 4 ||
+      record.activityType !== "medical" ||
+      record.kind !== "medical" ||
+      !safeId(record.activityId)
+    )
+      return false;
+    const activity = (activities.medical ?? {})[record.activityId];
+    if (!activity || activity.animalId !== record.animalId) return false;
+  }
 
   const entry = entries[id];
 
@@ -537,10 +567,11 @@ function validate(parsed: ParsedBackup): void {
     throw new Error("Backup scopes are invalid.");
 
   const keys = Object.keys(data);
+  const schemaVersion = manifest.schemaVersion as number;
   const husbandryKeys = [
     "animals",
-    ...activityNames,
-    ...((manifest.schemaVersion as number) >= 2 ? ["documents"] : []),
+    ...activityNames.filter((name) => schemaVersion >= 4 || name !== "medical"),
+    ...(schemaVersion >= 2 ? ["documents"] : []),
   ];
   const preferenceKeys = [
     "settings",
@@ -601,7 +632,7 @@ function validate(parsed: ParsedBackup): void {
   const documentRecords = (data.documents ?? {}) as Table;
 
   for (const [id, record] of Object.entries(documentRecords))
-    if (!validDocument(record, id, animals, documents))
+    if (!validDocument(record, id, animals, documents, schemaVersion, data))
       throw new Error("Backup has an invalid document.");
 
   for (const id of Object.keys(documents))
@@ -680,6 +711,9 @@ function replaceActivityTable(name: ActivityTable, value: Table): void {
       break;
     case "habitats":
       activityTables.habitats.set(value as never);
+      break;
+    case "medical":
+      activityTables.medical.set(value as never);
       break;
   }
 }
@@ -771,6 +805,22 @@ export function animalForBackup(animal: Animal): Animal {
 }
 
 function isBackupableDocument(document: unknown): document is AnimalDocument {
+  if (!isPlainObject(document)) return false;
+  const hasActivityType = document.activityType !== undefined;
+  const hasActivityId = document.activityId !== undefined;
+  if (hasActivityType !== hasActivityId) return false;
+  if (hasActivityId && !safeId(document.activityId)) return false;
+  if (hasActivityType) {
+    if (
+      document.activityType !== "medical" ||
+      document.kind !== "medical" ||
+      !safeId(document.activityId)
+    )
+      return false;
+    const activity = activityStores.medical.$.peek()[document.activityId];
+    if (!activity || activity.animalId !== document.animalId) return false;
+  }
+
   return (
     isPlainObject(document) &&
     safeId(document.id) &&
@@ -804,6 +854,12 @@ function documentForBackup(
     file: `${DOCUMENT_PREFIX}${document.id}.${document.extension}`,
     extension: document.extension,
     size: bytes.byteLength,
+    ...(document.activityType && document.activityId
+      ? {
+          activityType: document.activityType,
+          activityId: document.activityId,
+        }
+      : {}),
   });
 }
 
@@ -1108,7 +1164,12 @@ export async function restoreBackup(file: File): Promise<RestoredBackup> {
         );
 
         for (const name of activityNames)
-          replaceActivityTable(name, data[name] ?? {});
+          replaceActivityTable(
+            name,
+            manifest.schemaVersion < 4 && name === "medical"
+              ? {}
+              : (data[name] ?? {}),
+          );
         documents$.set(
           Object.fromEntries(
             Object.entries(
@@ -1138,7 +1199,9 @@ export async function restoreBackup(file: File): Promise<RestoredBackup> {
     if (manifest.scopes.husbandry !== "absent") {
       for (const animal of Object.values(old.animals))
         if (animal.photo && !photos[animal.id])
-          deleteManagedAnimalPhoto(animal.photo);
+          try {
+            deleteManagedAnimalPhoto(animal.photo);
+          } catch {}
 
       for (const document of Object.values(old.documents))
         if (
@@ -1149,7 +1212,9 @@ export async function restoreBackup(file: File): Promise<RestoredBackup> {
               documents[document.id].extension as DocumentExtension,
             )
         )
-          deleteManagedAnimalDocument(document.file);
+          try {
+            deleteManagedAnimalDocument(document.file);
+          } catch {}
     }
 
     if (manifest.scopes.preferences === "present")
@@ -1175,9 +1240,15 @@ export async function restoreBackup(file: File): Promise<RestoredBackup> {
 
     for (const animal of Object.values(data.animals ?? {}))
       if (animal.photo && !old.animals[animal.id]?.photo)
-        deleteManagedAnimalPhoto(managedAnimalPhotoUri(animal.id));
+        try {
+          deleteManagedAnimalPhoto(managedAnimalPhotoUri(animal.id));
+        } catch {}
 
-    for (const uri of writtenDocumentUris) deleteManagedAnimalDocument(uri);
+    for (const uri of writtenDocumentUris) {
+      try {
+        deleteManagedAnimalDocument(uri);
+      } catch {}
+    }
 
     for (const photo of oldPhotos) {
       const destination = new File(getAnimalPhotoUri(photo.uri));

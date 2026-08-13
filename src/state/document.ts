@@ -9,6 +9,7 @@ import {
 } from "@/utils/animal-document-storage";
 import { clampTextFields } from "@/utils/text-limits";
 
+import { linkedMedicalActivity } from "./document-link-registry";
 import { persistedAsWritten, persistPlugin } from "./persist";
 
 export const DOCUMENT_KINDS = [
@@ -16,6 +17,7 @@ export const DOCUMENT_KINDS = [
   "authenticity",
   "origin",
   "permit",
+  "medical",
   "other",
 ] as const;
 
@@ -33,6 +35,8 @@ export interface AnimalDocument {
   file: string;
   extension: DocumentExtension;
   size: number;
+  activityType?: "medical";
+  activityId?: string;
 }
 
 export const documents$ = observable<Record<string, AnimalDocument>>({});
@@ -41,7 +45,22 @@ export function newDocumentId(): string {
   return randomUUID();
 }
 
+export function assertValidDocumentLink(document: AnimalDocument): void {
+  const hasType = document.activityType !== undefined;
+  const hasId = document.activityId !== undefined;
+  if (hasType !== hasId)
+    throw new Error("Document activity link is incomplete.");
+  if (!hasType || !hasId) return;
+  if (document.kind !== "medical")
+    throw new Error("Linked medical documents must have medical kind.");
+
+  const activity = linkedMedicalActivity(document.activityId!);
+  if (!activity || activity.animalId !== document.animalId)
+    throw new Error("Document activity link is invalid.");
+}
+
 export function addDocument(document: AnimalDocument): void {
+  assertValidDocumentLink(document);
   const clamped = clampTextFields(document);
   documents$.set({ ...documents$.peek(), [clamped.id]: clamped });
 }
@@ -69,7 +88,11 @@ export function removeDocumentsForAnimal(animalId: string): void {
     ),
   );
 
-  for (const document of removed) deleteManagedAnimalDocument(document.file);
+  for (const document of removed) {
+    try {
+      deleteManagedAnimalDocument(document.file);
+    } catch {}
+  }
 }
 
 export function clearDocuments(): void {
@@ -79,6 +102,38 @@ export function clearDocuments(): void {
 
 function sortKey(document: AnimalDocument): string {
   return document.issuedDate ?? document.createdAt.slice(0, 10);
+}
+
+export function documentsForActivity(
+  activityType: NonNullable<AnimalDocument["activityType"]>,
+  activityId: string,
+  documents: Record<string, AnimalDocument>,
+): AnimalDocument[] {
+  return Object.values(documents).filter(
+    (document) =>
+      document.activityType === activityType &&
+      document.activityId === activityId,
+  );
+}
+
+export function removeDocumentsForActivity(
+  activityType: NonNullable<AnimalDocument["activityType"]>,
+  activityId: string,
+): AnimalDocument[] {
+  const current = documents$.peek();
+  const removed = documentsForActivity(activityType, activityId, current);
+  if (!removed.length) return [];
+
+  documents$.set(
+    Object.fromEntries(
+      Object.entries(current).filter(
+        ([, document]) =>
+          document.activityType !== activityType ||
+          document.activityId !== activityId,
+      ),
+    ),
+  );
+  return removed;
 }
 
 export function documentsForAnimal(

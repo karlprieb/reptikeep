@@ -47,6 +47,7 @@ const KIND_SYMBOLS: Record<DocumentKind, SFSymbolName> = {
   authenticity: "checkmark.seal",
   origin: "globe",
   permit: "signature",
+  medical: "cross.case",
   other: "paperclip",
 };
 
