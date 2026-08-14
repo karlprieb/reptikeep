@@ -1,6 +1,7 @@
 import { act, fireEvent, render, waitFor } from "@testing-library/react-native";
 import { router } from "expo-router";
 
+import { VISIBLE_LIMIT } from "@/components/activity-timeline";
 import { AnimalDetail } from "@/components/animal-detail";
 import type { Animal } from "@/state/animal";
 import { careSchedules$ } from "@/state/care-schedule";
@@ -377,10 +378,12 @@ describe("AnimalDetail activity timeline", () => {
   });
 
   it("caps the list and offers the whole history from its last row", () => {
+    const total = VISIBLE_LIMIT + 3;
+
     act(() => {
       shedStore.$.set(
         Object.fromEntries(
-          Array.from({ length: 11 }, (_, index) => [
+          Array.from({ length: total }, (_, index) => [
             `s${index}`,
             {
               id: `s${index}`,
@@ -398,11 +401,135 @@ describe("AnimalDetail activity timeline", () => {
       makeAnimal({ id: ANIMAL_ID, name: "Iggy" }),
     );
 
-    expect(getAllByText("Shed")).toHaveLength(8);
+    expect(getAllByText("Shed")).toHaveLength(VISIBLE_LIMIT);
 
-    fireEvent.press(getByText("See all 11 records"));
+    fireEvent.press(getByText(`See all ${total} records`));
 
     expect(router.push).toHaveBeenCalledWith(`/animal/${ANIMAL_ID}/history`);
+  });
+
+  it("narrows the list to one type and keeps a path to that type's history", () => {
+    const sheds = VISIBLE_LIMIT + 3;
+
+    act(() => {
+      feedingStore.$.set({
+        f1: {
+          id: "f1",
+          animalId: ANIMAL_ID,
+          createdAt: daysAgo(0),
+          occurredAt: daysAgo(0),
+          foodType: "Mouse",
+          frozen: false,
+          refused: false,
+        },
+      });
+      shedStore.$.set(
+        Object.fromEntries(
+          Array.from({ length: sheds }, (_, index) => [
+            `s${index}`,
+            {
+              id: `s${index}`,
+              animalId: ANIMAL_ID,
+              createdAt: daysAgo(index + 1),
+              occurredAt: daysAgo(index + 1),
+              issues: false,
+            },
+          ]),
+        ),
+      );
+    });
+
+    const { getByLabelText, getByText, queryByText } = renderDetail(
+      makeAnimal({ id: ANIMAL_ID, name: "Iggy" }),
+    );
+
+    expect(queryByText("Mouse")).toBeTruthy();
+    expect(queryByText(`See all ${sheds + 1} records`)).toBeTruthy();
+
+    fireEvent.press(getByLabelText("Shed"));
+
+    expect(queryByText("Mouse")).toBeNull();
+
+    fireEvent.press(getByText(`See all ${sheds} records`));
+
+    expect(router.push).toHaveBeenCalledWith(
+      `/animal/${ANIMAL_ID}/history?type=shed`,
+    );
+  });
+
+  it("clears a filter whose last record disappears", () => {
+    act(() => {
+      feedingStore.$.set({
+        f1: {
+          id: "f1",
+          animalId: ANIMAL_ID,
+          createdAt: daysAgo(0),
+          occurredAt: daysAgo(0),
+          foodType: "Mouse",
+          frozen: false,
+          refused: false,
+        },
+      });
+      shedStore.$.set({
+        s1: {
+          id: "s1",
+          animalId: ANIMAL_ID,
+          createdAt: daysAgo(1),
+          occurredAt: daysAgo(1),
+          issues: false,
+        },
+      });
+    });
+
+    const { getByLabelText, queryByLabelText, queryByText } = renderDetail(
+      makeAnimal({ id: ANIMAL_ID, name: "Iggy" }),
+    );
+
+    fireEvent.press(getByLabelText("Shed"));
+    expect(queryByText("Mouse")).toBeNull();
+
+    act(() => {
+      shedStore.$.set({});
+    });
+
+    expect(queryByLabelText("Shed")).toBeNull();
+    expect(queryByText("Mouse")).toBeTruthy();
+    expect(queryByText("Nothing logged yet")).toBeNull();
+
+    act(() => {
+      shedStore.$.set({
+        s2: {
+          id: "s2",
+          animalId: ANIMAL_ID,
+          createdAt: daysAgo(2),
+          occurredAt: daysAgo(2),
+          issues: false,
+        },
+      });
+    });
+
+    expect(queryByLabelText("Shed")).toBeTruthy();
+    expect(queryByText("Mouse")).toBeTruthy();
+  });
+
+  it("hides the type filter when every record shares one type", () => {
+    act(() => {
+      shedStore.$.set({
+        s1: {
+          id: "s1",
+          animalId: ANIMAL_ID,
+          createdAt: daysAgo(1),
+          occurredAt: daysAgo(1),
+          issues: false,
+        },
+      });
+    });
+
+    const { queryByLabelText } = renderDetail(
+      makeAnimal({ id: ANIMAL_ID, name: "Iggy" }),
+    );
+
+    expect(queryByLabelText("All")).toBeNull();
   });
 });
 

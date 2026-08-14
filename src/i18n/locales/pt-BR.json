@@ -445,6 +445,11 @@
   },
   "timeline": {
     "title": "Atividades recentes",
+    "filter": {
+      "all": "Todos",
+      "allHint": "Mostra registros de todos os tipos",
+      "hint": "Mostra apenas registros deste tipo"
+    },
     "empty": {
       "title": "Nada registrado ainda",
       "subtitle": "Tudo o que você registrar para {{animalName}} aparecerá aqui.",

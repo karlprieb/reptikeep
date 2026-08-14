@@ -1,5 +1,5 @@
 import { useSelector as useValue } from "@legendapp/state/react";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import { useCallback, useMemo } from "react";
 import { FlatList, StyleSheet } from "react-native";
 import { useTranslation } from "react-i18next";
@@ -8,6 +8,7 @@ import {
   ActivityHistoryRow,
   ActivityPanel,
 } from "@/components/activity-timeline";
+import { presentTypes } from "@/components/activity-type-filter";
 import { AnimalNotFound, useAnimalRoute } from "@/components/animal-route";
 import { IOSPageHeader } from "@/components/page-header";
 import { MaxContentWidth, Spacing } from "@/constants/theme";
@@ -33,7 +34,9 @@ export default function AnimalHistoryScreen() {
   const habitats = useValue(activityStores.habitat.$);
   const medical = useValue(activityStores.medical.$);
 
-  const activity = useMemo(
+  const { type } = useLocalSearchParams<{ type?: string }>();
+
+  const entries = useMemo(
     () =>
       animalActivityFeed(id, {
         feedings,
@@ -44,6 +47,17 @@ export default function AnimalHistoryScreen() {
         medical,
       }),
     [defecations, feedings, habitats, id, medical, sheds, weights],
+  );
+
+  const activeType = presentTypes(entries).find(
+    (candidate) => candidate === type,
+  );
+  const activity = useMemo(
+    () =>
+      activeType
+        ? entries.filter((entry) => entry.type === activeType)
+        : entries,
+    [activeType, entries],
   );
   const previous = useMemo(() => previousOfSameType(activity), [activity]);
 
@@ -84,7 +98,13 @@ export default function AnimalHistoryScreen() {
         }
       />
 
-      <IOSPageHeader title={t("timeline.historyTitle")} />
+      <IOSPageHeader
+        title={
+          activeType
+            ? t(`activity.type.${activeType}`)
+            : t("timeline.historyTitle")
+        }
+      />
     </>
   );
 }
