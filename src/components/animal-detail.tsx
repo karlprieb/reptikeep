@@ -26,13 +26,27 @@ import {
   resizable,
   strokeBorder,
 } from "@expo/ui/swift-ui/modifiers";
-import { useCallback, useState } from "react";
-import { StyleSheet, View, useWindowDimensions } from "react-native";
+import { useCallback, useMemo, useState } from "react";
+import {
+  StyleSheet,
+  View,
+  useWindowDimensions,
+  type LayoutChangeEvent,
+} from "react-native";
 import { useTranslation } from "react-i18next";
 
 import { ActivityPanel, VISIBLE_LIMIT } from "@/components/activity-timeline";
+import {
+  ActivityTypeFilter,
+  presentTypes,
+} from "@/components/activity-type-filter";
 import { ThemedText } from "@/components/themed-text";
-import { Radius, Spacing, type Theme } from "@/constants/theme";
+import {
+  Radius,
+  Spacing,
+  type ActivityType,
+  type Theme,
+} from "@/constants/theme";
 import { typeFont, typeStyle } from "@/constants/type-font";
 import { useTheme } from "@/hooks/use-theme";
 import type { Animal } from "@/state/animal";
@@ -160,14 +174,45 @@ export function AnimalDetail({ animal, onAddActivity }: AnimalDetailProps) {
 
   const feedings = useValue(activityStores.feed.$);
   const habitats = useValue(activityStores.habitat.$);
-  const activity = animalActivityFeed(animal.id, {
-    feedings,
-    habitats,
-    weights: useValue(activityStores.weight.$),
-    sheds: useValue(activityStores.shed.$),
-    defecations: useValue(activityStores.poop.$),
-    medical: useValue(activityStores.medical.$),
-  });
+  const weights = useValue(activityStores.weight.$);
+  const sheds = useValue(activityStores.shed.$);
+  const defecations = useValue(activityStores.poop.$);
+  const medical = useValue(activityStores.medical.$);
+
+  const activity = useMemo(
+    () =>
+      animalActivityFeed(animal.id, {
+        feedings,
+        habitats,
+        weights,
+        sheds,
+        defecations,
+        medical,
+      }),
+    [animal.id, defecations, feedings, habitats, medical, sheds, weights],
+  );
+
+  const [typeFilter, setTypeFilter] = useState<ActivityType | null>(null);
+  const [panelReserve, setPanelReserve] = useState(0);
+
+  const types = useMemo(() => presentTypes(activity), [activity]);
+  if (typeFilter && !types.includes(typeFilter)) setTypeFilter(null);
+  const activeType =
+    typeFilter && types.includes(typeFilter) ? typeFilter : null;
+  const shown = useMemo(
+    () =>
+      activeType
+        ? activity.filter((entry) => entry.type === activeType)
+        : activity,
+    [activity, activeType],
+  );
+
+  const holdPanelHeight = useCallback(
+    ({ nativeEvent }: LayoutChangeEvent) => {
+      if (!activeType) setPanelReserve(nativeEvent.layout.height);
+    },
+    [activeType],
+  );
 
   const { weightUnit } = useAnimalDefaults(animal.id);
   const latestWeight = activity.find((entry) => entry.type === "weight");
@@ -445,14 +490,32 @@ export function AnimalDetail({ animal, onAddActivity }: AnimalDetailProps) {
       <View style={styles.timeline}>
         <ThemedText type="heading">{t("timeline.title")}</ThemedText>
 
-        <ActivityPanel
-          entries={activity}
-          animalId={animal.id}
-          animalName={animal.name}
-          onAddActivity={onAddActivity}
-          limit={VISIBLE_LIMIT}
-          onSeeAll={() => router.push(`/animal/${animal.id}/history`)}
-        />
+        {types.length > 1 ? (
+          <ActivityTypeFilter
+            types={types}
+            selected={activeType}
+            onSelect={setTypeFilter}
+          />
+        ) : null}
+
+        <View style={{ minHeight: panelReserve }}>
+          <View onLayout={holdPanelHeight}>
+            <ActivityPanel
+              entries={shown}
+              animalId={animal.id}
+              animalName={animal.name}
+              onAddActivity={onAddActivity}
+              limit={VISIBLE_LIMIT}
+              onSeeAll={() =>
+                router.push(
+                  activeType
+                    ? `/animal/${animal.id}/history?type=${activeType}`
+                    : `/animal/${animal.id}/history`,
+                )
+              }
+            />
+          </View>
+        </View>
       </View>
     </View>
   );

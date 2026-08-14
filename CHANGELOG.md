@@ -25,6 +25,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Attach multiple PDFs or photos to a medical record. Linked files also appear
   under the reptile's Documents area as medical documents, can be previewed and
   edited there, and are removed with the medical record after confirmation.
+- **Filter the timeline by type** — a row of chips above a reptile's activity,
+  one for each kind of record that reptile actually has. Tap Feed to see only
+  feedings, tap it again or All for everything. "See all" keeps the filter and
+  opens the full history for just that type.
 
 ### Changed
 
@@ -46,6 +50,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   backup made now will not restore on 0.3.0 or older.
 - Habitat records are now moss green wherever they appear — the timeline,
   the record picker and the reminder rows.
+- A reptile's detail screen shows the 20 most recent records instead of 8, so
+  a weekly feeder sees months of history before reaching "See all".
 
 ### Fixed
 

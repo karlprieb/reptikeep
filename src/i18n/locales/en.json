@@ -445,6 +445,11 @@
   },
   "timeline": {
     "title": "Recent activity",
+    "filter": {
+      "all": "All",
+      "allHint": "Shows records of every type",
+      "hint": "Shows only records of this type"
+    },
     "empty": {
       "title": "Nothing logged yet",
       "subtitle": "Everything you record for {{animalName}} will appear here.",

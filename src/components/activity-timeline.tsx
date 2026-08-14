@@ -72,7 +72,7 @@ import {
 import { weightChange } from "@/utils/weight-change";
 import type { WeightUnit } from "@/utils/weight-unit";
 
-export const VISIBLE_LIMIT = 8;
+export const VISIBLE_LIMIT = 20;
 const BADGE_SIZE = 28;
 const BADGE_MAX_SCALE = 2;
 const SYMBOL_RATIO = 0.54;
