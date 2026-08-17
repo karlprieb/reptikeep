@@ -60,6 +60,7 @@
     "start": "expo start",
     "android": "expo run:android",
     "ios": "expo run:ios",
+    "generate:performance-backup": "node scripts/generate-performance-backup.ts",
     "format": "prettier --write \"src/**/*.{ts,tsx,json}\" \"*.{js,json,md,ts,tsx}\"",
     "lint": "expo lint",
     "test": "jest"

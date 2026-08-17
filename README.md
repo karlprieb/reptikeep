@@ -54,6 +54,26 @@ npm run lint
 npm run format
 ```
 
+### Performance backup generator
+
+Generate deterministic backup files for testing large local datasets:
+
+```sh
+npm run generate:performance-backup -- --scale heavy --seed 42 --output performance-heavy.zip
+```
+
+Parameters:
+
+- `--scale`: Dataset preset: `typical`, `heavy`, `hot-animal`, `reminders`, or `extreme`. Defaults to `typical`.
+- `--seed`: Non-negative integer controlling the generated values. Reusing a seed produces the same archive. Defaults to `42`.
+- `--animals`: Overrides the preset's number of reptiles.
+- `--activities`: Overrides the number of activities generated per reptile. The `hot-animal` preset still gives its first reptile 25,000 activities.
+- `--output`: Destination ZIP path. Defaults to `performance-<scale>-seed-<seed>.zip` in the current directory.
+
+The `--` after the npm script name forwards the remaining parameters to the generator. Backups include all six activity types and realistic animal photos.
+
+Restore the generated ZIP from **Settings → Advanced settings → Backup & restore**. Restoring replaces the husbandry data currently on the device.
+
 ## Built with
 
 - [Expo](https://expo.dev/) and React Native

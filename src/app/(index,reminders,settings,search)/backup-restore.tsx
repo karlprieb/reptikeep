@@ -37,6 +37,7 @@ const activityTables = [
   "sheds",
   "defecations",
   "habitats",
+  "medical",
 ] as const;
 
 function withDocuments(
@@ -139,8 +140,7 @@ export default function BackupRestoreScreen() {
           },
         ],
       );
-    } catch (error) {
-      logBackupError("parse", error);
+    } catch {
       setError(t("backup.error"));
     } finally {
       setBusy(false);

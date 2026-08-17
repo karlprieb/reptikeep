@@ -42,7 +42,7 @@ import {
 } from "@expo/ui/swift-ui/modifiers";
 import { useValue } from "@legendapp/state/react";
 import { router } from "expo-router";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   AppState,
   Linking,
@@ -53,10 +53,6 @@ import {
 } from "react-native";
 import { useTranslation } from "react-i18next";
 
-import {
-  useMeasuredText,
-  uniformRowHeight,
-} from "@/components/activity-timeline";
 import { EmptyState } from "@/components/empty-state";
 import { IOSPageHeader } from "@/components/page-header";
 import { ThemedText } from "@/components/themed-text";
@@ -389,18 +385,20 @@ function ReminderPanel({
   onStopReminding,
 }: ReminderPanelProps) {
   const { fontScale } = useWindowDimensions();
-  const { heights, measure } = useMeasuredText();
+  const [measuredHeight, setMeasuredHeight] = useState(0);
+  const measure = useCallback(
+    (height: number) =>
+      setMeasuredHeight((current) => Math.max(current, Math.ceil(height))),
+    [],
+  );
 
   const floor = Math.max(badgeSize, checkboxSize);
   const estimate = Math.round(
     ROW_HEIGHT_ESTIMATE * Math.min(fontScale, BADGE_MAX_SCALE),
   );
-  const rowHeight =
-    uniformRowHeight(
-      items.map((item) => `${item.animalId}:${item.routine}`),
-      heights,
-      floor,
-    ) ?? estimate;
+  const rowHeight = measuredHeight
+    ? Math.max(floor, measuredHeight) + Spacing.sm * 2
+    : estimate;
 
   return (
     <Host
@@ -429,7 +427,7 @@ function ReminderPanel({
             divided={index > 0}
             textInset={textInset}
             rowHeight={rowHeight}
-            onMeasure={measure(`${reminder.animalId}:${reminder.routine}`)}
+            onMeasure={measure}
             onStopReminding={() =>
               onStopReminding(reminder.animalId, reminder.routine)
             }
@@ -547,10 +545,14 @@ export default function RemindersScreen() {
   };
 
   const today = toCalendarDate(new Date());
-  const reminders = careReminders(
-    animals,
-    { water: collectionWater, cleaning: collectionCleaning },
-    lastCareByAnimal(habitats),
+  const reminders = useMemo(
+    () =>
+      careReminders(
+        animals,
+        { water: collectionWater, cleaning: collectionCleaning },
+        lastCareByAnimal(habitats),
+      ),
+    [animals, collectionCleaning, collectionWater, habitats],
   );
 
   const dueState = (reminder: CareReminder): DueState => {

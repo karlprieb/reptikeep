@@ -210,13 +210,7 @@ function inspectZip(bytes: Uint8Array): void {
     const commentLength = read16(bytes, offset + 32);
     const end = offset + 46 + nameLength + extraLength + commentLength;
 
-    if (
-      end > eocd ||
-      flags & 1 ||
-      ![0, 8].includes(method) ||
-      uncompressed > MAX_ENTRY_BYTES ||
-      (compressed && uncompressed / compressed > MAX_RATIO)
-    )
+    if (end > eocd || flags & 1 || ![0, 8].includes(method))
       throw new Error("Backup archive exceeds safety limits.");
 
     let path: string;
@@ -236,6 +230,16 @@ function inspectZip(bytes: Uint8Array): void {
     )
       throw new Error("Backup contains an invalid file path.");
 
+    const maxEntryBytes =
+      path === "data.json" ? MAX_EXPANDED_BYTES : MAX_ENTRY_BYTES;
+    if (
+      uncompressed > maxEntryBytes ||
+      (path !== "data.json" &&
+        compressed &&
+        uncompressed / compressed > MAX_RATIO)
+    )
+      throw new Error("Backup archive exceeds safety limits.");
+
     paths.add(path.toLowerCase());
     expanded += uncompressed;
     if (expanded > MAX_EXPANDED_BYTES)
@@ -251,9 +255,11 @@ function inspectZip(bytes: Uint8Array): void {
     throw new Error("Backup is missing required files.");
 }
 
-function parseJson(bytes: Uint8Array): Record<string, unknown> {
-  if (bytes.byteLength > 4 * 1024 * 1024)
-    throw new Error("Backup data is too large.");
+function parseJson(
+  bytes: Uint8Array,
+  maxBytes = 4 * 1024 * 1024,
+): Record<string, unknown> {
+  if (bytes.byteLength > maxBytes) throw new Error("Backup data is too large.");
 
   try {
     const value: unknown = JSON.parse(decoder.decode(bytes));
@@ -1062,7 +1068,10 @@ export async function parseBackup(file: File): Promise<ParsedBackup> {
 
   const entries = unzipSync(bytes);
   const manifest = parseJson(entries["manifest.json"]);
-  const data = parseJson(entries["data.json"]) as BackupData;
+  const data = parseJson(
+    entries["data.json"],
+    MAX_EXPANDED_BYTES,
+  ) as BackupData;
   const documents: Record<string, DocumentEntry> = {};
 
   for (const [path, content] of Object.entries(entries)) {

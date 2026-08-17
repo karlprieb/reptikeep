@@ -61,6 +61,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - At larger text sizes the icon on an overdue badge ran into the first
   character of its label, so "16 days overdue" read as "6 days overdue".
   The icon now grows with the text instead of staying a fixed width.
+- A backup from a large collection refused to restore, reporting that the
+  archive exceeded safety limits. Your records now get their own size
+  ceiling, separate from the one that guards individual attachments.
+- The confirmation shown before restoring left medical records out of its
+  record count, so a backup looked smaller than it was. The restore itself
+  was never affected.
 
 ## [0.3.0] - 2026-08-06
 
