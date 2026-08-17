@@ -735,4 +735,38 @@ describe("AnimalDetail weight trend", () => {
 
     expect(getByText("· last 8")).toBeTruthy();
   });
+
+  it("relabels the axis when the language changes while it is on screen", async () => {
+    logWeights([
+      { id: "a", days: 60, weight: 400 },
+      { id: "b", days: 30, weight: 430 },
+    ]);
+
+    const { getByText, queryByText } = renderDetail(
+      makeAnimal({ id: ANIMAL_ID, name: "Iggy" }),
+    );
+
+    const [month, day] = [
+      new Date(daysAgo(30)).getMonth() + 1,
+      new Date(daysAgo(30)).getDate(),
+    ];
+    expect(getByText(`${month}/${day}`)).toBeTruthy();
+
+    await act(async () => {
+      await i18n.changeLanguage("pt-BR");
+    });
+
+    await waitFor(() => {
+      expect(
+        getByText(
+          `${String(day).padStart(2, "0")}/${String(month).padStart(2, "0")}`,
+        ),
+      ).toBeTruthy();
+    });
+    expect(queryByText(`${month}/${day}`)).toBeNull();
+
+    await act(async () => {
+      await i18n.changeLanguage("en");
+    });
+  });
 });

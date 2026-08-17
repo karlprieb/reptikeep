@@ -242,12 +242,17 @@ jest.mock("@expo/ui/swift-ui", () => {
     return React.createElement(View, { testID: "expo-ui-rectangle" });
   }
 
-  function Chart({ modifiers, data }: MockSlotProps & { data?: unknown[] }) {
-    return React.createElement(View, {
-      testID: "expo-ui-chart",
-      accessibilityLabel: `chart with ${data?.length ?? 0} points`,
-      ...a11yProps(modifiers),
-    });
+  function Chart({
+    modifiers,
+    data,
+  }: MockSlotProps & { data?: { x?: unknown }[] }) {
+    return React.createElement(
+      View,
+      { testID: "expo-ui-chart", ...a11yProps(modifiers) },
+      (data ?? []).map((point, index) =>
+        React.createElement(Text, { key: index }, String(point?.x)),
+      ),
+    );
   }
 
   function ContentUnavailableView({

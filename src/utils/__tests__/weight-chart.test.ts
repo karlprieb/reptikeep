@@ -35,14 +35,17 @@ describe("weightChartData", () => {
     expect(data.last?.id).toBe("c");
   });
 
-  it("labels each point with its own short date", () => {
+  it("keeps raw timestamps on the points so the axis can follow the language", () => {
     const weights: Record<string, WeightActivity> = {
       a: record("a", "2026-01-01T12:00:00.000Z", 400),
       b: record("b", "2026-04-17T12:00:00.000Z", 460),
     };
 
     const data = weightChartData(weights, "kaa", "g");
-    expect(data.points.map((p) => p.x)).toEqual(["1/1", "4/17"]);
+    expect(data.points.map((p) => p.x)).toEqual([
+      "2026-01-01T12:00:00.000Z",
+      "2026-04-17T12:00:00.000Z",
+    ]);
   });
 
   it("keeps only the most recent weigh-ins and reports the total", () => {

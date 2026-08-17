@@ -21,6 +21,7 @@ import {
 } from "@/constants/theme";
 import { typeFont, typeStyle } from "@/constants/type-font";
 import { useTheme } from "@/hooks/use-theme";
+import { formatAxisDate } from "@/utils/format-date";
 import type { WeightChartPoint } from "@/utils/weight-chart";
 
 const PLOT_HEIGHT = 132;
@@ -134,7 +135,10 @@ export function WeightTrendChart({
 
           <Chart
             type="line"
-            data={points}
+            data={points.map((point) => ({
+              x: formatAxisDate(point.x),
+              y: point.y,
+            }))}
             showGrid
             animate={false}
             lineStyle={{

@@ -1,11 +1,11 @@
 import type { WeightActivity } from "@/state/weight";
 
-import { formatAxisDate } from "./format-date";
 import { gramsToUnit, type WeightUnit } from "./weight-unit";
 
 const WEIGHT_TREND_LIMIT = 8;
 
 export type WeightChartPoint = {
+  /** ISO timestamp. Formatted for the axis at render, so it follows the language. */
   x: string;
   y: number;
 };
@@ -50,7 +50,7 @@ export function weightChartData(
 
   return {
     points: window.map((record) => ({
-      x: formatAxisDate(record.occurredAt),
+      x: record.occurredAt,
       y: gramsToUnit(record.weight, unit),
     })),
     count: window.length,
