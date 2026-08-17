@@ -29,6 +29,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   one for each kind of record that reptile actually has. Tap Feed to see only
   feedings, tap it again or All for everything. "See all" keeps the filter and
   opens the full history for just that type.
+- **Weight trend chart** — a reptile's detail screen now plots its last eight
+  weigh-ins, dated along the bottom, with the change since the first of them
+  at the top. It appears once there are two weigh-ins to compare, and says
+  "last 8" when the reptile has more history than the chart shows.
 
 ### Changed
 

@@ -1,0 +1,32 @@
+diff --git a/node_modules/@expo/ui/ios/ChartView.swift b/node_modules/@expo/ui/ios/ChartView.swift
+index 664eb10..44b7fb9 100644
+--- a/node_modules/@expo/ui/ios/ChartView.swift
++++ b/node_modules/@expo/ui/ios/ChartView.swift
+@@ -137,15 +137,13 @@ public struct ChartView: ExpoSwiftUI.View {
+         .foregroundStyle(props.lineStyle?.color ?? .blue)
+         .symbol(getSymbol(props.lineStyle?.pointStyle ?? .circle))
+         .symbolSize(CGFloat(props.lineStyle?.pointSize ?? 6.0))
+-        .lineStyle(getLineStyle(props.lineStyle?.dashArray ?? []))
+-        .lineStyle(.init(lineWidth: CGFloat(props.lineStyle?.width ?? 2.0)))
++        .lineStyle(getLineStyle(props.lineStyle?.dashArray ?? [], props.lineStyle?.width ?? 2.0))
+     } else {
+       LineMark(x: .value("X", dataPoint.xValue), y: .value("Y", dataPoint.y))
+         .foregroundStyle(props.lineStyle?.color ?? .blue)
+         .symbol(getSymbol(props.lineStyle?.pointStyle ?? .circle))
+         .symbolSize(CGFloat(props.lineStyle?.pointSize ?? 6.0))
+-        .lineStyle(getLineStyle(props.lineStyle?.dashArray ?? []))
+-        .lineStyle(.init(lineWidth: CGFloat(props.lineStyle?.width ?? 2.0)))
++        .lineStyle(getLineStyle(props.lineStyle?.dashArray ?? [], props.lineStyle?.width ?? 2.0))
+     }
+   }
+ 
+@@ -254,7 +252,7 @@ public struct ChartView: ExpoSwiftUI.View {
+     }
+   }
+ 
+-  private func getLineStyle(_ dashArray: [Double]) -> StrokeStyle {
+-    StrokeStyle(dash: dashArray.map { CGFloat($0) })
++  private func getLineStyle(_ dashArray: [Double], _ width: Double) -> StrokeStyle {
++    StrokeStyle(lineWidth: CGFloat(width), dash: dashArray.map { CGFloat($0) })
+   }
+ }
