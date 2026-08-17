@@ -62,8 +62,10 @@ import {
 import { getAnimalPhotoUri } from "@/utils/animal-photo-storage";
 import { formatAbsoluteDate } from "@/utils/format-date";
 import { scheduleDaysOverdue } from "@/utils/schedule";
-import { formatWeight } from "@/utils/format-number";
+import { formatWeight, formatWeightDelta } from "@/utils/format-number";
 import { relativeLine } from "@/utils/relative-date";
+import { WeightTrendChart } from "@/components/weight-trend-chart";
+import { weightChartData } from "@/utils/weight-chart";
 
 const GRADIENT_BAND_FRACTION = 0.55;
 
@@ -216,6 +218,40 @@ export function AnimalDetail({ animal, onAddActivity }: AnimalDetailProps) {
 
   const { weightUnit } = useAnimalDefaults(animal.id);
   const latestWeight = activity.find((entry) => entry.type === "weight");
+
+  const weightTrend = useMemo(
+    () => weightChartData(weights, animal.id, weightUnit),
+    [weights, animal.id, weightUnit],
+  );
+
+  const trend =
+    weightTrend.count > 1 && weightTrend.first && weightTrend.last
+      ? {
+          span: t("weightTrend.span", {
+            first: formatAbsoluteDate(weightTrend.first.occurredAt),
+            last: formatAbsoluteDate(weightTrend.last.occurredAt),
+          }),
+          change: formatWeightDelta(weightTrend.deltaGrams, weightUnit),
+          direction:
+            weightTrend.deltaGrams > 0
+              ? ("up" as const)
+              : weightTrend.deltaGrams < 0
+                ? ("down" as const)
+                : ("flat" as const),
+          window:
+            weightTrend.total > weightTrend.count
+              ? t("weightTrend.window", { count: weightTrend.count })
+              : null,
+          summary: t("weightTrend.summary", {
+            count: weightTrend.count,
+            first: formatAbsoluteDate(weightTrend.first.occurredAt),
+            last: formatAbsoluteDate(weightTrend.last.occurredAt),
+            latest: formatWeight(weightTrend.last.weight, weightUnit),
+            change: formatWeightDelta(weightTrend.deltaGrams, weightUnit),
+          }),
+        }
+      : null;
+
   const latestFeed = latestAcceptedFeeding(feedings, animal.id);
   const overdueDays = scheduleDaysOverdue(
     latestFeed?.occurredAt,
@@ -487,6 +523,22 @@ export function AnimalDetail({ animal, onAddActivity }: AnimalDetailProps) {
         </Host>
       </View>
 
+      {trend ? (
+        <View style={styles.weightTrend}>
+          <WeightTrendChart
+            title={t("weightTrend.title")}
+            points={weightTrend.points}
+            span={trend.span}
+            change={trend.change}
+            direction={trend.direction}
+            window={trend.window}
+            summaryLabel={[t("weightTrend.title"), trend.window, trend.summary]
+              .filter((part): part is string => Boolean(part))
+              .join(", ")}
+          />
+        </View>
+      ) : null}
+
       <View style={styles.timeline}>
         <ThemedText type="heading">{t("timeline.title")}</ThemedText>
 
@@ -537,6 +589,10 @@ const styles = StyleSheet.create({
   },
   statHost: {
     width: "100%",
+  },
+  weightTrend: {
+    paddingHorizontal: Spacing.md,
+    paddingTop: Spacing.md,
   },
   timeline: {
     paddingHorizontal: Spacing.md,

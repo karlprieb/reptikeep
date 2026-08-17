@@ -669,3 +669,104 @@ describe("AnimalDetail localization", () => {
     jest.useRealTimers();
   });
 });
+
+describe("AnimalDetail weight trend", () => {
+  function logWeights(entries: { id: string; days: number; weight: number }[]) {
+    act(() => {
+      weightStore.$.set(
+        Object.fromEntries(
+          entries.map(({ id, days, weight }) => [
+            id,
+            {
+              id,
+              animalId: ANIMAL_ID,
+              createdAt: daysAgo(days),
+              occurredAt: daysAgo(days),
+              weight,
+            },
+          ]),
+        ),
+      );
+    });
+  }
+
+  it("hides the chart until there are two weigh-ins to compare", () => {
+    logWeights([{ id: "only", days: 5, weight: 400 }]);
+
+    const { queryByText } = renderDetail(
+      makeAnimal({ id: ANIMAL_ID, name: "Iggy" }),
+    );
+
+    expect(queryByText("WEIGHT TREND")).toBeNull();
+  });
+
+  it("charts every weigh-in and states the change since the first", () => {
+    logWeights([
+      { id: "a", days: 60, weight: 400 },
+      { id: "b", days: 30, weight: 430 },
+      { id: "c", days: 2, weight: 460 },
+    ]);
+
+    const { getByLabelText, getByText } = renderDetail(
+      makeAnimal({ id: ANIMAL_ID, name: "Iggy" }),
+    );
+
+    expect(getByText("WEIGHT TREND")).toBeTruthy();
+    expect(getByText("+60 g")).toBeTruthy();
+    expect(
+      getByLabelText(
+        /^Weight trend, 3 weigh-ins from .+ to .+\. Latest 460 g\. Change \+60 g since the first weigh-in\.$/,
+      ),
+    ).toBeTruthy();
+  });
+
+  it("says how many weigh-ins the chart is showing when history is longer", () => {
+    logWeights(
+      Array.from({ length: 12 }, (_, index) => ({
+        id: `w${index}`,
+        days: 100 - index * 5,
+        weight: 400 + index,
+      })),
+    );
+
+    const { getByText } = renderDetail(
+      makeAnimal({ id: ANIMAL_ID, name: "Iggy" }),
+    );
+
+    expect(getByText("· last 8")).toBeTruthy();
+  });
+
+  it("relabels the axis when the language changes while it is on screen", async () => {
+    logWeights([
+      { id: "a", days: 60, weight: 400 },
+      { id: "b", days: 30, weight: 430 },
+    ]);
+
+    const { getByText, queryByText } = renderDetail(
+      makeAnimal({ id: ANIMAL_ID, name: "Iggy" }),
+    );
+
+    const [month, day] = [
+      new Date(daysAgo(30)).getMonth() + 1,
+      new Date(daysAgo(30)).getDate(),
+    ];
+    expect(getByText(`${month}/${day}`)).toBeTruthy();
+
+    await act(async () => {
+      await i18n.changeLanguage("pt-BR");
+    });
+
+    await waitFor(() => {
+      expect(
+        getByText(
+          `${String(day).padStart(2, "0")}/${String(month).padStart(2, "0")}`,
+        ),
+      ).toBeTruthy();
+    });
+    expect(queryByText(`${month}/${day}`)).toBeNull();
+
+    await act(async () => {
+      await i18n.changeLanguage("en");
+    });
+  });
+});

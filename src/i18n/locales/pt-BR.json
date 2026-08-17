@@ -443,6 +443,12 @@
     "lastWaterChange": "Última troca de água",
     "lastClean": "Última limpeza"
   },
+  "weightTrend": {
+    "title": "Tendência de peso",
+    "span": "{{first}} – {{last}}",
+    "window": "últimas {{count}}",
+    "summary": "{{count}} pesagens de {{first}} a {{last}}. Última: {{latest}}. Variação de {{change}} desde a primeira pesagem."
+  },
   "timeline": {
     "title": "Atividades recentes",
     "filter": {

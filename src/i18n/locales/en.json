@@ -443,6 +443,12 @@
     "lastWaterChange": "Last water change",
     "lastClean": "Last clean"
   },
+  "weightTrend": {
+    "title": "Weight trend",
+    "span": "{{first}} – {{last}}",
+    "window": "last {{count}}",
+    "summary": "{{count}} weigh-ins from {{first}} to {{last}}. Latest {{latest}}. Change {{change}} since the first weigh-in."
+  },
   "timeline": {
     "title": "Recent activity",
     "filter": {

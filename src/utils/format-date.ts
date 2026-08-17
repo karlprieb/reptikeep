@@ -86,6 +86,17 @@ export function formatAbsoluteDate(value: string): string {
   ].join(" ");
 }
 
+export function formatAxisDate(value: string): string {
+  const parsed = parseIsoCalendarDate(value);
+  if (!parsed) return "—";
+
+  return new Intl.DateTimeFormat(i18n.language, {
+    month: "numeric",
+    day: "numeric",
+    timeZone: "UTC",
+  }).format(new Date(Date.UTC(parsed.year, parsed.month - 1, parsed.day)));
+}
+
 function timeFormatter(): Intl.DateTimeFormat {
   return new Intl.DateTimeFormat(i18n.language, {
     hour: "numeric",
