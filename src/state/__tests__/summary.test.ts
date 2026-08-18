@@ -1,7 +1,7 @@
 import { feedingStore } from "@/state/feeding";
 import { habitatStore } from "@/state/habitat";
 import { resummarizeActivities } from "@/state/activity-stores";
-import { lastActivityAt, summaries$ } from "@/state/summary";
+import { lastActivityAt, summaries$, summaryState$ } from "@/state/summary";
 import { weightStore } from "@/state/weight";
 import { lastCareByAnimal, lastFedByAnimal } from "@/utils/animal-activity";
 
@@ -61,6 +61,7 @@ describe("activity summaries", () => {
     habitatStore.clear();
     weightStore.clear();
     summaries$.set({});
+    summaryState$.set({});
   });
 
   it("records the newest accepted feeding, not the newest feeding", () => {
@@ -170,5 +171,19 @@ describe("activity summaries", () => {
     resummarizeActivities();
 
     expect(summaries$.peek()[ANIMAL]).toBeUndefined();
+  });
+
+  it("marks summaries dirty when a record is added", () => {
+    expect(summaryState$.dirty.peek()).toBeFalsy();
+    feedingStore.add(feeding("f1", "2026-07-01T00:00:00.000Z"));
+    expect(summaryState$.dirty.peek()).toBe(true);
+  });
+
+  it("clears the dirty flag after resummarize", () => {
+    feedingStore.add(feeding("f1", "2026-07-01T00:00:00.000Z"));
+    expect(summaryState$.dirty.peek()).toBe(true);
+
+    resummarizeActivities();
+    expect(summaryState$.dirty.peek()).toBe(false);
   });
 });

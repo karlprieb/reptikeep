@@ -5,7 +5,7 @@ import type { ActivityType } from "@/constants/theme";
 import { clampTextFields } from "@/utils/text-limits";
 
 import { persistedAsWritten, persistPlugin } from "./persist";
-import { summarize, summarizeAll } from "./summary";
+import { summarize, summarizeAll, summaryState$ } from "./summary";
 
 export interface ActivityRecord {
   id: string;
@@ -25,6 +25,7 @@ export function createActivityStore<T extends ActivityRecord>(
     for (const animalId of new Set(animalIds)) {
       summarize(type, animalId, records);
     }
+    summaryState$.dirty.set(true);
   };
 
   // Hydration parses the whole table, so it waits until something actually

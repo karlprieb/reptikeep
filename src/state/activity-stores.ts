@@ -50,7 +50,7 @@ export function clearActivities(): void {
 export function resummarizeActivities(): void {
   clearSummaries();
   for (const store of Object.values(activityStores)) store.resummarize();
-  summaryState$.backfilled.set(true);
+  summaryState$.dirty.set(false);
 }
 
 /**
@@ -58,7 +58,7 @@ export function resummarizeActivities(): void {
  * Hydrates every table, so callers run it after the first screen is up.
  */
 export function backfillSummaries(): void {
-  if (summaryState$.backfilled.peek()) return;
+  if (!summaryState$.dirty.peek()) return;
 
   resummarizeActivities();
 }

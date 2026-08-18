@@ -1249,6 +1249,8 @@ export async function restoreBackup(file: File): Promise<RestoredBackup> {
         replaceActivityTable(name, old.activities[name] as Table);
     });
 
+    resummarizeActivities();
+
     for (const animal of Object.values(data.animals ?? {}))
       if (animal.photo && !old.animals[animal.id]?.photo)
         try {
