@@ -38,5 +38,7 @@ export function createDefecationActivity(
   };
 }
 
-export const defecationStore =
-  createActivityStore<DefecationActivity>("defecations");
+export const defecationStore = createActivityStore<DefecationActivity>(
+  "defecations",
+  "poop",
+);

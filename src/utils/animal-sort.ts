@@ -18,15 +18,24 @@ export function sortAnimals(
   lastActivity: Record<string, string>,
 ): Animal[] {
   const sign = sort.direction === "asc" ? 1 : -1;
+  const activeAt = new Map<string, number>();
+
+  if (sort.field === "lastActivity") {
+    for (const animal of animals) {
+      const at = lastActivity[animal.id];
+      if (at) activeAt.set(animal.id, Date.parse(at));
+    }
+  }
 
   return [...animals].sort((a, b) => {
     if (sort.field === "lastActivity") {
-      const aAt = lastActivity[a.id];
-      const bAt = lastActivity[b.id];
-      if (!aAt && !bAt) return collate(a.name, b.name);
-      if (!aAt) return 1;
-      if (!bAt) return -1;
-      return (new Date(aAt).getTime() - new Date(bAt).getTime()) * sign;
+      const aAt = activeAt.get(a.id);
+      const bAt = activeAt.get(b.id);
+      if (aAt === undefined && bAt === undefined)
+        return collate(a.name, b.name);
+      if (aAt === undefined) return 1;
+      if (bAt === undefined) return -1;
+      return (aAt - bAt) * sign;
     }
 
     const aValue = a[sort.field];

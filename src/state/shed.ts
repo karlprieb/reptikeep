@@ -25,4 +25,4 @@ export function createShedActivity(input: CreateShedInput): ShedActivity {
   };
 }
 
-export const shedStore = createActivityStore<ShedActivity>("sheds");
+export const shedStore = createActivityStore<ShedActivity>("sheds", "shed");

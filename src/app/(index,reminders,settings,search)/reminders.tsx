@@ -31,7 +31,6 @@ import {
   listRowSeparator,
   listRowSpacing,
   listStyle,
-  onGeometryChange,
   onTapGesture,
   padding,
   scrollContentBackground,
@@ -42,7 +41,7 @@ import {
 } from "@expo/ui/swift-ui/modifiers";
 import { useValue } from "@legendapp/state/react";
 import { router } from "expo-router";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   AppState,
   Linking,
@@ -65,7 +64,6 @@ import {
 } from "@/constants/theme";
 import { typeFont } from "@/constants/type-font";
 import { useTheme } from "@/hooks/use-theme";
-import { activityStores } from "@/state/activity-stores";
 import { addAnimal, animals$, type Animal } from "@/state/animal";
 import { careSchedules$, type CareRoutine } from "@/state/care-schedule";
 import { createHabitatActivity, habitatStore } from "@/state/habitat";
@@ -75,7 +73,8 @@ import {
   type ReminderPermission,
 } from "@/state/notifications";
 import { reminders$ } from "@/state/reminders";
-import { lastCareByAnimal } from "@/utils/animal-activity";
+import { summaries$, summaryLookups } from "@/state/summary";
+import { panelRowHeight } from "@/utils/panel-row";
 import { careReminders, type CareReminder } from "@/utils/care-reminders";
 import {
   daysSince,
@@ -96,7 +95,16 @@ const SYMBOL_RATIO = 0.54;
 const STACK_ABOVE_FONT_SCALE = 1.6;
 const CHECKBOX_SYMBOL = 22;
 const CHECKBOX_HIT = 44;
-const ROW_HEIGHT_ESTIMATE = 96;
+const ROW_BLOCKS: Parameters<typeof panelRowHeight>[0] = [
+  ["body", 1],
+  ["bodyS", 1],
+];
+const STACKED_ROW_BLOCKS: Parameters<typeof panelRowHeight>[0] = [
+  ["body", 2],
+  ["bodyS", 2],
+  ["data", 1],
+  ["bodyS", 2],
+];
 
 type DueState = {
   text: string;
@@ -144,7 +152,6 @@ type ReminderRowProps = {
   divided: boolean;
   textInset: number;
   rowHeight: number;
-  onMeasure: (height: number) => void;
   onStopReminding: () => void;
 };
 
@@ -158,7 +165,6 @@ function ReminderRow({
   divided,
   textInset,
   rowHeight,
-  onMeasure,
   onStopReminding,
 }: ReminderRowProps) {
   const { t } = useTranslation();
@@ -178,7 +184,13 @@ function ReminderRow({
   );
 
   const routineLine = (
-    <Text modifiers={[typeFont("bodyS"), foregroundStyle(theme.textSecondary)]}>
+    <Text
+      modifiers={[
+        typeFont("bodyS"),
+        foregroundStyle(theme.textSecondary),
+        lineLimit(2),
+      ]}
+    >
       {routine}
     </Text>
   );
@@ -200,7 +212,7 @@ function ReminderRow({
       modifiers={[
         typeFont("bodyS"),
         foregroundStyle(state.color),
-        ...(stacked ? [] : [lineLimit(1)]),
+        ...(stacked ? [lineLimit(2)] : [lineLimit(1)]),
       ]}
     >
       {state.text}
@@ -269,10 +281,7 @@ function ReminderRow({
             <VStack
               alignment="leading"
               spacing={Spacing["2xs"]}
-              modifiers={[
-                frame({ maxWidth: Infinity, alignment: "leading" }),
-                onGeometryChange((geometry) => onMeasure(geometry.height)),
-              ]}
+              modifiers={[frame({ maxWidth: Infinity, alignment: "leading" })]}
             >
               {stacked ? (
                 <>
@@ -385,20 +394,11 @@ function ReminderPanel({
   onStopReminding,
 }: ReminderPanelProps) {
   const { fontScale } = useWindowDimensions();
-  const [measuredHeight, setMeasuredHeight] = useState(0);
-  const measure = useCallback(
-    (height: number) =>
-      setMeasuredHeight((current) => Math.max(current, Math.ceil(height))),
-    [],
+  const rowHeight = panelRowHeight(
+    stacked ? STACKED_ROW_BLOCKS : ROW_BLOCKS,
+    fontScale,
+    Math.max(badgeSize, checkboxSize),
   );
-
-  const floor = Math.max(badgeSize, checkboxSize);
-  const estimate = Math.round(
-    ROW_HEIGHT_ESTIMATE * Math.min(fontScale, BADGE_MAX_SCALE),
-  );
-  const rowHeight = measuredHeight
-    ? Math.max(floor, measuredHeight) + Spacing.sm * 2
-    : estimate;
 
   return (
     <Host
@@ -427,7 +427,6 @@ function ReminderPanel({
             divided={index > 0}
             textInset={textInset}
             rowHeight={rowHeight}
-            onMeasure={measure}
             onStopReminding={() =>
               onStopReminding(reminder.animalId, reminder.routine)
             }
@@ -524,7 +523,7 @@ export default function RemindersScreen() {
   const animals = useValue(animals$);
   const collectionWater = useValue(careSchedules$.water);
   const collectionCleaning = useValue(careSchedules$.cleaning);
-  const habitats = useValue(activityStores.habitat.$);
+  const summaries = useValue(summaries$);
   const reminderTime = useValue(reminders$);
   const [permission, setPermission] = useState<ReminderPermission>();
 
@@ -545,15 +544,15 @@ export default function RemindersScreen() {
   };
 
   const today = toCalendarDate(new Date());
-  const reminders = useMemo(
-    () =>
-      careReminders(
-        animals,
-        { water: collectionWater, cleaning: collectionCleaning },
-        lastCareByAnimal(habitats),
-      ),
-    [animals, collectionCleaning, collectionWater, habitats],
-  );
+  const reminders = useMemo(() => {
+    const { lastWater, lastClean } = summaryLookups(summaries);
+
+    return careReminders(
+      animals,
+      { water: collectionWater, cleaning: collectionCleaning },
+      { water: lastWater, cleaning: lastClean },
+    );
+  }, [animals, collectionCleaning, collectionWater, summaries]);
 
   const dueState = (reminder: CareReminder): DueState => {
     if (reminder.dueOn < today) {

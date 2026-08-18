@@ -13,6 +13,7 @@ import { clampTextFields } from "@/utils/text-limits";
 import { persistedAsWritten, persistPlugin } from "./persist";
 import { removeActivitiesForAnimal } from "./activity-stores";
 import { removeDocumentsForAnimal } from "./document";
+import { forgetAnimalSummary } from "./summary";
 import type {
   AnimalSchedule,
   CareRoutine,
@@ -73,6 +74,7 @@ export function removeAnimal(id: string): void {
     animals$.set(rest);
     removeActivitiesForAnimal(id);
     removeDocumentsForAnimal(id);
+    forgetAnimalSummary(id);
   });
 
   deleteManagedAnimalPhoto(photoUri);

@@ -108,16 +108,11 @@ export function AddWeightSheet({
   const canSave = grams !== undefined && grams >= MIN_WEIGHT_GRAMS;
   const invalid = draft.weight.trim().length > 0 && !canSave;
 
-  const history = activity
-    ? Object.fromEntries(
-        Object.entries(weights).filter(([id]) => id !== activity.id),
-      )
-    : weights;
-
   const previous = previousRecord(
     animalId,
-    history,
+    weights,
     draft.occurredAt.toISOString(),
+    activity?.id,
   );
   const change =
     previous && canSave ? weightChange(previous.weight, grams) : undefined;

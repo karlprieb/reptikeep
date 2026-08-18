@@ -86,6 +86,28 @@ function latestQualifying<T extends ActivityRecord>(
   return latest;
 }
 
+function latestFor<T extends ActivityRecord>(
+  records: Record<string, T>,
+  animalId: string,
+  qualifies: (record: T) => boolean,
+): T | undefined {
+  let latest: T | undefined;
+
+  for (const record of Object.values(records)) {
+    if (record.animalId !== animalId || !qualifies(record)) continue;
+
+    if (
+      !latest ||
+      new Date(record.occurredAt).getTime() >
+        new Date(latest.occurredAt).getTime()
+    ) {
+      latest = record;
+    }
+  }
+
+  return latest;
+}
+
 function occurredAtByAnimal<T extends ActivityRecord>(
   latest: Record<string, T>,
 ): Record<string, string> {
@@ -106,7 +128,7 @@ export function latestAcceptedFeeding(
   feedings: Record<string, FeedingActivity>,
   animalId: string,
 ): FeedingActivity | undefined {
-  return latestQualifying(feedings, wasAccepted)[animalId];
+  return latestFor(feedings, animalId, wasAccepted);
 }
 
 export function lastFedByAnimal(
@@ -119,14 +141,14 @@ export function latestWaterChange(
   habitats: Record<string, HabitatActivity>,
   animalId: string,
 ): HabitatActivity | undefined {
-  return latestQualifying(habitats, changedWater)[animalId];
+  return latestFor(habitats, animalId, changedWater);
 }
 
 export function latestEnclosureClean(
   habitats: Record<string, HabitatActivity>,
   animalId: string,
 ): HabitatActivity | undefined {
-  return latestQualifying(habitats, cleanedEnclosure)[animalId];
+  return latestFor(habitats, animalId, cleanedEnclosure);
 }
 
 export function lastCareByAnimal(
@@ -144,26 +166,6 @@ export function lastCareByAnimal(
     },
     {} as Record<CareRoutine, Record<string, string>>,
   );
-}
-
-export function lastActivityByAnimal(
-  ...stores: Record<string, ActivityRecord>[]
-): Record<string, string> {
-  const latest: Record<string, string> = {};
-
-  for (const store of stores) {
-    for (const record of Object.values(store)) {
-      const current = latest[record.animalId];
-      if (
-        !current ||
-        new Date(record.occurredAt).getTime() > new Date(current).getTime()
-      ) {
-        latest[record.animalId] = record.occurredAt;
-      }
-    }
-  }
-
-  return latest;
 }
 
 export type ActivityStores = {
@@ -188,27 +190,30 @@ export function animalActivityFeed(
     medical,
   };
 
-  return (
-    Object.entries(byType).flatMap(([type, records]) =>
-      Object.values(records)
-        .filter((record) => record.animalId === animalId)
-        .map((record) => ({
+  const dated = Object.entries(byType).flatMap(([type, records]) =>
+    Object.values(records)
+      .filter((record) => record.animalId === animalId)
+      .map((record) => ({
+        entry: {
           id: record.id,
           type,
           occurredAt: record.occurredAt,
           record,
-        })),
-    ) as AnimalActivity[]
-  ).sort((a, b) => {
-    const occurred =
-      new Date(b.occurredAt).getTime() - new Date(a.occurredAt).getTime();
+        } as AnimalActivity,
+        occurred: Date.parse(record.occurredAt),
+        created: Date.parse(record.createdAt),
+      })),
+  );
+
+  dated.sort((a, b) => {
+    const occurred = b.occurred - a.occurred;
     if (occurred !== 0) return occurred;
 
-    const created =
-      new Date(b.record.createdAt).getTime() -
-      new Date(a.record.createdAt).getTime();
+    const created = b.created - a.created;
     if (created !== 0) return created;
 
-    return a.id < b.id ? -1 : a.id > b.id ? 1 : 0;
+    return a.entry.id < b.entry.id ? -1 : a.entry.id > b.entry.id ? 1 : 0;
   });
+
+  return dated.map((item) => item.entry);
 }

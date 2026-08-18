@@ -30,3 +30,55 @@ index 664eb10..44b7fb9 100644
 +    StrokeStyle(lineWidth: CGFloat(width), dash: dashArray.map { CGFloat($0) })
    }
  }
+diff --git a/node_modules/@expo/ui/ios/ImageView.swift b/node_modules/@expo/ui/ios/ImageView.swift
+index 170de73..94980d8 100644
+--- a/node_modules/@expo/ui/ios/ImageView.swift
++++ b/node_modules/@expo/ui/ios/ImageView.swift
+@@ -12,6 +12,35 @@ public final class ImageViewProps: UIBaseViewProps {
+   var onTap = EventDispatcher()
+ }
+ 
++private enum DecodedImageCache {
++  static let shared: NSCache<NSString, UIImage> = {
++    let cache = NSCache<NSString, UIImage>()
++    cache.totalCostLimit = 64 * 1024 * 1024
++    return cache
++  }()
++
++  static func image(for source: String?) -> UIImage? {
++    guard let source, let url = URL(string: source) else {
++      return nil
++    }
++
++    let modified = (try? FileManager.default.attributesOfItem(atPath: url.path))?[.modificationDate] as? Date
++    let key = "\(url.absoluteString)@\(modified?.timeIntervalSince1970 ?? 0)" as NSString
++
++    if let cached = shared.object(forKey: key) {
++      return cached
++    }
++
++    guard let data = try? Data(contentsOf: url), let image = UIImage(data: data) else {
++      return nil
++    }
++
++    let pixels = image.size.width * image.scale * image.size.height * image.scale
++    shared.setObject(image, forKey: key, cost: Int(pixels) * 4)
++    return image
++  }
++}
++
+ public struct ImageView: ExpoSwiftUI.View {
+   @ObservedObject public var props: ImageViewProps
+ 
+@@ -41,10 +70,7 @@ public struct ImageView: ExpoSwiftUI.View {
+       symbolImage
+         .applyImageModifiers(props.modifiers, appContext: props.appContext)
+         .applyOnTapGesture(useTapGesture: props.useTapGesture, eventDispatcher: props.onTap)
+-    } else if let url = props.uiImage,
+-              let url = URL(string: url),
+-              let data = try? Data(contentsOf: url),
+-              let uiImage = UIImage(data: data) {
++    } else if let uiImage = DecodedImageCache.image(for: props.uiImage) {
+       Image(uiImage: uiImage)
+         .applyImageModifiers(props.modifiers, appContext: props.appContext)
+         .applyOnTapGesture(useTapGesture: props.useTapGesture, eventDispatcher: props.onTap)

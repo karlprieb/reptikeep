@@ -37,4 +37,7 @@ export function createFeedingActivity(
   };
 }
 
-export const feedingStore = createActivityStore<FeedingActivity>("feedings");
+export const feedingStore = createActivityStore<FeedingActivity>(
+  "feedings",
+  "feed",
+);

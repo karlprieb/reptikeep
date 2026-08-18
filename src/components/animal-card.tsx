@@ -24,6 +24,7 @@ import {
   padding,
   resizable,
 } from "@expo/ui/swift-ui/modifiers";
+import { memo } from "react";
 import { Pressable, StyleSheet, useWindowDimensions } from "react-native";
 import { useTranslation } from "react-i18next";
 
@@ -98,7 +99,7 @@ export type AnimalCardProps = {
   onPress: () => void;
 };
 
-export function AnimalCard({
+function AnimalCardBase({
   animal,
   width,
   height,
@@ -387,6 +388,8 @@ export function AnimalCard({
     </Pressable>
   );
 }
+
+export const AnimalCard = memo(AnimalCardBase);
 
 const styles = StyleSheet.create({
   pressed: {

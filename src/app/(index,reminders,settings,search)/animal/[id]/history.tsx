@@ -1,11 +1,11 @@
 import { useSelector as useValue } from "@legendapp/state/react";
 import { router, useLocalSearchParams } from "expo-router";
-import { useCallback, useMemo } from "react";
-import { FlatList, StyleSheet } from "react-native";
+import { useMemo } from "react";
+import { ScrollView, StyleSheet } from "react-native";
 import { useTranslation } from "react-i18next";
 
 import {
-  ActivityHistoryRow,
+  ActivityHistoryList,
   ActivityPanel,
 } from "@/components/activity-timeline";
 import { presentTypes } from "@/components/activity-type-filter";
@@ -14,14 +14,9 @@ import { IOSPageHeader } from "@/components/page-header";
 import { MaxContentWidth, Spacing } from "@/constants/theme";
 import { useTheme } from "@/hooks/use-theme";
 import { activityStores } from "@/state/activity-stores";
-import {
-  animalActivityFeed,
-  previousOfSameType,
-  type AnimalActivity,
-} from "@/utils/animal-activity";
+import { animalActivityFeed } from "@/utils/animal-activity";
 
 const goBack = () => router.back();
-const activityKey = (entry: AnimalActivity) => `${entry.type}:${entry.id}`;
 
 export default function AnimalHistoryScreen() {
   const theme = useTheme();
@@ -59,44 +54,30 @@ export default function AnimalHistoryScreen() {
         : entries,
     [activeType, entries],
   );
-  const previous = useMemo(() => previousOfSameType(activity), [activity]);
-
-  const renderActivity = useCallback(
-    ({ item, index }: { item: AnimalActivity; index: number }) => (
-      <ActivityHistoryRow
-        entry={item}
-        previous={previous[activityKey(item)]}
-        divided={index > 0}
-      />
-    ),
-    [previous],
-  );
-
   if (!animal) return <AnimalNotFound />;
 
   return (
     <>
-      <FlatList
-        style={[{ backgroundColor: theme.bg }, styles.list]}
-        contentInsetAdjustmentBehavior="automatic"
-        contentContainerStyle={styles.content}
-        data={activity}
-        keyExtractor={activityKey}
-        renderItem={renderActivity}
-        initialNumToRender={10}
-        maxToRenderPerBatch={8}
-        updateCellsBatchingPeriod={50}
-        windowSize={7}
-        removeClippedSubviews
-        ListEmptyComponent={
+      {activity.length === 0 ? (
+        <ScrollView
+          style={[{ backgroundColor: theme.bg }, styles.list]}
+          contentInsetAdjustmentBehavior="automatic"
+          contentContainerStyle={styles.content}
+        >
           <ActivityPanel
             entries={activity}
             animalId={id}
             animalName={animal.name}
             onAddActivity={goBack}
           />
-        }
-      />
+        </ScrollView>
+      ) : (
+        <ActivityHistoryList
+          entries={activity}
+          animalId={id}
+          background={theme.bg}
+        />
+      )}
 
       <IOSPageHeader
         title={
@@ -111,6 +92,7 @@ export default function AnimalHistoryScreen() {
 
 const styles = StyleSheet.create({
   list: {
+    flex: 1,
     width: "100%",
   },
   content: {

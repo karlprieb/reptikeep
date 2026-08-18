@@ -30,4 +30,7 @@ export function createHabitatActivity(
   };
 }
 
-export const habitatStore = createActivityStore<HabitatActivity>("habitats");
+export const habitatStore = createActivityStore<HabitatActivity>(
+  "habitats",
+  "habitat",
+);

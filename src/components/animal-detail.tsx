@@ -16,12 +16,12 @@ import {
   background,
   clipped,
   clipShape,
+  fixedSize,
   foregroundStyle,
   frame,
   italic,
   lineLimit,
   minimumScaleFactor,
-  onGeometryChange,
   padding,
   resizable,
   strokeBorder,
@@ -88,15 +88,17 @@ function pairs(stats: Stat[]): Stat[][] {
 type StatBoxProps = {
   stat: Stat;
   theme: Theme;
-  minHeight: number;
-  onMeasure: (key: string, height: number) => void;
 };
 
-function StatBox({ stat, theme, minHeight, onMeasure }: StatBoxProps) {
+function StatBox({ stat, theme }: StatBoxProps) {
   return (
     <VStack
       modifiers={[
-        frame({ maxWidth: Infinity, minHeight, alignment: "topLeading" }),
+        frame({
+          maxWidth: Infinity,
+          maxHeight: Infinity,
+          alignment: "topLeading",
+        }),
         background(theme.surface),
         clipShape("roundedRectangle", Radius.lg),
         strokeBorder({
@@ -119,7 +121,7 @@ function StatBox({ stat, theme, minHeight, onMeasure }: StatBoxProps) {
         modifiers={[
           padding({ all: Spacing.md }),
           frame({ maxWidth: Infinity, alignment: "topLeading" }),
-          onGeometryChange(({ height }) => onMeasure(stat.key, height)),
+          fixedSize({ horizontal: false, vertical: true }),
         ]}
       >
         <Text
@@ -166,13 +168,6 @@ export function AnimalDetail({ animal, onAddActivity }: AnimalDetailProps) {
   const { t } = useTranslation();
   const { width } = useWindowDimensions();
   const sex = animal.sex === "unknown" ? null : t(`sex.${animal.sex}`);
-
-  const [statHeights, setStatHeights] = useState<Record<string, number>>({});
-  const measureStat = useCallback((key: string, height: number) => {
-    setStatHeights((current) =>
-      current[key] === height ? current : { ...current, [key]: height },
-    );
-  }, []);
 
   const feedings = useValue(activityStores.feed.$);
   const habitats = useValue(activityStores.habitat.$);
@@ -252,7 +247,10 @@ export function AnimalDetail({ animal, onAddActivity }: AnimalDetailProps) {
         }
       : null;
 
-  const latestFeed = latestAcceptedFeeding(feedings, animal.id);
+  const latestFeed = useMemo(
+    () => latestAcceptedFeeding(feedings, animal.id),
+    [feedings, animal.id],
+  );
   const overdueDays = scheduleDaysOverdue(
     latestFeed?.occurredAt,
     animal.feedingSchedule,
@@ -262,7 +260,10 @@ export function AnimalDetail({ animal, onAddActivity }: AnimalDetailProps) {
     useValue(careSchedules$.water),
     animal.waterSchedule,
   );
-  const latestWater = latestWaterChange(habitats, animal.id);
+  const latestWater = useMemo(
+    () => latestWaterChange(habitats, animal.id),
+    [habitats, animal.id],
+  );
   const waterOverdueDays = scheduleDaysOverdue(
     latestWater?.occurredAt ?? animal.createdAt,
     waterSchedule,
@@ -272,7 +273,10 @@ export function AnimalDetail({ animal, onAddActivity }: AnimalDetailProps) {
     useValue(careSchedules$.cleaning),
     animal.cleaningSchedule,
   );
-  const latestClean = latestEnclosureClean(habitats, animal.id);
+  const latestClean = useMemo(
+    () => latestEnclosureClean(habitats, animal.id),
+    [habitats, animal.id],
+  );
   const cleaningOverdueDays = scheduleDaysOverdue(
     latestClean?.occurredAt ?? animal.createdAt,
     cleaningSchedule,
@@ -370,13 +374,6 @@ export function AnimalDetail({ animal, onAddActivity }: AnimalDetailProps) {
         ]
       : []),
   ];
-
-  const tallestStat = Math.max(
-    0,
-    ...[...dateStats, ...currentStats].map(
-      (stat) => statHeights[stat.key] ?? 0,
-    ),
-  );
 
   return (
     <View>
@@ -509,13 +506,7 @@ export function AnimalDetail({ animal, onAddActivity }: AnimalDetailProps) {
                 modifiers={[frame({ maxWidth: Infinity })]}
               >
                 {row.map((stat) => (
-                  <StatBox
-                    key={stat.key}
-                    stat={stat}
-                    theme={theme}
-                    minHeight={tallestStat}
-                    onMeasure={measureStat}
-                  />
+                  <StatBox key={stat.key} stat={stat} theme={theme} />
                 ))}
               </HStack>
             ))}

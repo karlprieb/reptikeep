@@ -1,7 +1,9 @@
 import i18n from "@/i18n";
 
-function dateFormatter(): Intl.DateTimeFormat {
-  return new Intl.DateTimeFormat(i18n.language, {
+import { dateFormatter } from "./intl-cache";
+
+function absoluteDateFormatter(): Intl.DateTimeFormat {
+  return dateFormatter(i18n.language, {
     month: "short",
     day: "numeric",
     year: "numeric",
@@ -69,15 +71,11 @@ export function formatAbsoluteDate(value: string): string {
   if (!parsed) return "—";
 
   const date = new Date(Date.UTC(parsed.year, parsed.month - 1, parsed.day));
-  const formatter = dateFormatter();
 
-  if (!isPortuguese()) return formatter.format(date);
+  if (!isPortuguese()) return absoluteDateFormatter().format(date);
 
   const formatPart = (options: Intl.DateTimeFormatOptions) =>
-    new Intl.DateTimeFormat(i18n.language, {
-      ...options,
-      timeZone: "UTC",
-    }).format(date);
+    dateFormatter(i18n.language, { ...options, timeZone: "UTC" }).format(date);
 
   return [
     formatPart({ day: "numeric" }),
@@ -90,7 +88,7 @@ export function formatAxisDate(value: string): string {
   const parsed = parseIsoCalendarDate(value);
   if (!parsed) return "—";
 
-  return new Intl.DateTimeFormat(i18n.language, {
+  return dateFormatter(i18n.language, {
     month: "numeric",
     day: "numeric",
     timeZone: "UTC",
@@ -98,7 +96,7 @@ export function formatAxisDate(value: string): string {
 }
 
 function timeFormatter(): Intl.DateTimeFormat {
-  return new Intl.DateTimeFormat(i18n.language, {
+  return dateFormatter(i18n.language, {
     hour: "numeric",
     minute: "2-digit",
   });
