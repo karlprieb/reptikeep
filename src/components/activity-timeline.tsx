@@ -38,7 +38,7 @@ import {
   tint,
 } from "@expo/ui/swift-ui/modifiers";
 import { router } from "expo-router";
-import { useCallback, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import {
   ScrollView,
   StyleSheet,
@@ -492,7 +492,7 @@ export function ActivityHistoryList({
     fontScale,
     badgeSize,
   );
-  const previous = previousOfSameType(entries);
+  const previous = useMemo(() => previousOfSameType(entries), [entries]);
   const visible = entries.slice(0, limit);
 
   const growNearEnd = useCallback(
@@ -582,7 +582,7 @@ export function ActivityPanel({
 
   const textInset = Spacing.md + badgeSize + Spacing.sm;
 
-  const previous = previousOfSameType(entries);
+  const previous = useMemo(() => previousOfSameType(entries), [entries]);
   const rowHeight = panelRowHeight(
     stacked ? STACKED_ROW_BLOCKS : ROW_BLOCKS,
     fontScale,

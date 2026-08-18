@@ -1,5 +1,6 @@
 import { feedingStore } from "@/state/feeding";
 import { habitatStore } from "@/state/habitat";
+import { resummarizeActivities } from "@/state/activity-stores";
 import { lastActivityAt, summaries$ } from "@/state/summary";
 import { weightStore } from "@/state/weight";
 import { lastCareByAnimal, lastFedByAnimal } from "@/utils/animal-activity";
@@ -159,5 +160,15 @@ describe("activity summaries", () => {
       "2026-07-09T00:00:00.000Z",
     );
     expectSummaryMatchesRecords();
+  });
+
+  it("drops stale summaries for animals with no records on resummarize", () => {
+    summaries$.set({
+      [ANIMAL]: { lastFedAt: "2020-01-01T00:00:00.000Z" },
+    });
+
+    resummarizeActivities();
+
+    expect(summaries$.peek()[ANIMAL]).toBeUndefined();
   });
 });

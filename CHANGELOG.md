@@ -57,7 +57,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - A reptile's detail screen shows the 20 most recent records instead of 8, so
   a weekly feeder sees months of history before reaching "See all".
 - The Reptiles tab scrolls and switches between single-column, grid and list
-  views without the lag and freezes large collections caused before.
+  views without the lag and freezes that large collections caused before.
 
 ### Fixed
 

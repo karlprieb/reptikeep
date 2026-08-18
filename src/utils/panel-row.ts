@@ -1,13 +1,11 @@
 import { Spacing, Typography, type TypographyAlias } from "@/constants/theme";
 
-export const ROW_MAX_TEXT_SCALE = 2;
-
 export function panelRowHeight(
   blocks: [TypographyAlias, number][],
   fontScale: number,
   badgeSize: number,
 ): number {
-  const scale = Math.min(Math.max(fontScale, 1), ROW_MAX_TEXT_SCALE);
+  const scale = Math.max(fontScale, 1);
   const text =
     blocks.reduce(
       (total, [alias, lines]) =>

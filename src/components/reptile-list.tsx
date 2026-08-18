@@ -134,10 +134,10 @@ export function ReptileList({
         contentSize.height - contentOffset.y - layoutMeasurement.height;
 
       if (remaining < layoutMeasurement.height * 2) {
-        setLimit((current) => current + CARD_PAGE);
+        setLimit((current) => Math.min(current + CARD_PAGE, animals.length));
       }
     },
-    [],
+    [animals.length],
   );
 
   if (animals.length === 0) {

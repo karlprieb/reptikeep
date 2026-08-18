@@ -1,5 +1,5 @@
 import { Spacing, Typography } from "@/constants/theme";
-import { panelRowHeight, ROW_MAX_TEXT_SCALE } from "@/utils/panel-row";
+import { panelRowHeight } from "@/utils/panel-row";
 
 const PADDING = Spacing.sm * 2;
 
@@ -37,12 +37,12 @@ describe("panelRowHeight", () => {
     );
   });
 
-  it("caps the scale so an accessibility size cannot run away", () => {
+  it("does not cap the scale, so accessibility sizes grow without clipping", () => {
     const blocks: [Parameters<typeof panelRowHeight>[0][number][0], number][] =
       [["body", 1]];
 
-    expect(panelRowHeight(blocks, 5, 0)).toBe(
-      panelRowHeight(blocks, ROW_MAX_TEXT_SCALE, 0),
+    expect(panelRowHeight(blocks, 5, 0)).toBeGreaterThan(
+      panelRowHeight(blocks, 2, 0),
     );
   });
 
