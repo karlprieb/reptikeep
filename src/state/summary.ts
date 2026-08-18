@@ -25,7 +25,7 @@ syncObservable(summaries$, {
   },
 });
 
-export const summaryState$ = observable<{ dirty?: boolean }>({});
+export const summaryState$ = observable<{ dirty?: boolean }>({ dirty: true });
 
 syncObservable(summaryState$, {
   persist: { name: "activity-summary-state", plugin: persistPlugin },
