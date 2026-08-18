@@ -86,6 +86,65 @@ export function summarize<T extends ActivityRecord>(
   summaries$[animalId].set(next);
 }
 
+export function summarizeAll<T extends ActivityRecord>(
+  type: ActivityType,
+  records: Record<string, T>,
+): void {
+  const byAnimal: Record<
+    string,
+    {
+      newest?: string;
+      lastFedAt?: string;
+      lastWaterAt?: string;
+      lastCleanAt?: string;
+    }
+  > = {};
+
+  for (const record of Object.values(records)) {
+    let entry = byAnimal[record.animalId];
+    if (!entry) {
+      entry = {};
+      byAnimal[record.animalId] = entry;
+    }
+
+    entry.newest = latest(entry.newest, record.occurredAt);
+
+    if (type === "feed") {
+      const feeding = record as unknown as FeedingActivity;
+      if (wasAccepted(feeding)) {
+        entry.lastFedAt = latest(entry.lastFedAt, record.occurredAt);
+      }
+    }
+
+    if (type === "habitat") {
+      const habitat = record as unknown as HabitatActivity;
+      if (changedWater(habitat)) {
+        entry.lastWaterAt = latest(entry.lastWaterAt, record.occurredAt);
+      }
+      if (cleanedEnclosure(habitat)) {
+        entry.lastCleanAt = latest(entry.lastCleanAt, record.occurredAt);
+      }
+    }
+  }
+
+  const current = summaries$.peek();
+  for (const [animalId, entry] of Object.entries(byAnimal)) {
+    const existing = current[animalId] ?? {};
+    const next: AnimalSummary = {
+      ...existing,
+      lastByType: { ...existing.lastByType, [type]: entry.newest },
+    };
+
+    if (type === "feed") next.lastFedAt = entry.lastFedAt;
+    if (type === "habitat") {
+      next.lastWaterAt = entry.lastWaterAt;
+      next.lastCleanAt = entry.lastCleanAt;
+    }
+
+    summaries$[animalId].set(next);
+  }
+}
+
 export function lastActivityAt(summary: AnimalSummary): string | undefined {
   let newest: string | undefined;
 

@@ -5,7 +5,7 @@ import type { ActivityType } from "@/constants/theme";
 import { clampTextFields } from "@/utils/text-limits";
 
 import { persistedAsWritten, persistPlugin } from "./persist";
-import { summarize } from "./summary";
+import { summarize, summarizeAll } from "./summary";
 
 export interface ActivityRecord {
   id: string;
@@ -97,7 +97,7 @@ export function createActivityStore<T extends ActivityRecord>(
     /** Rebuilds every animal's entry — for restore, and to repair drift. */
     resummarize(): void {
       hydrate();
-      refresh(Object.values(records$.peek()).map((record) => record.animalId));
+      summarizeAll(type, records$.peek());
     },
   };
 }
