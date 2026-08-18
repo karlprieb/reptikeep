@@ -1,4 +1,4 @@
-import { forAnimal, type ActivityRecord } from "@/state/activity-store";
+import type { ActivityRecord } from "@/state/activity-store";
 
 const IMPLAUSIBLE_CHANGE_RATIO = 0.5;
 
@@ -12,13 +12,25 @@ export function previousRecord<T extends ActivityRecord>(
   animalId: string,
   records: Record<string, T>,
   before: string,
+  excludeId?: string,
 ): T | undefined {
-  const beforeTime = new Date(before).getTime();
+  const beforeTime = Date.parse(before);
   if (!Number.isFinite(beforeTime)) return undefined;
 
-  return forAnimal(animalId, records).find(
-    (record) => new Date(record.occurredAt).getTime() < beforeTime,
-  );
+  let latest: T | undefined;
+  let latestTime = -Infinity;
+
+  for (const record of Object.values(records)) {
+    if (record.animalId !== animalId || record.id === excludeId) continue;
+
+    const time = Date.parse(record.occurredAt);
+    if (!(time < beforeTime) || time <= latestTime) continue;
+
+    latest = record;
+    latestTime = time;
+  }
+
+  return latest;
 }
 
 export function weightChange(

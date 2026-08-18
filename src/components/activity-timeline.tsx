@@ -29,7 +29,6 @@ import {
   listRowSeparator,
   listRowSpacing,
   listStyle,
-  onGeometryChange,
   onTapGesture,
   padding,
   scrollContentBackground,
@@ -39,8 +38,14 @@ import {
   tint,
 } from "@expo/ui/swift-ui/modifiers";
 import { router } from "expo-router";
-import { useCallback, useState } from "react";
-import { StyleSheet, useWindowDimensions } from "react-native";
+import { useCallback, useMemo, useState } from "react";
+import {
+  ScrollView,
+  StyleSheet,
+  useWindowDimensions,
+  type NativeScrollEvent,
+  type NativeSyntheticEvent,
+} from "react-native";
 import { useTranslation } from "react-i18next";
 import type { TFunction } from "i18next";
 
@@ -69,6 +74,7 @@ import {
   formatWeight,
   formatWeightDelta,
 } from "@/utils/format-number";
+import { panelRowHeight } from "@/utils/panel-row";
 import { weightChange } from "@/utils/weight-change";
 import type { WeightUnit } from "@/utils/weight-unit";
 
@@ -77,7 +83,16 @@ const BADGE_SIZE = 28;
 const BADGE_MAX_SCALE = 2;
 const SYMBOL_RATIO = 0.54;
 const STACK_ABOVE_FONT_SCALE = 1.6;
-const ROW_HEIGHT_ESTIMATE = 96;
+const ROW_BLOCKS: Parameters<typeof panelRowHeight>[0] = [
+  ["body", 1],
+  ["bodyS", 2],
+];
+const STACKED_ROW_BLOCKS: Parameters<typeof panelRowHeight>[0] = [
+  ["body", 2],
+  ["data", 1],
+  ["bodyS", 2],
+  ["bodyS", 2],
+];
 
 function describeActivity(
   entry: AnimalActivity,
@@ -186,7 +201,6 @@ type ActivityRowProps = {
   divided: boolean;
   textInset: number;
   rowHeight: number;
-  onMeasure: (height: number) => void;
 };
 
 function ActivityRow({
@@ -199,7 +213,6 @@ function ActivityRow({
   divided,
   textInset,
   rowHeight,
-  onMeasure,
 }: ActivityRowProps) {
   const { t } = useTranslation();
   const typeName = t(`activity.type.${entry.type}`);
@@ -260,7 +273,7 @@ function ActivityRow({
         modifiers={[
           typeFont("bodyS"),
           foregroundStyle(change.color),
-          ...(stacked ? [] : [lineLimit(1)]),
+          ...(stacked ? [lineLimit(2)] : [lineLimit(1)]),
         ]}
       >
         {change.text}
@@ -273,7 +286,7 @@ function ActivityRow({
       modifiers={[
         typeFont("bodyS"),
         foregroundStyle(flagged ? theme.warning : theme.textSecondary),
-        ...(stacked ? [] : [lineLimit(2)]),
+        lineLimit(2),
       ]}
     >
       {detail}
@@ -331,10 +344,7 @@ function ActivityRow({
           <VStack
             alignment="leading"
             spacing={Spacing["2xs"]}
-            modifiers={[
-              frame({ maxWidth: Infinity, alignment: "leading" }),
-              onGeometryChange((geometry) => onMeasure(geometry.height)),
-            ]}
+            modifiers={[frame({ maxWidth: Infinity, alignment: "leading" })]}
           >
             {stacked ? (
               <>
@@ -401,14 +411,12 @@ function SeeAllRow({
   rowHeight,
   textInset,
   onPress,
-  onMeasure,
 }: {
   count: number;
   theme: Theme;
   rowHeight: number;
   textInset: number;
   onPress: () => void;
-  onMeasure: (height: number) => void;
 }) {
   const { t } = useTranslation();
   const label = t("timeline.showAll", { count });
@@ -441,10 +449,7 @@ function SeeAllRow({
       >
         <VStack
           alignment="leading"
-          modifiers={[
-            frame({ maxWidth: Infinity, alignment: "leading" }),
-            onGeometryChange((geometry) => onMeasure(geometry.height)),
-          ]}
+          modifiers={[frame({ maxWidth: Infinity, alignment: "leading" })]}
         >
           <Text modifiers={[typeFont("body"), foregroundStyle(theme.primary)]}>
             {label}
@@ -460,71 +465,90 @@ function SeeAllRow({
   );
 }
 
-export function ActivityHistoryRow({
-  entry,
-  previous,
-  divided,
-}: {
-  entry: AnimalActivity;
-  previous?: AnimalActivity;
-  divided: boolean;
-}) {
+const HISTORY_PAGE = 60;
+
+export type ActivityHistoryListProps = {
+  entries: AnimalActivity[];
+  animalId: string;
+  background?: string;
+};
+
+export function ActivityHistoryList({
+  entries,
+  animalId,
+  background,
+}: ActivityHistoryListProps) {
   const theme = useTheme();
   const { fontScale } = useWindowDimensions();
-  const { weightUnit } = useAnimalDefaults(entry.record.animalId);
-  const [measuredHeight, setMeasuredHeight] = useState<number>();
+  const { weightUnit } = useAnimalDefaults(animalId);
+  const [limit, setLimit] = useState(HISTORY_PAGE);
+
   const badgeSize = Math.round(
     BADGE_SIZE * Math.min(fontScale, BADGE_MAX_SCALE),
   );
   const stacked = fontScale >= STACK_ABOVE_FONT_SCALE;
-  const estimate = Math.round(
-    ROW_HEIGHT_ESTIMATE * Math.min(fontScale, BADGE_MAX_SCALE),
+  const rowHeight = panelRowHeight(
+    stacked ? STACKED_ROW_BLOCKS : ROW_BLOCKS,
+    fontScale,
+    badgeSize,
   );
-  const rowHeight = measuredHeight
-    ? Math.ceil(Math.max(badgeSize, measuredHeight)) + Spacing.sm * 2
-    : estimate;
+  const previous = useMemo(() => previousOfSameType(entries), [entries]);
+  const visible = entries.slice(0, limit);
+
+  const growNearEnd = useCallback(
+    ({ nativeEvent }: NativeSyntheticEvent<NativeScrollEvent>) => {
+      const { contentOffset, layoutMeasurement, contentSize } = nativeEvent;
+      const remaining =
+        contentSize.height - contentOffset.y - layoutMeasurement.height;
+
+      if (remaining < layoutMeasurement.height * 2) {
+        setLimit((current) => Math.min(current + HISTORY_PAGE, entries.length));
+      }
+    },
+    [entries.length],
+  );
 
   return (
-    <Host style={{ width: "100%", height: rowHeight }}>
-      <ActivityRow
-        entry={entry}
-        previous={previous}
-        theme={theme}
-        unit={weightUnit}
-        badgeSize={badgeSize}
-        stacked={stacked}
-        divided={divided}
-        textInset={Spacing.md + badgeSize + Spacing.sm}
-        rowHeight={rowHeight}
-        onMeasure={setMeasuredHeight}
-      />
-    </Host>
+    <ScrollView
+      style={[
+        styles.historyHost,
+        background ? { backgroundColor: background } : null,
+      ]}
+      contentInsetAdjustmentBehavior="automatic"
+      onScroll={growNearEnd}
+      scrollEventThrottle={64}
+    >
+      <Host
+        style={{ width: "100%", height: rowHeight * visible.length }}
+        matchContents={false}
+      >
+        <List
+          modifiers={[
+            listStyle("plain"),
+            scrollDisabled(true),
+            listRowSpacing(0),
+            scrollContentBackground("hidden"),
+            frame({ height: rowHeight * visible.length }),
+          ]}
+        >
+          {visible.map((entry, index) => (
+            <ActivityRow
+              key={`${entry.type}:${entry.id}`}
+              entry={entry}
+              previous={previous[`${entry.type}:${entry.id}`]}
+              theme={theme}
+              unit={weightUnit}
+              badgeSize={badgeSize}
+              stacked={stacked}
+              divided={index > 0}
+              textInset={Spacing.md + badgeSize + Spacing.sm}
+              rowHeight={rowHeight}
+            />
+          ))}
+        </List>
+      </Host>
+    </ScrollView>
   );
-}
-
-export function useMeasuredText() {
-  const [heights, setHeights] = useState<Record<string, number>>({});
-
-  const measure = useCallback(
-    (key: string) => (height: number) =>
-      setHeights((current) =>
-        current[key] === height ? current : { ...current, [key]: height },
-      ),
-    [],
-  );
-
-  return { heights, measure };
-}
-
-export function uniformRowHeight(
-  keys: string[],
-  heights: Record<string, number>,
-  badgeSize: number,
-): number | undefined {
-  const measured = keys.map((key) => heights[key]);
-  if (measured.some((value) => value === undefined)) return undefined;
-
-  return Math.ceil(Math.max(badgeSize, ...measured)) + Spacing.sm * 2;
 }
 
 export type ActivityPanelProps = {
@@ -558,17 +582,12 @@ export function ActivityPanel({
 
   const textInset = Spacing.md + badgeSize + Spacing.sm;
 
-  const rowKeys = [
-    ...visible.map((entry) => `${entry.type}:${entry.id}`),
-    ...(seeAll ? ["see-all"] : []),
-  ];
-  const previous = previousOfSameType(entries);
-  const { heights, measure } = useMeasuredText();
-
-  const estimate = Math.round(
-    ROW_HEIGHT_ESTIMATE * Math.min(fontScale, BADGE_MAX_SCALE),
+  const previous = useMemo(() => previousOfSameType(entries), [entries]);
+  const rowHeight = panelRowHeight(
+    stacked ? STACKED_ROW_BLOCKS : ROW_BLOCKS,
+    fontScale,
+    badgeSize,
   );
-  const rowHeight = uniformRowHeight(rowKeys, heights, badgeSize) ?? estimate;
   const panelHeight = rowHeight * (visible.length + (seeAll ? 1 : 0));
 
   const panel = [
@@ -623,7 +642,6 @@ export function ActivityPanel({
               divided={index > 0}
               textInset={textInset}
               rowHeight={rowHeight}
-              onMeasure={measure(`${entry.type}:${entry.id}`)}
             />
           ))}
 
@@ -635,7 +653,6 @@ export function ActivityPanel({
               rowHeight={rowHeight}
               textInset={textInset}
               onPress={seeAll}
-              onMeasure={measure("see-all")}
             />
           ) : null}
         </List>
@@ -647,5 +664,8 @@ export function ActivityPanel({
 const styles = StyleSheet.create({
   panelHost: {
     width: "100%",
+  },
+  historyHost: {
+    flex: 1,
   },
 });

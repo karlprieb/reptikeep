@@ -1,0 +1,41 @@
+const dateFormatters = new Map<string, Intl.DateTimeFormat>();
+const numberFormatters = new Map<string, Intl.NumberFormat>();
+
+function keyed<T>(
+  cache: Map<string, T>,
+  locale: string,
+  options: object | undefined,
+  create: () => T,
+): T {
+  const key = `${locale}|${options ? JSON.stringify(options) : ""}`;
+  const cached = cache.get(key);
+  if (cached) return cached;
+
+  const formatter = create();
+  cache.set(key, formatter);
+  return formatter;
+}
+
+export function dateFormatter(
+  locale: string,
+  options: Intl.DateTimeFormatOptions,
+): Intl.DateTimeFormat {
+  return keyed(
+    dateFormatters,
+    locale,
+    options,
+    () => new Intl.DateTimeFormat(locale, options),
+  );
+}
+
+export function numberFormatter(
+  locale: string,
+  options?: Intl.NumberFormatOptions,
+): Intl.NumberFormat {
+  return keyed(
+    numberFormatters,
+    locale,
+    options,
+    () => new Intl.NumberFormat(locale, options),
+  );
+}

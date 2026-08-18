@@ -25,4 +25,7 @@ export function createWeightActivity(input: CreateWeightInput): WeightActivity {
   };
 }
 
-export const weightStore = createActivityStore<WeightActivity>("weights");
+export const weightStore = createActivityStore<WeightActivity>(
+  "weights",
+  "weight",
+);

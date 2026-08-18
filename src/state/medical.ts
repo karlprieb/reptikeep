@@ -56,10 +56,17 @@ const typedMedicalActivityStore = medicalActivityStore as ReturnType<
 >;
 
 export const medicalStore = {
-  ...typedMedicalActivityStore,
+  get $() {
+    return typedMedicalActivityStore.$;
+  },
+  hydrate: typedMedicalActivityStore.hydrate,
   add(record: MedicalActivity): void {
     typedMedicalActivityStore.add(validMedicalActivity(record));
   },
+  remove: typedMedicalActivityStore.remove,
+  removeForAnimal: typedMedicalActivityStore.removeForAnimal,
+  clear: typedMedicalActivityStore.clear,
+  resummarize: typedMedicalActivityStore.resummarize,
 };
 
 export type PendingMedicalDocument = {

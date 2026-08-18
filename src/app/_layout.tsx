@@ -6,12 +6,14 @@ import {
   type Href,
 } from "expo-router";
 import * as Notifications from "expo-notifications";
+import { InteractionManager } from "react-native";
 import { useEffect } from "react";
 
 import "@/i18n";
 import "@/state/settings";
 import AppTabs from "@/components/app-tabs";
 import { useColorScheme } from "@/hooks/use-theme";
+import { backfillSummaries } from "@/state/activity-stores";
 import { startReminderScheduler } from "@/state/notifications";
 
 function useNotificationRouting() {
@@ -36,6 +38,11 @@ export default function TabLayout() {
   const colorScheme = useColorScheme();
   useNotificationRouting();
   useEffect(startReminderScheduler, []);
+  useEffect(() => {
+    const task = InteractionManager.runAfterInteractions(backfillSummaries);
+
+    return () => task.cancel();
+  }, []);
 
   return (
     <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>

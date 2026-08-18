@@ -9,6 +9,7 @@ import { habitatStore } from "./habitat";
 import { removeDocumentsForActivity } from "./document";
 import { medicalStore } from "./medical";
 import { shedStore } from "./shed";
+import { clearSummaries, summaryState$ } from "./summary";
 import { weightStore } from "./weight";
 
 export const activityStores = {
@@ -43,4 +44,21 @@ export function removeActivitiesForAnimal(animalId: string): void {
 
 export function clearActivities(): void {
   for (const store of Object.values(activityStores)) store.clear();
+}
+
+/** Rebuilds every summary from the records — after a restore, or to repair. */
+export function resummarizeActivities(): void {
+  clearSummaries();
+  for (const store of Object.values(activityStores)) store.resummarize();
+  summaryState$.dirty.set(false);
+}
+
+/**
+ * Builds the summaries once for a collection recorded before they existed.
+ * Hydrates every table, so callers run it after the first screen is up.
+ */
+export function backfillSummaries(): void {
+  if (!summaryState$.dirty.peek()) return;
+
+  resummarizeActivities();
 }

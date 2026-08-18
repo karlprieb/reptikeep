@@ -6,9 +6,9 @@ import type { ShedActivity } from "@/state/shed";
 import type { WeightActivity } from "@/state/weight";
 import {
   animalActivityFeed,
-  lastActivityByAnimal,
   lastCareByAnimal,
   lastFedByAnimal,
+  latestAcceptedFeeding,
   latestEnclosureClean,
   latestWaterChange,
   previousOfSameType,
@@ -394,31 +394,34 @@ describe("previousOfSameType", () => {
   });
 });
 
-describe("lastActivityByAnimal", () => {
-  it("takes the newest occurredAt per animal across every store given, refused or not", () => {
-    const latest = lastActivityByAnimal(
-      {
-        f1: feeding({ id: "f1", occurredAt: "2026-07-01T00:00:00.000Z" }),
-        f2: feeding({
-          id: "f2",
-          occurredAt: "2026-07-20T00:00:00.000Z",
-          refused: true,
-        }),
-      },
-      {
-        s1: shed({
-          id: "s1",
-          animalId: "a2",
-          occurredAt: "2026-07-15T00:00:00.000Z",
-        }),
-      },
-    );
+describe("latestAcceptedFeeding", () => {
+  const records = {
+    older: feeding({ id: "older", occurredAt: "2026-07-02T00:00:00.000Z" }),
+    newest: feeding({ id: "newest", occurredAt: "2026-07-20T00:00:00.000Z" }),
+    refused: feeding({
+      id: "refused",
+      occurredAt: "2026-07-28T00:00:00.000Z",
+      refused: true,
+    }),
+    otherAnimal: feeding({
+      id: "otherAnimal",
+      animalId: "a2",
+      occurredAt: "2026-08-14T00:00:00.000Z",
+    }),
+  };
 
-    expect(latest.a1).toBe("2026-07-20T00:00:00.000Z");
-    expect(latest.a2).toBe("2026-07-15T00:00:00.000Z");
+  it("takes the newest feeding the animal accepted", () => {
+    expect(latestAcceptedFeeding(records, ANIMAL)?.id).toBe("newest");
   });
 
-  it("returns an empty record when every store given is empty", () => {
-    expect(lastActivityByAnimal({}, {})).toEqual({});
+  it("ignores a newer feeding belonging to another animal", () => {
+    expect(latestAcceptedFeeding(records, "a2")?.id).toBe("otherAnimal");
+  });
+
+  it("returns undefined for an animal with no accepted feeding", () => {
+    expect(latestAcceptedFeeding(records, "a3")).toBeUndefined();
+    expect(
+      latestAcceptedFeeding({ refused: records.refused }, ANIMAL),
+    ).toBeUndefined();
   });
 });

@@ -1,26 +1,20 @@
 import { useSelector as useValue } from "@legendapp/state/react";
 import { router, Stack } from "expo-router";
 import { useMemo } from "react";
-import { ScrollView, StyleSheet } from "react-native";
+
 import { useTranslation } from "react-i18next";
 
 import { IOSPageHeader } from "@/components/page-header";
 import { ReptileList } from "@/components/reptile-list";
-import { MaxContentWidth, Spacing } from "@/constants/theme";
 import { useTheme } from "@/hooks/use-theme";
 import { animals$ } from "@/state/animal";
-import { activityStores } from "@/state/activity-stores";
 import {
   setReptileSort,
   setReptileView,
   settings$,
   type ReptileViewMode,
 } from "@/state/settings";
-import {
-  lastActivityByAnimal,
-  lastCareByAnimal,
-  lastFedByAnimal,
-} from "@/utils/animal-activity";
+import { summaries$, summaryLookups } from "@/state/summary";
 import type { AnimalSortField, SortDirection } from "@/utils/animal-sort";
 import { sortAnimals } from "@/utils/animal-sort";
 
@@ -46,28 +40,18 @@ export default function ReptilesScreen() {
   const theme = useTheme();
   const { t } = useTranslation();
   const animalsRecord = useValue(animals$);
-  const feedings = useValue(activityStores.feed.$);
-  const weights = useValue(activityStores.weight.$);
-  const sheds = useValue(activityStores.shed.$);
-  const poops = useValue(activityStores.poop.$);
-  const habitats = useValue(activityStores.habitat.$);
-  const medical = useValue(activityStores.medical.$);
+  const summaries = useValue(summaries$);
   const sort = useValue(settings$.reptileSort);
   const view = useValue(settings$.reptileView);
 
-  const lastFed = useMemo(() => lastFedByAnimal(feedings), [feedings]);
-  const lastCare = useMemo(() => lastCareByAnimal(habitats), [habitats]);
-  const lastActivity = useMemo(
-    () =>
-      lastActivityByAnimal(feedings, weights, sheds, poops, habitats, medical),
-    [feedings, weights, sheds, poops, habitats, medical],
+  const { lastFed, lastWater, lastClean, lastActivity } = useMemo(
+    () => summaryLookups(summaries),
+    [summaries],
   );
   const animals = useMemo(
     () => sortAnimals(Object.values(animalsRecord), sort, lastActivity),
     [animalsRecord, sort, lastActivity],
   );
-
-  const isEmpty = animals.length === 0;
 
   const setSortField = (field: AnimalSortField) =>
     setReptileSort({ ...sort, field });
@@ -76,21 +60,15 @@ export default function ReptilesScreen() {
 
   return (
     <>
-      <ScrollView
-        style={[styles.container, { backgroundColor: theme.bg }]}
-        contentInsetAdjustmentBehavior={isEmpty ? "never" : "automatic"}
-        alwaysBounceVertical={!isEmpty}
-        contentContainerStyle={[styles.content, isEmpty && styles.emptyContent]}
-      >
-        <ReptileList
-          animals={animals}
-          lastFed={lastFed}
-          lastWaterChange={lastCare.water}
-          lastClean={lastCare.cleaning}
-          viewMode={view}
-          onAddPress={handleAdd}
-        />
-      </ScrollView>
+      <ReptileList
+        key={view}
+        animals={animals}
+        lastFed={lastFed}
+        lastWaterChange={lastWater}
+        lastClean={lastClean}
+        viewMode={view}
+        onAddPress={handleAdd}
+      />
 
       <IOSPageHeader
         title={t("reptiles.title")}
@@ -163,22 +141,3 @@ export default function ReptilesScreen() {
     </>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    width: "100%",
-  },
-  emptyContent: {
-    flexGrow: 1,
-    justifyContent: "center",
-  },
-  content: {
-    width: "100%",
-    maxWidth: MaxContentWidth,
-    alignSelf: "center",
-    paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.md,
-    gap: Spacing.md,
-  },
-});

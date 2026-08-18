@@ -23,7 +23,7 @@ function record(
 }
 
 describe("createActivityStore", () => {
-  const store = createActivityStore<TestActivity>("test-activities");
+  const store = createActivityStore<TestActivity>("test-activities", "feed");
 
   beforeEach(() => store.clear());
 

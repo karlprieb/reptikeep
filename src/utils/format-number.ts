@@ -1,11 +1,12 @@
 import i18n from "@/i18n";
 
+import { numberFormatter as cachedNumberFormatter } from "./intl-cache";
 import { gramsToUnit, type WeightUnit } from "./weight-unit";
 
 function numberFormatter(
   options?: Intl.NumberFormatOptions,
 ): Intl.NumberFormat {
-  return new Intl.NumberFormat(i18n.language, options);
+  return cachedNumberFormatter(i18n.language, options);
 }
 
 function oneDecimalFormatter(): Intl.NumberFormat {

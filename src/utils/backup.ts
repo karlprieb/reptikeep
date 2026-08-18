@@ -3,7 +3,7 @@ import * as Sharing from "expo-sharing";
 import { Directory, File, Paths } from "expo-file-system";
 import { unzipSync, zipSync, type Zippable } from "fflate";
 
-import { activityStores } from "@/state/activity-stores";
+import { activityStores, resummarizeActivities } from "@/state/activity-stores";
 import { animals$, type Animal } from "@/state/animal";
 import { careSchedules$ } from "@/state/care-schedule";
 import {
@@ -1197,6 +1197,8 @@ export async function restoreBackup(file: File): Promise<RestoredBackup> {
         );
       }
 
+      if (manifest.scopes.husbandry !== "absent") resummarizeActivities();
+
       if (manifest.scopes.preferences === "present") {
         settings$.set(data.settings as never);
         defaults$.set(data.loggingDefaults as never);
@@ -1246,6 +1248,8 @@ export async function restoreBackup(file: File): Promise<RestoredBackup> {
       for (const name of activityNames)
         replaceActivityTable(name, old.activities[name] as Table);
     });
+
+    resummarizeActivities();
 
     for (const animal of Object.values(data.animals ?? {}))
       if (animal.photo && !old.animals[animal.id]?.photo)

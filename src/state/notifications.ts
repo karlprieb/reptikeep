@@ -3,12 +3,11 @@ import * as Notifications from "expo-notifications";
 import { AppState } from "react-native";
 
 import i18n from "@/i18n";
-import { activityStores } from "@/state/activity-stores";
 import { animals$ } from "@/state/animal";
 import { CARE_ROUTINES, careSchedules$ } from "@/state/care-schedule";
 import { reminders$ } from "@/state/reminders";
 import { settings$ } from "@/state/settings";
-import { lastCareByAnimal } from "@/utils/animal-activity";
+import { summaries$, summaryLookups } from "@/state/summary";
 import {
   careReminders,
   reminderDigest,
@@ -17,6 +16,12 @@ import {
 import { atClockTime, fromCalendarDate } from "@/utils/format-date";
 
 const HORIZON_DAYS = 14;
+
+function careLookups() {
+  const { lastWater, lastClean } = summaryLookups(summaries$.peek());
+
+  return { water: lastWater, cleaning: lastClean };
+}
 
 const NAMES_SHOWN = 3;
 
@@ -68,11 +73,7 @@ async function reschedule(): Promise<void> {
   const run = (generation += 1);
 
   const days = reminderDigest(
-    careReminders(
-      animals$.peek(),
-      careSchedules$.peek(),
-      lastCareByAnimal(activityStores.habitat.$.peek()),
-    ),
+    careReminders(animals$.peek(), careSchedules$.peek(), careLookups()),
     new Date(),
     HORIZON_DAYS,
   );
@@ -132,7 +133,7 @@ export function startReminderScheduler(): () => void {
   const stopObserving = observe(() => {
     animals$.get();
     for (const routine of CARE_ROUTINES) careSchedules$[routine].get();
-    activityStores.habitat.$.get();
+    summaries$.get();
     reminders$.get();
     settings$.language.get();
 
