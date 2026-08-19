@@ -14,7 +14,6 @@ import {
 } from "@/components/form-sheet";
 import { Typography } from "@/constants/theme";
 import { useTheme } from "@/hooks/use-theme";
-import { historyRange$ } from "@/state/history-range";
 import { fromCalendarDate, toCalendarDate } from "@/utils/format-date";
 
 type RangeDraft = {
@@ -27,10 +26,12 @@ export default function HistoryRangeScreen() {
   const { t } = useTranslation();
   const modifiers = useFormModifiers();
   const { animal } = useAnimalRoute();
-  const { from, to, earliest } = useLocalSearchParams<{
+  const { id, from, to, earliest, type } = useLocalSearchParams<{
+    id?: string;
     from?: string;
     to?: string;
     earliest?: string;
+    type?: string;
   }>();
 
   const today = new Date();
@@ -42,15 +43,10 @@ export default function HistoryRangeScreen() {
 
   if (!animal) return <AnimalNotFound />;
 
-  const handleSave = () => {
-    historyRange$.set({
-      preset: "custom",
-      from: toCalendarDate(draft.from),
-      to: toCalendarDate(draft.to),
-    });
-
-    router.back();
-  };
+  const handleSave = () =>
+    router.dismissTo(
+      `/animal/${id}/history?type=${type ?? ""}&preset=custom&from=${toCalendarDate(draft.from)}&to=${toCalendarDate(draft.to)}`,
+    );
 
   return (
     <>

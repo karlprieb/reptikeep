@@ -51,6 +51,24 @@ describe("resolveDateFilter", () => {
     });
   });
 
+  it("clamps a month-end start to the target month's last day", () => {
+    const mayThirtyFirst = new Date(2026, 4, 31, 12, 0);
+
+    expect(resolveDateFilter({ preset: "3m" }, mayThirtyFirst)).toEqual({
+      from: "2026-02-28",
+      to: "2026-05-31",
+    });
+  });
+
+  it("clamps a leap day back to Feb 28 a year earlier", () => {
+    const leapDay = new Date(2028, 1, 29, 12, 0);
+
+    expect(resolveDateFilter({ preset: "1y" }, leapDay)).toEqual({
+      from: "2027-02-28",
+      to: "2028-02-29",
+    });
+  });
+
   it("resolves 1y against the injected now", () => {
     expect(resolveDateFilter({ preset: "1y" }, now)).toEqual({
       from: "2025-08-19",

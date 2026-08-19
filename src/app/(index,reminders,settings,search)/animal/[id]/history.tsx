@@ -13,7 +13,7 @@ import {
   tint,
 } from "@expo/ui/swift-ui/modifiers";
 import { router, Stack, useLocalSearchParams } from "expo-router";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
 import {
   ScrollView,
   StyleSheet,
@@ -45,16 +45,19 @@ import { typeFont } from "@/constants/type-font";
 import { useAddActivity } from "@/hooks/use-add-activity";
 import { useTheme } from "@/hooks/use-theme";
 import { activityStores } from "@/state/activity-stores";
-import { historyRange$, resetHistoryRange } from "@/state/history-range";
 import {
   filterActivity,
+  isRangePreset,
   RANGE_PRESETS,
   resolveDateFilter,
+  type DateFilter,
+  type RangePreset,
 } from "@/utils/activity-filter";
 import { animalActivityFeed } from "@/utils/animal-activity";
 import {
   calendarDateOf,
   formatAbsoluteDate,
+  fromCalendarDate,
   toCalendarDate,
 } from "@/utils/format-date";
 
@@ -197,7 +200,12 @@ export default function AnimalHistoryScreen() {
   const habitats = useValue(activityStores.habitat.$);
   const medical = useValue(activityStores.medical.$);
 
-  const { type } = useLocalSearchParams<{ type?: string }>();
+  const { type, preset, from, to } = useLocalSearchParams<{
+    type?: string;
+    preset?: string;
+    from?: string;
+    to?: string;
+  }>();
 
   const entries = useMemo(
     () =>
@@ -214,42 +222,51 @@ export default function AnimalHistoryScreen() {
 
   const types = useMemo(() => presentTypes(entries), [entries]);
 
-  const seededType =
+  const addActivity = useAddActivity(id);
+
+  const filter = useMemo<DateFilter>(
+    () =>
+      preset === "custom" && from && to
+        ? { preset: "custom", from, to }
+        : { preset: isRangePreset(preset) ? preset : "all" },
+    [preset, from, to],
+  );
+
+  const selectedType =
     type !== undefined && type in activityStores
       ? (type as ActivityType)
       : null;
-  const [typeFilter, setTypeFilter] = useState<ActivityType | null>(seededType);
-  const [seenType, setSeenType] = useState(type);
-
-  if (seenType !== type) {
-    setSeenType(type);
-    setTypeFilter(seededType);
-  }
-  const filter = useValue(historyRange$);
-  const addActivity = useAddActivity(id);
-
-  useEffect(() => resetHistoryRange, [id]);
-
   const activeType =
-    typeFilter && types.includes(typeFilter) ? typeFilter : null;
+    selectedType && types.includes(selectedType) ? selectedType : null;
 
+  const today = toCalendarDate(new Date());
   const shown = useMemo(
-    () => filterActivity(entries, filter, activeType),
-    [entries, filter, activeType],
+    () =>
+      filterActivity(
+        entries,
+        filter,
+        activeType,
+        fromCalendarDate(today) ?? new Date(),
+      ),
+    [entries, filter, activeType, today],
   );
 
   if (!animal) return <AnimalNotFound />;
 
-  const range = resolveDateFilter(filter);
+  const range = resolveDateFilter(
+    filter,
+    fromCalendarDate(today) ?? new Date(),
+  );
   const stacked = fontScale >= StackAboveFontScale;
   const activeRange = filter.preset !== "all";
 
-  const clearFilters = () => {
-    setTypeFilter(null);
-    resetHistoryRange();
-  };
+  const setType = (next: ActivityType | null) =>
+    router.setParams({ type: next ?? "" });
+  const setPreset = (next: RangePreset) =>
+    router.setParams({ preset: next, from: "", to: "" });
+  const clearFilters = () =>
+    router.setParams({ type: "", preset: "all", from: "", to: "" });
 
-  const today = toCalendarDate(new Date());
   const earliest =
     entries.length > 0
       ? (calendarDateOf(entries[entries.length - 1].occurredAt) ?? today)
@@ -258,7 +275,7 @@ export default function AnimalHistoryScreen() {
 
   const openCustomRange = () =>
     router.push(
-      `/animal/${id}/history-range?from=${seed.from}&to=${seed.to}&earliest=${earliest}`,
+      `/animal/${id}/history-range?from=${seed.from}&to=${seed.to}&earliest=${earliest}&type=${activeType ?? ""}`,
     );
 
   const filterBar = (
@@ -267,7 +284,7 @@ export default function AnimalHistoryScreen() {
         <ActivityTypeFilter
           types={types}
           selected={activeType}
-          onSelect={setTypeFilter}
+          onSelect={setType}
         />
       ) : null}
       {range ? (
@@ -276,7 +293,7 @@ export default function AnimalHistoryScreen() {
           to={range.to}
           count={shown.length}
           stacked={stacked}
-          onClear={resetHistoryRange}
+          onClear={() => setPreset("all")}
         />
       ) : null}
     </View>
@@ -349,7 +366,7 @@ export default function AnimalHistoryScreen() {
                 <Stack.Toolbar.MenuAction
                   key={preset}
                   isOn={filter.preset === preset}
-                  onPress={() => historyRange$.set({ preset })}
+                  onPress={() => setPreset(preset)}
                 >
                   {t(`timeline.range.${preset}`)}
                 </Stack.Toolbar.MenuAction>

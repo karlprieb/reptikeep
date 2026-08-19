@@ -9,6 +9,22 @@ export type DateFilter =
 
 export const RANGE_PRESETS: RangePreset[] = ["all", "7d", "30d", "3m", "1y"];
 
+function monthsBefore(now: Date, months: number): Date {
+  const shifted = new Date(now.getFullYear(), now.getMonth() - months, 1);
+  const lastDay = new Date(
+    shifted.getFullYear(),
+    shifted.getMonth() + 1,
+    0,
+  ).getDate();
+  shifted.setDate(Math.min(now.getDate(), lastDay));
+
+  return shifted;
+}
+
+export function isRangePreset(value: string | undefined): value is RangePreset {
+  return value !== undefined && (RANGE_PRESETS as string[]).includes(value);
+}
+
 export function resolveDateFilter(
   filter: DateFilter,
   now: Date = new Date(),
@@ -29,11 +45,15 @@ export function resolveDateFilter(
       from.setDate(from.getDate() - 29);
       break;
     case "3m":
-      from.setMonth(from.getMonth() - 3);
-      break;
+      return {
+        from: toCalendarDate(monthsBefore(now, 3)),
+        to: toCalendarDate(now),
+      };
     case "1y":
-      from.setFullYear(from.getFullYear() - 1);
-      break;
+      return {
+        from: toCalendarDate(monthsBefore(now, 12)),
+        to: toCalendarDate(now),
+      };
   }
 
   return { from: toCalendarDate(from), to: toCalendarDate(now) };
