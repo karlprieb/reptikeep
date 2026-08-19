@@ -1,5 +1,6 @@
 import {
   Button,
+  ConfirmationDialog,
   Form,
   Host,
   Menu,
@@ -13,6 +14,7 @@ import {
   foregroundStyle,
   listRowBackground,
   menuActionDismissBehavior,
+  tint,
 } from "@expo/ui/swift-ui/modifiers";
 import { useValue } from "@legendapp/state/react";
 import * as DocumentPicker from "expo-document-picker";
@@ -24,6 +26,7 @@ import { useTranslation } from "react-i18next";
 import { useFormModifiers } from "@/components/form-sheet";
 import { useTheme } from "@/hooks/use-theme";
 import { animals$ } from "@/state/animal";
+import { resetAppData } from "@/state/reset";
 import {
   parseBackup,
   restoreBackup,
@@ -59,6 +62,8 @@ export default function BackupRestoreScreen() {
   const [busy, setBusy] = useState(false);
   const [success, setSuccess] = useState<RestoredBackup>();
   const [error, setError] = useState<string>();
+  const [isAdvancedPresented, setIsAdvancedPresented] = useState(false);
+  const [isResetPresented, setIsResetPresented] = useState(false);
   const selectedAnimalIds = animalIds.filter((id) =>
     animals.some((animal) => animal.id === id),
   );
@@ -159,6 +164,11 @@ export default function BackupRestoreScreen() {
     } finally {
       setBusy(false);
     }
+  };
+
+  const handleReset = () => {
+    resetAppData();
+    setIsResetPresented(false);
   };
 
   return (
@@ -283,6 +293,64 @@ export default function BackupRestoreScreen() {
             </Text>
           </Section>
         )}
+        <Section>
+          <Button
+            label={
+              isAdvancedPresented
+                ? t("backup.hideAdvanced")
+                : t("backup.advanced")
+            }
+            systemImage={isAdvancedPresented ? "chevron.up" : "chevron.down"}
+            onPress={() => setIsAdvancedPresented((value) => !value)}
+            modifiers={[
+              listRowBackground(theme.surface),
+              accessibilityHint(t("a11y.advancedSettings.hint")),
+            ]}
+          />
+        </Section>
+
+        {isAdvancedPresented ? (
+          <Section
+            footer={
+              <Text modifiers={[foregroundStyle(theme.textSecondary)]}>
+                {t("settings.resetFooter")}
+              </Text>
+            }
+          >
+            <ConfirmationDialog
+              title={t("settings.resetTitle")}
+              titleVisibility="visible"
+              isPresented={isResetPresented}
+              onIsPresentedChange={setIsResetPresented}
+            >
+              <ConfirmationDialog.Trigger>
+                <Button
+                  label={t("settings.reset")}
+                  systemImage="trash"
+                  role="destructive"
+                  onPress={() => setIsResetPresented(true)}
+                  modifiers={[
+                    tint(theme.danger),
+                    foregroundStyle(theme.danger),
+                    listRowBackground(theme.surface),
+                    accessibilityHint(t("a11y.resetData.hint")),
+                  ]}
+                />
+              </ConfirmationDialog.Trigger>
+              <ConfirmationDialog.Actions>
+                <Button
+                  label={t("settings.resetConfirm")}
+                  role="destructive"
+                  onPress={handleReset}
+                />
+                <Button label={t("settings.cancel")} role="cancel" />
+              </ConfirmationDialog.Actions>
+              <ConfirmationDialog.Message>
+                <Text>{t("settings.resetMessage")}</Text>
+              </ConfirmationDialog.Message>
+            </ConfirmationDialog>
+          </Section>
+        ) : null}
       </Form>
     </Host>
   );

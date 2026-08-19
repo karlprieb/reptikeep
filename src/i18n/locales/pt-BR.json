@@ -8,15 +8,11 @@
   "settings": {
     "title": "Ajustes",
     "general": "Geral",
-    "subtitle": "Escolha o idioma usado em todo o aplicativo. Seguir dispositivo usa a preferência do sistema.",
+    "subtitle": "Opções de idioma e backup deste dispositivo.",
     "language": "Idioma",
     "followDevice": "Seguir dispositivo",
     "english": "English",
     "portuguese": "Português",
-    "advanced": "Avançado",
-    "advancedButton": "Ajustes avançados",
-    "hideAdvanced": "Ocultar ajustes avançados",
-    "data": "Dados do app",
     "reset": "Apagar dados do app",
     "resetTitle": "Apagar os dados do app?",
     "resetFooter": "Exclui permanentemente todos os répteis e registros de atividade deste dispositivo. O idioma não será alterado.",
@@ -52,7 +48,9 @@
     "documentsRestored_one": "{{count}} documento também restaurado.",
     "documentsRestored_other": "{{count}} documentos também restaurados.",
     "error": "Não foi possível preparar este backup.",
-    "restoreError": "Não foi possível restaurar este backup. Tente novamente."
+    "restoreError": "Não foi possível restaurar este backup. Tente novamente.",
+    "advanced": "Opções avançadas",
+    "hideAdvanced": "Ocultar opções avançadas"
   },
   "about": {
     "title": "Sobre",
@@ -510,7 +508,7 @@
       "restore": "Escolhe um backup ZIP para validar antes de restaurar"
     },
     "advancedSettings": {
-      "hint": "Mostra ou oculta os ajustes avançados"
+      "hint": "Mostra ou oculta as opções avançadas"
     },
     "about": {
       "openHint": "Abre informações sobre o ReptiKeep",
