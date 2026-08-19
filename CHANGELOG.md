@@ -58,6 +58,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   a weekly feeder sees months of history before reaching "See all".
 - The Reptiles tab scrolls and switches between single-column, grid and list
   views without the lag and freezes that large collections caused before.
+- Settings was reorganized: language and a shortcut to Backup & restore now
+  share a General section, the reminder time sits near the top, and the
+  Advanced settings section is gone. "Reset app data" moved to the
+  Backup & restore screen, under its own advanced options.
 
 ### Fixed
 
@@ -73,6 +77,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The confirmation shown before restoring left medical records out of its
   record count, so a backup looked smaller than it was. The restore itself
   was never affected.
+- Tapping the circle on a Reminders row to mark a routine done left the row
+  in place until you left the screen and came back. The Reminders tab, the
+  Reptiles list and the detail screens now update the moment you mark
+  something done.
 
 ## [0.3.0] - 2026-08-06
 
