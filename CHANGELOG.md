@@ -157,9 +157,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Reset app data** in Settings, which permanently clears every reptile and
   record on the device.
 
-[Unreleased]: https://github.com/karlprieb/reptikeep/compare/v0.4.0...HEAD
-[0.4.0]: https://github.com/karlprieb/reptikeep/compare/v0.3.0...v0.4.0
-[0.3.0]: https://github.com/karlprieb/reptikeep/compare/v0.2.0...v0.3.0
+[Unreleased]: https://github.com/karlprieb/reptikeep/compare/0.4.0...HEAD
+[0.4.0]: https://github.com/karlprieb/reptikeep/compare/0.3.0...0.4.0
+[0.3.0]: https://github.com/karlprieb/reptikeep/compare/v0.2.0...0.3.0
 [0.2.0]: https://github.com/karlprieb/reptikeep/compare/v0.1.0...v0.2.0
 [0.1.1]: https://github.com/karlprieb/reptikeep/compare/v0.1.0...349df00
 [0.1.0]: https://github.com/karlprieb/reptikeep/releases/tag/v0.1.0
