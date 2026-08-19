@@ -66,6 +66,11 @@ export function fromCalendarDate(value: string): Date | null {
   return new Date(parsed.year, parsed.month - 1, parsed.day);
 }
 
+export function calendarDateOf(value: string): string | null {
+  const day = fromCalendarDate(value);
+  return day && toCalendarDate(day);
+}
+
 export function formatAbsoluteDate(value: string): string {
   const parsed = parseIsoCalendarDate(value);
   if (!parsed) return "—";

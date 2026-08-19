@@ -221,3 +221,5 @@ export const Radius = {
 } as const;
 
 export const MaxContentWidth = 800;
+
+export const StackAboveFontScale = 1.6;

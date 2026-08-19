@@ -61,6 +61,7 @@ import {
   Spacing,
   type SFSymbolName,
   type Theme,
+  StackAboveFontScale,
 } from "@/constants/theme";
 import { typeFont } from "@/constants/type-font";
 import { useTheme } from "@/hooks/use-theme";
@@ -92,7 +93,6 @@ const ROUTINE_SYMBOLS: Record<CareRoutine, SFSymbolName> = {
 const BADGE_SIZE = 28;
 const BADGE_MAX_SCALE = 2;
 const SYMBOL_RATIO = 0.54;
-const STACK_ABOVE_FONT_SCALE = 1.6;
 const CHECKBOX_SYMBOL = 22;
 const CHECKBOX_HIT = 44;
 const ROW_BLOCKS: Parameters<typeof panelRowHeight>[0] = [
@@ -599,7 +599,7 @@ export default function RemindersScreen() {
   const checkboxSize = Math.round(
     CHECKBOX_HIT * Math.min(fontScale, BADGE_MAX_SCALE),
   );
-  const stacked = fontScale >= STACK_ABOVE_FONT_SCALE;
+  const stacked = fontScale >= StackAboveFontScale;
   const textInset = Spacing.md + badgeSize + Spacing.sm;
   const clockTime = formatClockTime(reminderTime.hour, reminderTime.minute);
 

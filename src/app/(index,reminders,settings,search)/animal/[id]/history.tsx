@@ -1,26 +1,194 @@
 import { useSelector as useValue } from "@legendapp/state/react";
-import { router, useLocalSearchParams } from "expo-router";
-import { useMemo } from "react";
-import { ScrollView, StyleSheet } from "react-native";
+import { Button, HStack, Host, Spacer, Text, VStack } from "@expo/ui/swift-ui";
+import {
+  accessibilityElement,
+  accessibilityHint,
+  accessibilityLabel,
+  background,
+  buttonStyle,
+  clipShape,
+  foregroundStyle,
+  frame,
+  strokeBorder,
+  tint,
+} from "@expo/ui/swift-ui/modifiers";
+import { router, Stack, useLocalSearchParams } from "expo-router";
+import { useEffect, useMemo, useState } from "react";
+import {
+  ScrollView,
+  StyleSheet,
+  useWindowDimensions,
+  View,
+} from "react-native";
 import { useTranslation } from "react-i18next";
 
 import {
   ActivityHistoryList,
   ActivityPanel,
 } from "@/components/activity-timeline";
-import { presentTypes } from "@/components/activity-type-filter";
+import {
+  ActivityTypeFilter,
+  presentTypes,
+} from "@/components/activity-type-filter";
+import { AddActivitySheet } from "@/components/add-activity-sheet";
 import { AnimalNotFound, useAnimalRoute } from "@/components/animal-route";
+import { EmptyStateContent } from "@/components/empty-state";
 import { IOSPageHeader } from "@/components/page-header";
-import { MaxContentWidth, Spacing } from "@/constants/theme";
+import {
+  MaxContentWidth,
+  Radius,
+  Spacing,
+  type ActivityType,
+  StackAboveFontScale,
+} from "@/constants/theme";
+import { typeFont } from "@/constants/type-font";
+import { useAddActivity } from "@/hooks/use-add-activity";
 import { useTheme } from "@/hooks/use-theme";
 import { activityStores } from "@/state/activity-stores";
+import { historyRange$, resetHistoryRange } from "@/state/history-range";
+import {
+  filterActivity,
+  RANGE_PRESETS,
+  resolveDateFilter,
+} from "@/utils/activity-filter";
 import { animalActivityFeed } from "@/utils/animal-activity";
+import {
+  calendarDateOf,
+  formatAbsoluteDate,
+  toCalendarDate,
+} from "@/utils/format-date";
 
-const goBack = () => router.back();
+function RangeSummaryRow({
+  from,
+  to,
+  count,
+  stacked,
+  onClear,
+}: {
+  from: string;
+  to: string;
+  count: number;
+  stacked: boolean;
+  onClear: () => void;
+}) {
+  const theme = useTheme();
+  const { t } = useTranslation();
+
+  const spanText = t("timeline.range.span", {
+    from: formatAbsoluteDate(from),
+    to: formatAbsoluteDate(to),
+  });
+  const countText = t("timeline.filtered.count", { count });
+
+  const summary = (
+    <>
+      <VStack
+        alignment="leading"
+        spacing={Spacing["2xs"]}
+        modifiers={[
+          frame({ maxWidth: Infinity, alignment: "leading" }),
+          accessibilityElement("combine"),
+          accessibilityLabel(`${spanText}, ${countText}`),
+        ]}
+      >
+        <Text modifiers={[typeFont("data"), foregroundStyle(theme.text)]}>
+          {spanText}
+        </Text>
+        <Text modifiers={[typeFont("bodyS"), foregroundStyle(theme.textMuted)]}>
+          {countText}
+        </Text>
+      </VStack>
+
+      {stacked ? null : <Spacer />}
+
+      <Button
+        label={t("timeline.range.clear")}
+        onPress={onClear}
+        modifiers={[
+          buttonStyle("plain"),
+          typeFont("body"),
+          foregroundStyle(theme.primary),
+          tint(theme.primary),
+          accessibilityLabel(t("timeline.range.clear")),
+          accessibilityHint(t("timeline.range.clearHint")),
+        ]}
+      />
+    </>
+  );
+
+  return (
+    <Host
+      style={styles.rangeHost}
+      matchContents={{ horizontal: false, vertical: true }}
+    >
+      {stacked ? (
+        <VStack
+          alignment="leading"
+          spacing={Spacing.xs}
+          modifiers={[frame({ maxWidth: Infinity })]}
+        >
+          {summary}
+        </VStack>
+      ) : (
+        <HStack
+          alignment="center"
+          spacing={Spacing.xs}
+          modifiers={[frame({ maxWidth: Infinity })]}
+        >
+          {summary}
+        </HStack>
+      )}
+    </Host>
+  );
+}
+
+function FilteredEmptyPanel({
+  animalName,
+  onClear,
+}: {
+  animalName: string;
+  onClear: () => void;
+}) {
+  const theme = useTheme();
+  const { t } = useTranslation();
+
+  return (
+    <Host
+      style={styles.panelHost}
+      matchContents={{ horizontal: false, vertical: true }}
+    >
+      <VStack
+        spacing={0}
+        modifiers={[
+          frame({ maxWidth: Infinity }),
+          background(theme.surface),
+          clipShape("roundedRectangle", Radius.lg),
+          strokeBorder({
+            color: theme.border,
+            style: { lineWidth: StyleSheet.hairlineWidth },
+            shape: "roundedRectangle",
+            cornerRadius: Radius.lg,
+          }),
+        ]}
+      >
+        <EmptyStateContent
+          title={t("timeline.filtered.empty.title")}
+          description={t("timeline.filtered.empty.subtitle", { animalName })}
+          systemImage="line.3.horizontal.decrease.circle"
+          action={{
+            label: t("timeline.filtered.empty.action"),
+            onPress: onClear,
+          }}
+        />
+      </VStack>
+    </Host>
+  );
+}
 
 export default function AnimalHistoryScreen() {
   const theme = useTheme();
   const { t } = useTranslation();
+  const { fontScale } = useWindowDimensions();
   const { id, animal } = useAnimalRoute();
   const feedings = useValue(activityStores.feed.$);
   const weights = useValue(activityStores.weight.$);
@@ -44,47 +212,168 @@ export default function AnimalHistoryScreen() {
     [defecations, feedings, habitats, id, medical, sheds, weights],
   );
 
-  const activeType = presentTypes(entries).find(
-    (candidate) => candidate === type,
+  const types = useMemo(() => presentTypes(entries), [entries]);
+
+  const seededType =
+    type !== undefined && type in activityStores
+      ? (type as ActivityType)
+      : null;
+  const [typeFilter, setTypeFilter] = useState<ActivityType | null>(seededType);
+  const [seenType, setSeenType] = useState(type);
+
+  if (seenType !== type) {
+    setSeenType(type);
+    setTypeFilter(seededType);
+  }
+  const filter = useValue(historyRange$);
+  const addActivity = useAddActivity(id);
+
+  useEffect(() => resetHistoryRange, [id]);
+
+  const activeType =
+    typeFilter && types.includes(typeFilter) ? typeFilter : null;
+
+  const shown = useMemo(
+    () => filterActivity(entries, filter, activeType),
+    [entries, filter, activeType],
   );
-  const activity = useMemo(
-    () =>
-      activeType
-        ? entries.filter((entry) => entry.type === activeType)
-        : entries,
-    [activeType, entries],
-  );
+
   if (!animal) return <AnimalNotFound />;
+
+  const range = resolveDateFilter(filter);
+  const stacked = fontScale >= StackAboveFontScale;
+  const activeRange = filter.preset !== "all";
+
+  const clearFilters = () => {
+    setTypeFilter(null);
+    resetHistoryRange();
+  };
+
+  const today = toCalendarDate(new Date());
+  const earliest =
+    entries.length > 0
+      ? (calendarDateOf(entries[entries.length - 1].occurredAt) ?? today)
+      : today;
+  const seed = range ?? { from: earliest, to: today };
+
+  const openCustomRange = () =>
+    router.push(
+      `/animal/${id}/history-range?from=${seed.from}&to=${seed.to}&earliest=${earliest}`,
+    );
+
+  const filterBar = (
+    <View style={styles.filterBar}>
+      {types.length > 1 ? (
+        <ActivityTypeFilter
+          types={types}
+          selected={activeType}
+          onSelect={setTypeFilter}
+        />
+      ) : null}
+      {range ? (
+        <RangeSummaryRow
+          from={range.from}
+          to={range.to}
+          count={shown.length}
+          stacked={stacked}
+          onClear={resetHistoryRange}
+        />
+      ) : null}
+    </View>
+  );
 
   return (
     <>
-      {activity.length === 0 ? (
+      {entries.length === 0 ? (
         <ScrollView
           style={[{ backgroundColor: theme.bg }, styles.list]}
           contentInsetAdjustmentBehavior="automatic"
           contentContainerStyle={styles.content}
         >
-          <ActivityPanel
-            entries={activity}
-            animalId={id}
-            animalName={animal.name}
-            onAddActivity={goBack}
-          />
+          <View style={styles.panelWrap}>
+            <ActivityPanel
+              entries={entries}
+              animalId={id}
+              animalName={animal.name}
+              onAddActivity={addActivity.open}
+            />
+          </View>
+        </ScrollView>
+      ) : shown.length === 0 ? (
+        <ScrollView
+          style={[{ backgroundColor: theme.bg }, styles.list]}
+          contentInsetAdjustmentBehavior="automatic"
+          contentContainerStyle={styles.content}
+        >
+          {filterBar}
+          <View style={styles.panelWrap}>
+            <FilteredEmptyPanel
+              animalName={animal.name}
+              onClear={clearFilters}
+            />
+          </View>
         </ScrollView>
       ) : (
         <ActivityHistoryList
-          entries={activity}
+          entries={shown}
           animalId={id}
           background={theme.bg}
+          header={filterBar}
         />
       )}
 
       <IOSPageHeader
-        title={
-          activeType
-            ? t(`activity.type.${activeType}`)
-            : t("timeline.historyTitle")
+        title={t("timeline.historyTitle")}
+        actions={[
+          {
+            key: "add",
+            icon: "plus",
+            tintColor: theme.primary,
+            accessibilityLabel: t("animal.addActivity"),
+            onPress: addActivity.open,
+          },
+        ]}
+        menu={
+          <Stack.Toolbar.Menu
+            icon={
+              activeRange
+                ? "line.3.horizontal.decrease.circle.fill"
+                : "line.3.horizontal.decrease.circle"
+            }
+            tintColor={activeRange ? theme.primary : theme.textSecondary}
+            accessibilityLabel={t("timeline.range.label")}
+            accessibilityHint={t("timeline.range.hint")}
+          >
+            <Stack.Toolbar.Menu inline>
+              {RANGE_PRESETS.map((preset) => (
+                <Stack.Toolbar.MenuAction
+                  key={preset}
+                  isOn={filter.preset === preset}
+                  onPress={() => historyRange$.set({ preset })}
+                >
+                  {t(`timeline.range.${preset}`)}
+                </Stack.Toolbar.MenuAction>
+              ))}
+            </Stack.Toolbar.Menu>
+            <Stack.Toolbar.Menu inline>
+              <Stack.Toolbar.MenuAction
+                icon="calendar"
+                isOn={filter.preset === "custom"}
+                onPress={openCustomRange}
+              >
+                {t("timeline.range.custom")}
+              </Stack.Toolbar.MenuAction>
+            </Stack.Toolbar.Menu>
+          </Stack.Toolbar.Menu>
         }
+      />
+
+      <AddActivitySheet
+        visible={addActivity.visible}
+        animalName={animal.name}
+        onClose={addActivity.close}
+        onDismiss={addActivity.dismiss}
+        onPick={addActivity.pick}
       />
     </>
   );
@@ -99,8 +388,21 @@ const styles = StyleSheet.create({
     width: "100%",
     maxWidth: MaxContentWidth,
     alignSelf: "center",
-    paddingHorizontal: Spacing.md,
     paddingTop: Spacing.md,
     paddingBottom: Spacing.xl,
+  },
+  panelWrap: {
+    paddingHorizontal: Spacing.md,
+  },
+  filterBar: {
+    paddingHorizontal: Spacing.md,
+    paddingBottom: Spacing.sm,
+    gap: Spacing.sm,
+  },
+  rangeHost: {
+    width: "100%",
+  },
+  panelHost: {
+    width: "100%",
   },
 });
