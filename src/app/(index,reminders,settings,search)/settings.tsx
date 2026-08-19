@@ -1,6 +1,5 @@
 import {
   Button,
-  ConfirmationDialog,
   DatePicker,
   Form,
   Host,
@@ -16,7 +15,6 @@ import {
   listRowBackground,
   pickerStyle,
   tag,
-  tint,
 } from "@expo/ui/swift-ui/modifiers";
 import { useValue } from "@legendapp/state/react";
 import { router } from "expo-router";
@@ -38,7 +36,6 @@ import { careSchedules$ } from "@/state/care-schedule";
 import { DEFECATION_TYPES } from "@/state/defecation";
 import { defaults$, FEEDING_MEASURES } from "@/state/logging-defaults";
 import { reminders$ } from "@/state/reminders";
-import { resetAppData } from "@/state/reset";
 import { settings$, setLanguage, type LanguageSetting } from "@/state/settings";
 import { atClockTime } from "@/utils/format-date";
 import { WEIGHT_UNITS } from "@/utils/weight-unit";
@@ -66,19 +63,12 @@ export default function SettingsScreen() {
   const [cleaningDays, setCleaningDays] = useState(() =>
     scheduleCustomDays(cleaning),
   );
-  const [isResetPresented, setIsResetPresented] = useState(false);
-  const [isAdvancedPresented, setIsAdvancedPresented] = useState(false);
 
   const waterValid = isScheduleValid(water?.frequency ?? "weekly", waterDays);
   const cleaningValid = isScheduleValid(
     cleaning?.frequency ?? "weekly",
     cleaningDays,
   );
-
-  const handleReset = () => {
-    resetAppData();
-    setIsResetPresented(false);
-  };
 
   const handleWaterSelection = (selection: ScheduleSelection) =>
     careSchedules$.water.set(careScheduleFromFields(selection, waterDays));
@@ -112,39 +102,6 @@ export default function SettingsScreen() {
     <>
       <Host style={styles.host} useViewportSizeMeasurement>
         <Form modifiers={formModifiers.form}>
-          <Section
-            header={
-              <Text modifiers={[foregroundStyle(theme.textSecondary)]}>
-                {t("settings.general")}
-              </Text>
-            }
-            footer={
-              <Text modifiers={[foregroundStyle(theme.textSecondary)]}>
-                {t("settings.subtitle")}
-              </Text>
-            }
-          >
-            <Picker
-              label={t("settings.language")}
-              systemImage="globe"
-              selection={currentLanguage}
-              onSelectionChange={(value) =>
-                setLanguage(value as LanguageSetting)
-              }
-              modifiers={[
-                pickerStyle("menu"),
-                listRowBackground(theme.surface),
-                accessibilityHint(t("a11y.language.hint")),
-              ]}
-            >
-              {LANGUAGE_OPTIONS.map((option) => (
-                <Text key={option.value} modifiers={[tag(option.value)]}>
-                  {t(option.labelKey)}
-                </Text>
-              ))}
-            </Picker>
-          </Section>
-
           <Section
             header={
               <Text modifiers={[foregroundStyle(theme.textSecondary)]}>
@@ -189,6 +146,36 @@ export default function SettingsScreen() {
               describe={(value) => t(`timeline.poop.${value}`)}
               value={globalDefaults.poopType}
               onChange={(value) => value && defaults$.poopType.set(value)}
+            />
+          </Section>
+
+          <Section
+            header={
+              <Text modifiers={[foregroundStyle(theme.textSecondary)]}>
+                {t("reminders.settings.section")}
+              </Text>
+            }
+            footer={
+              <Text modifiers={[foregroundStyle(theme.textSecondary)]}>
+                {t("reminders.settings.footer")}
+              </Text>
+            }
+          >
+            <DatePicker
+              title={t("reminders.settings.time")}
+              selection={reminderDate}
+              displayedComponents={["hourAndMinute"]}
+              onDateChange={(value) =>
+                reminders$.set({
+                  hour: value.getHours(),
+                  minute: value.getMinutes(),
+                })
+              }
+              modifiers={[
+                datePickerStyle("compact"),
+                listRowBackground(theme.surface),
+                accessibilityHint(t("a11y.reminders.time.hint")),
+              ]}
             />
           </Section>
 
@@ -287,29 +274,41 @@ export default function SettingsScreen() {
           <Section
             header={
               <Text modifiers={[foregroundStyle(theme.textSecondary)]}>
-                {t("reminders.settings.section")}
+                {t("settings.general")}
               </Text>
             }
             footer={
               <Text modifiers={[foregroundStyle(theme.textSecondary)]}>
-                {t("reminders.settings.footer")}
+                {t("settings.subtitle")}
               </Text>
             }
           >
-            <DatePicker
-              title={t("reminders.settings.time")}
-              selection={reminderDate}
-              displayedComponents={["hourAndMinute"]}
-              onDateChange={(value) =>
-                reminders$.set({
-                  hour: value.getHours(),
-                  minute: value.getMinutes(),
-                })
+            <Picker
+              label={t("settings.language")}
+              systemImage="globe"
+              selection={currentLanguage}
+              onSelectionChange={(value) =>
+                setLanguage(value as LanguageSetting)
               }
               modifiers={[
-                datePickerStyle("compact"),
+                pickerStyle("menu"),
                 listRowBackground(theme.surface),
-                accessibilityHint(t("a11y.reminders.time.hint")),
+                accessibilityHint(t("a11y.language.hint")),
+              ]}
+            >
+              {LANGUAGE_OPTIONS.map((option) => (
+                <Text key={option.value} modifiers={[tag(option.value)]}>
+                  {t(option.labelKey)}
+                </Text>
+              ))}
+            </Picker>
+            <Button
+              label={t("backup.title")}
+              systemImage="arrow.triangle.2.circlepath"
+              onPress={() => router.push("/backup-restore" as never)}
+              modifiers={[
+                listRowBackground(theme.surface),
+                accessibilityHint(t("a11y.backup.open")),
               ]}
             />
           </Section>
@@ -325,85 +324,6 @@ export default function SettingsScreen() {
               ]}
             />
           </Section>
-
-          <Section
-            header={
-              <Text modifiers={[foregroundStyle(theme.textSecondary)]}>
-                {t("settings.advanced")}
-              </Text>
-            }
-          >
-            <Button
-              label={
-                isAdvancedPresented
-                  ? t("settings.hideAdvanced")
-                  : t("settings.advancedButton")
-              }
-              systemImage={isAdvancedPresented ? "chevron.up" : "chevron.down"}
-              onPress={() => setIsAdvancedPresented((value) => !value)}
-              modifiers={[
-                listRowBackground(theme.surface),
-                accessibilityHint(t("a11y.advancedSettings.hint")),
-              ]}
-            />
-          </Section>
-
-          {isAdvancedPresented ? (
-            <Section
-              header={
-                <Text modifiers={[foregroundStyle(theme.textSecondary)]}>
-                  {t("settings.data")}
-                </Text>
-              }
-              footer={
-                <Text modifiers={[foregroundStyle(theme.textSecondary)]}>
-                  {t("settings.resetFooter")}
-                </Text>
-              }
-            >
-              <Button
-                label={t("backup.title")}
-                systemImage="arrow.triangle.2.circlepath"
-                onPress={() => router.push("/backup-restore" as never)}
-                modifiers={[
-                  listRowBackground(theme.surface),
-                  accessibilityHint(t("a11y.backup.open")),
-                ]}
-              />
-              <ConfirmationDialog
-                title={t("settings.resetTitle")}
-                titleVisibility="visible"
-                isPresented={isResetPresented}
-                onIsPresentedChange={setIsResetPresented}
-              >
-                <ConfirmationDialog.Trigger>
-                  <Button
-                    label={t("settings.reset")}
-                    systemImage="trash"
-                    role="destructive"
-                    onPress={() => setIsResetPresented(true)}
-                    modifiers={[
-                      tint(theme.danger),
-                      foregroundStyle(theme.danger),
-                      listRowBackground(theme.surface),
-                      accessibilityHint(t("a11y.resetData.hint")),
-                    ]}
-                  />
-                </ConfirmationDialog.Trigger>
-                <ConfirmationDialog.Actions>
-                  <Button
-                    label={t("settings.resetConfirm")}
-                    role="destructive"
-                    onPress={handleReset}
-                  />
-                  <Button label={t("settings.cancel")} role="cancel" />
-                </ConfirmationDialog.Actions>
-                <ConfirmationDialog.Message>
-                  <Text>{t("settings.resetMessage")}</Text>
-                </ConfirmationDialog.Message>
-              </ConfirmationDialog>
-            </Section>
-          ) : null}
         </Form>
       </Host>
       <IOSPageHeader title={t("settings.title")} />

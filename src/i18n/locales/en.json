@@ -8,15 +8,11 @@
   "settings": {
     "title": "Settings",
     "general": "General",
-    "subtitle": "Choose the language used throughout the app. Follow device uses your system preference.",
+    "subtitle": "Language and backup options for this device.",
     "language": "Language",
     "followDevice": "Follow device",
     "english": "English",
     "portuguese": "Português",
-    "advanced": "Advanced",
-    "advancedButton": "Advanced settings",
-    "hideAdvanced": "Hide advanced settings",
-    "data": "App data",
     "reset": "Reset app data",
     "resetTitle": "Reset app data?",
     "resetFooter": "Permanently deletes every reptile and activity record stored on this device. Your language setting will not change.",
@@ -52,7 +48,9 @@
     "documentsRestored_one": "Also restored {{count}} document.",
     "documentsRestored_other": "Also restored {{count}} documents.",
     "error": "Could not prepare this backup.",
-    "restoreError": "Could not restore this backup. Please try again."
+    "restoreError": "Could not restore this backup. Please try again.",
+    "advanced": "Advanced options",
+    "hideAdvanced": "Hide advanced options"
   },
   "about": {
     "title": "About",
@@ -510,7 +508,7 @@
       "restore": "Chooses a ZIP backup to validate before restoring"
     },
     "advancedSettings": {
-      "hint": "Shows or hides advanced settings"
+      "hint": "Shows or hides advanced options"
     },
     "about": {
       "openHint": "Opens information about ReptiKeep",
