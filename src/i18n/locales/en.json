@@ -454,10 +454,40 @@
       "allHint": "Shows records of every type",
       "hint": "Shows only records of this type"
     },
+    "range": {
+      "label": "Date range",
+      "hint": "Opens a menu to filter records by date",
+      "all": "All time",
+      "7d": "Last 7 days",
+      "30d": "Last 30 days",
+      "3m": "Last 3 months",
+      "1y": "Last year",
+      "custom": "Custom range…",
+      "customTitle": "Custom range",
+      "customPrompt": "Choose the dates to include.",
+      "from": "From",
+      "to": "To",
+      "apply": "Apply",
+      "applyHint": "Shows only records between these dates",
+      "cancel": "Cancel",
+      "cancelHint": "Closes without changing the date range",
+      "clear": "Clear",
+      "clearHint": "Removes the date range filter",
+      "span": "{{from}} – {{to}}"
+    },
     "empty": {
       "title": "Nothing logged yet",
       "subtitle": "Everything you record for {{animalName}} will appear here.",
       "action": "Log the first record"
+    },
+    "filtered": {
+      "count_one": "{{count}} record",
+      "count_other": "{{count}} records",
+      "empty": {
+        "title": "No matching records",
+        "subtitle": "Nothing for {{animalName}} falls inside these filters.",
+        "action": "Clear filters"
+      }
     },
     "showAll_one": "See all {{count}} record",
     "showAll_other": "See all {{count}} records",

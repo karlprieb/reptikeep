@@ -29,6 +29,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   one for each kind of record that reptile actually has. Tap Feed to see only
   feedings, tap it again or All for everything. "See all" keeps the filter and
   opens the full history for just that type.
+- **Filter the full activity history** — the Activities screen now carries the
+  same type chips as the reptile's detail screen, and a date range in its
+  toolbar: the last 7 days, 30 days, 3 months or year, or a custom From/To
+  range you pick yourself. An active range sits above the list with the number
+  of records inside it, and Clear puts everything back.
+- Log a record without leaving the Activities screen — the ＋ in its toolbar
+  opens the same record picker as the reptile's detail screen, and what you
+  save appears in the list you were already reading.
 - **Weight trend chart** — a reptile's detail screen now plots its last eight
   weigh-ins, dated along the bottom, with the change since the first of them
   at the top. It appears once there are two weigh-ins to compare, and says
@@ -58,6 +66,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   a weekly feeder sees months of history before reaching "See all".
 - The Reptiles tab scrolls and switches between single-column, grid and list
   views without the lag and freezes that large collections caused before.
+- Arriving at the full history from "See all" no longer renames the screen
+  after the record type. The title stays "Activities" and the type shows as a
+  selected chip, so you can widen or change the filter without going back.
 - Settings was reorganized: language and a shortcut to Backup & restore now
   share a General section, the reminder time sits near the top, and the
   Advanced settings section is gone. "Reset app data" moved to the

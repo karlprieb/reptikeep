@@ -41,11 +41,10 @@ import {
   Radius,
   Spacing,
   type ActivityType,
+  StackAboveFontScale,
 } from "@/constants/theme";
 import { typeFont } from "@/constants/type-font";
 import { useTheme } from "@/hooks/use-theme";
-
-const SINGLE_COLUMN_FONT_SCALE = 1.6;
 
 const BADGE_DIAMETER = 64;
 const BADGE_SYMBOL_SIZE = 30;
@@ -53,7 +52,7 @@ const CARD_MIN_HEIGHT = 180;
 const CLOSE_BUTTON_SIZE = 48;
 
 export function selectCardColumns(fontScale: number): 1 | 2 {
-  return fontScale >= SINGLE_COLUMN_FONT_SCALE ? 1 : 2;
+  return fontScale >= StackAboveFontScale ? 1 : 2;
 }
 
 type AddActivitySheetProps = {
@@ -124,8 +123,7 @@ export function sheetScrolls(
 ): boolean {
   if (columns === 1) return true;
 
-  const rowHeight =
-    CARD_MIN_HEIGHT * Math.min(fontScale, SINGLE_COLUMN_FONT_SCALE);
+  const rowHeight = CARD_MIN_HEIGHT * Math.min(fontScale, StackAboveFontScale);
   const content =
     HEADER_HEIGHT +
     rowCount * rowHeight +

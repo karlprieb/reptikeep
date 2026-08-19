@@ -1,13 +1,14 @@
 import { router, Stack } from "expo-router";
 import { useHeaderHeight } from "expo-router/react-navigation";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { Alert, ScrollView, StyleSheet, View } from "react-native";
 import { useTranslation } from "react-i18next";
 
 import { AddActivitySheet } from "@/components/add-activity-sheet";
 import { AnimalDetail } from "@/components/animal-detail";
 import { AnimalNotFound, useAnimalRoute } from "@/components/animal-route";
-import { Spacing, type ActivityType } from "@/constants/theme";
+import { Spacing } from "@/constants/theme";
+import { useAddActivity } from "@/hooks/use-add-activity";
 import { useTheme } from "@/hooks/use-theme";
 import { removeAnimal } from "@/state/animal";
 
@@ -16,22 +17,8 @@ export default function AnimalDetailScreen() {
   const { t } = useTranslation();
   const headerHeight = useHeaderHeight();
   const { id, animal } = useAnimalRoute();
-  const [addOpen, setAddOpen] = useState(false);
-  const pendingActivity = useRef<ActivityType | null>(null);
+  const addActivity = useAddActivity(id);
   const pendingDelete = useRef(false);
-
-  const openAddSheet = useCallback(() => setAddOpen(true), []);
-  const closeAddSheet = useCallback(() => setAddOpen(false), []);
-  const handlePickActivity = useCallback((type: ActivityType) => {
-    pendingActivity.current = type;
-    setAddOpen(false);
-  }, []);
-  const handleActivityPickerDismiss = useCallback(() => {
-    const type = pendingActivity.current;
-    pendingActivity.current = null;
-
-    if (type && id) router.push(`/animal/${id}/${type}`);
-  }, [id]);
 
   useEffect(
     () => () => {
@@ -66,7 +53,7 @@ export default function AnimalDetailScreen() {
           icon="plus"
           tintColor={theme.primary}
           accessibilityLabel={t("animal.addActivity")}
-          onPress={openAddSheet}
+          onPress={addActivity.open}
         />
         <Stack.Toolbar.Menu
           icon="ellipsis"
@@ -102,16 +89,16 @@ export default function AnimalDetailScreen() {
         contentContainerStyle={styles.content}
       >
         <View style={animal.photo ? { marginTop: -headerHeight } : undefined}>
-          <AnimalDetail animal={animal} onAddActivity={openAddSheet} />
+          <AnimalDetail animal={animal} onAddActivity={addActivity.open} />
         </View>
       </ScrollView>
 
       <AddActivitySheet
-        visible={addOpen}
+        visible={addActivity.visible}
         animalName={animal.name}
-        onClose={closeAddSheet}
-        onDismiss={handleActivityPickerDismiss}
-        onPick={handlePickActivity}
+        onClose={addActivity.close}
+        onDismiss={addActivity.dismiss}
+        onPick={addActivity.pick}
       />
     </>
   );

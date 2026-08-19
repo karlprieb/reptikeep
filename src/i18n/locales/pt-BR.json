@@ -454,10 +454,40 @@
       "allHint": "Mostra registros de todos os tipos",
       "hint": "Mostra apenas registros deste tipo"
     },
+    "range": {
+      "label": "Período",
+      "hint": "Abre um menu para filtrar registros por data",
+      "all": "Todo o período",
+      "7d": "Últimos 7 dias",
+      "30d": "Últimos 30 dias",
+      "3m": "Últimos 3 meses",
+      "1y": "Último ano",
+      "custom": "Período personalizado…",
+      "customTitle": "Período personalizado",
+      "customPrompt": "Escolha as datas para incluir.",
+      "from": "De",
+      "to": "Até",
+      "apply": "Aplicar",
+      "applyHint": "Mostra apenas registros entre estas datas",
+      "cancel": "Cancelar",
+      "cancelHint": "Fecha sem alterar o período",
+      "clear": "Limpar",
+      "clearHint": "Remove o filtro de período",
+      "span": "{{from}} – {{to}}"
+    },
     "empty": {
       "title": "Nada registrado ainda",
       "subtitle": "Tudo o que você registrar para {{animalName}} aparecerá aqui.",
       "action": "Registrar o primeiro"
+    },
+    "filtered": {
+      "count_one": "{{count}} registro",
+      "count_other": "{{count}} registros",
+      "empty": {
+        "title": "Nenhum registro encontrado",
+        "subtitle": "Nada para {{animalName}} corresponde a estes filtros.",
+        "action": "Limpar filtros"
+      }
     },
     "showAll_one": "Ver {{count}} registro",
     "showAll_other": "Ver todos os {{count}} registros",

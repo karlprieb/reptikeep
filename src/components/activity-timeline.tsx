@@ -38,7 +38,7 @@ import {
   tint,
 } from "@expo/ui/swift-ui/modifiers";
 import { router } from "expo-router";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useState, type ReactNode } from "react";
 import {
   ScrollView,
   StyleSheet,
@@ -57,6 +57,7 @@ import {
   Spacing,
   type SFSymbolName,
   type Theme,
+  StackAboveFontScale,
 } from "@/constants/theme";
 import { typeFont } from "@/constants/type-font";
 import { useTheme } from "@/hooks/use-theme";
@@ -82,7 +83,6 @@ export const VISIBLE_LIMIT = 20;
 const BADGE_SIZE = 28;
 const BADGE_MAX_SCALE = 2;
 const SYMBOL_RATIO = 0.54;
-const STACK_ABOVE_FONT_SCALE = 1.6;
 const ROW_BLOCKS: Parameters<typeof panelRowHeight>[0] = [
   ["body", 1],
   ["bodyS", 2],
@@ -471,12 +471,14 @@ export type ActivityHistoryListProps = {
   entries: AnimalActivity[];
   animalId: string;
   background?: string;
+  header?: ReactNode;
 };
 
 export function ActivityHistoryList({
   entries,
   animalId,
   background,
+  header,
 }: ActivityHistoryListProps) {
   const theme = useTheme();
   const { fontScale } = useWindowDimensions();
@@ -486,7 +488,7 @@ export function ActivityHistoryList({
   const badgeSize = Math.round(
     BADGE_SIZE * Math.min(fontScale, BADGE_MAX_SCALE),
   );
-  const stacked = fontScale >= STACK_ABOVE_FONT_SCALE;
+  const stacked = fontScale >= StackAboveFontScale;
   const rowHeight = panelRowHeight(
     stacked ? STACKED_ROW_BLOCKS : ROW_BLOCKS,
     fontScale,
@@ -518,8 +520,9 @@ export function ActivityHistoryList({
       onScroll={growNearEnd}
       scrollEventThrottle={64}
     >
+      {header}
       <Host
-        style={{ width: "100%", height: rowHeight * visible.length }}
+        style={[styles.historyList, { height: rowHeight * visible.length }]}
         matchContents={false}
       >
         <List
@@ -576,7 +579,7 @@ export function ActivityPanel({
   const badgeSize = Math.round(
     BADGE_SIZE * Math.min(fontScale, BADGE_MAX_SCALE),
   );
-  const stacked = fontScale >= STACK_ABOVE_FONT_SCALE;
+  const stacked = fontScale >= StackAboveFontScale;
   const visible = limit === undefined ? entries : entries.slice(0, limit);
   const seeAll = onSeeAll && entries.length > visible.length ? onSeeAll : null;
 
@@ -667,5 +670,9 @@ const styles = StyleSheet.create({
   },
   historyHost: {
     flex: 1,
+  },
+  historyList: {
+    width: "100%",
+    overflow: "hidden",
   },
 });

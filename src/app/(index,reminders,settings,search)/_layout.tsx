@@ -80,6 +80,13 @@ export default function TabStackLayout({ segment }: { segment: string }) {
         options={{ headerBackButtonDisplayMode: "minimal" }}
       />
       <Stack.Screen
+        name="animal/[id]/history-range"
+        options={{
+          ...FORM_SHEET_OPTIONS,
+          title: t("timeline.range.customTitle"),
+        }}
+      />
+      <Stack.Screen
         name="animal/[id]/documents"
         options={{
           title: t("documents.title"),
