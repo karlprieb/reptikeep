@@ -83,7 +83,7 @@ export function summarize<T extends ActivityRecord>(
     next.lastCleanAt = latestFor(habitats, animalId, cleanedEnclosure);
   }
 
-  summaries$[animalId].set(next);
+  summaries$.set({ ...summaries$.peek(), [animalId]: next });
 }
 
 export function summarizeAll<T extends ActivityRecord>(
@@ -128,6 +128,7 @@ export function summarizeAll<T extends ActivityRecord>(
   }
 
   const current = summaries$.peek();
+  const updated: Record<string, AnimalSummary> = { ...current };
   for (const [animalId, entry] of Object.entries(byAnimal)) {
     const existing = current[animalId] ?? {};
     const next: AnimalSummary = {
@@ -141,8 +142,9 @@ export function summarizeAll<T extends ActivityRecord>(
       next.lastCleanAt = entry.lastCleanAt;
     }
 
-    summaries$[animalId].set(next);
+    updated[animalId] = next;
   }
+  summaries$.set(updated);
 }
 
 export function lastActivityAt(summary: AnimalSummary): string | undefined {
