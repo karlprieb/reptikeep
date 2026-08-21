@@ -17,6 +17,15 @@ import { atClockTime, fromCalendarDate } from "@/utils/format-date";
 
 const HORIZON_DAYS = 14;
 
+const CARE_CHANNEL_ID = "care-reminders";
+
+async function ensureCareChannel(): Promise<void> {
+  await Notifications.setNotificationChannelAsync(CARE_CHANNEL_ID, {
+    name: i18n.t("reminders.channel.name"),
+    importance: Notifications.AndroidImportance.HIGH,
+  });
+}
+
 function careLookups() {
   const { lastWater, lastClean } = summaryLookups(summaries$.peek());
 
@@ -86,6 +95,9 @@ async function reschedule(): Promise<void> {
     asked === "ask" ? await requestReminderPermission() : asked;
   if (permission !== "granted" || run !== generation) return;
 
+  await ensureCareChannel();
+  if (run !== generation) return;
+
   const { hour, minute } = reminders$.peek();
 
   for (const day of days) {
@@ -105,6 +117,7 @@ async function reschedule(): Promise<void> {
       trigger: {
         type: Notifications.SchedulableTriggerInputTypes.DATE,
         date: at,
+        channelId: CARE_CHANNEL_ID,
       },
     });
 

@@ -5,8 +5,13 @@
     "settings": "Ajustes",
     "search": "Buscar"
   },
+  "android": {
+    "title": "Ainda não disponível no Android",
+    "description": "Esta tela ainda está sendo reconstruída para o Android. Já está disponível no iOS."
+  },
   "settings": {
     "title": "Ajustes",
+    "androidComingSoon": "Os ajustes estão sendo reconstruídos para o Android e ainda não estão prontos aqui.",
     "general": "Geral",
     "subtitle": "Opções de idioma e backup deste dispositivo.",
     "language": "Idioma",
@@ -101,6 +106,7 @@
   },
   "reminders": {
     "title": "Lembretes",
+    "androidComingSoon": "Os lembretes estão sendo reconstruídos para o Android e ainda não estão prontos aqui.",
     "enabled": "Me lembrar",
     "dueToday": "Vence hoje",
     "dueIn_one": "Em {{count}} dia",
@@ -109,6 +115,9 @@
     "routine": {
       "water": "Troca de água",
       "cleaning": "Limpeza do terrário"
+    },
+    "channel": {
+      "name": "Lembretes de cuidados"
     },
     "section": {
       "overdue": "Atrasados",

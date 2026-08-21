@@ -28,9 +28,6 @@ export function createActivityStore<T extends ActivityRecord>(
     summaryState$.dirty.set(true);
   };
 
-  // Hydration parses the whole table, so it waits until something actually
-  // reads or writes these records. The collection screens read the summaries
-  // instead, which is what keeps a large history off the launch path.
   let hydrated = false;
 
   const hydrate = () => {
@@ -52,7 +49,6 @@ export function createActivityStore<T extends ActivityRecord>(
       return records$ as unknown as Observable<Record<string, T>>;
     },
 
-    /** Loads the table without reading it, for a screen that is about to. */
     hydrate,
 
     add(record: T): void {
@@ -95,7 +91,6 @@ export function createActivityStore<T extends ActivityRecord>(
       refresh(cleared);
     },
 
-    /** Rebuilds every animal's entry — for restore, and to repair drift. */
     resummarize(): void {
       hydrate();
       summarizeAll(type, records$.peek());

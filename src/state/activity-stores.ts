@@ -46,17 +46,12 @@ export function clearActivities(): void {
   for (const store of Object.values(activityStores)) store.clear();
 }
 
-/** Rebuilds every summary from the records — after a restore, or to repair. */
 export function resummarizeActivities(): void {
   clearSummaries();
   for (const store of Object.values(activityStores)) store.resummarize();
   summaryState$.dirty.set(false);
 }
 
-/**
- * Builds the summaries once for a collection recorded before they existed.
- * Hydrates every table, so callers run it after the first screen is up.
- */
 export function backfillSummaries(): void {
   if (!summaryState$.dirty.peek()) return;
 
