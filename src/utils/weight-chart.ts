@@ -5,7 +5,6 @@ import { gramsToUnit, type WeightUnit } from "./weight-unit";
 const WEIGHT_TREND_LIMIT = 8;
 
 export type WeightChartPoint = {
-  /** ISO timestamp. Formatted for the axis at render, so it follows the language. */
   x: string;
   y: number;
 };

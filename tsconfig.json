@@ -3,6 +3,7 @@
   "compilerOptions": {
     "strict": true,
     "types": ["jest", "node"],
+    "moduleSuffixes": [".ios", ".android", ".native", ""],
     "paths": {
       "@/*": ["./src/*"],
       "@/assets/*": ["./assets/*"]

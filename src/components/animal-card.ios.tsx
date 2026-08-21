@@ -38,17 +38,9 @@ import {
 import { typeFont } from "@/constants/type-font";
 import type { Animal } from "@/state/animal";
 import type { CareSchedule } from "@/state/care-schedule";
+import { overdueRoutines, SEX_SYMBOLS } from "@/utils/animal-card-status";
 import { getAnimalPhotoUri } from "@/utils/animal-photo-storage";
 import { feedingStatus } from "@/utils/feeding-status";
-import { scheduleDaysOverdue } from "@/utils/schedule";
-
-export const SEX_SYMBOLS: Record<Animal["sex"], string | null> = {
-  unknown: null,
-  male: "♂",
-  female: "♀",
-};
-
-export const CARD_ASPECT_RATIO = 0.8;
 
 const SCRIM_GRADIENT_COLORS = ["rgba(14, 9, 4, 1)", "rgba(14, 9, 4, 0)"];
 const ON_PHOTO_TEXT = "#FFFFFF";
@@ -60,30 +52,6 @@ type OverdueTask = {
   icon: SFSymbolName;
   label: string;
 };
-
-export type OverdueInput = {
-  feedingSchedule?: CareSchedule;
-  lastFedAt?: string;
-  waterSchedule?: CareSchedule;
-  lastWaterChangeAt?: string;
-  cleaningSchedule?: CareSchedule;
-  lastCleanAt?: string;
-};
-
-function overdueRoutines(input: OverdueInput) {
-  return {
-    feed: scheduleDaysOverdue(input.lastFedAt, input.feedingSchedule) !== null,
-    water:
-      scheduleDaysOverdue(input.lastWaterChangeAt, input.waterSchedule) !==
-      null,
-    cleaning:
-      scheduleDaysOverdue(input.lastCleanAt, input.cleaningSchedule) !== null,
-  };
-}
-
-export function overdueCount(input: OverdueInput): number {
-  return Object.values(overdueRoutines(input)).filter(Boolean).length;
-}
 
 export type AnimalCardProps = {
   animal: Animal;

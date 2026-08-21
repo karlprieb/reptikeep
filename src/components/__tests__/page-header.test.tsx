@@ -1,16 +1,16 @@
 import { fireEvent, render } from "@testing-library/react-native";
 
-import { IOSPageHeader } from "@/components/page-header";
+import { PageHeader } from "@/components/page-header";
 
-describe("IOSPageHeader", () => {
+describe("PageHeader", () => {
   it("renders the title", () => {
-    const { getByText } = render(<IOSPageHeader title="Reptiles" />);
+    const { getByText } = render(<PageHeader title="Reptiles" />);
 
     expect(getByText("Reptiles")).toBeTruthy();
   });
 
   it("renders no toolbar when actions is undefined", () => {
-    const { queryByTestId } = render(<IOSPageHeader title="Reptiles" />);
+    const { queryByTestId } = render(<PageHeader title="Reptiles" />);
 
     expect(queryByTestId("stack-toolbar")).toBeNull();
     expect(queryByTestId("stack-toolbar-button")).toBeNull();
@@ -18,7 +18,7 @@ describe("IOSPageHeader", () => {
 
   it("renders no toolbar when actions is empty", () => {
     const { queryByTestId } = render(
-      <IOSPageHeader title="Reptiles" actions={[]} />,
+      <PageHeader title="Reptiles" actions={[]} />,
     );
 
     expect(queryByTestId("stack-toolbar")).toBeNull();
@@ -33,7 +33,7 @@ describe("IOSPageHeader", () => {
     ];
 
     const { getAllByTestId } = render(
-      <IOSPageHeader title="Reptiles" actions={actions} />,
+      <PageHeader title="Reptiles" actions={actions} />,
     );
 
     expect(getAllByTestId("stack-toolbar-button")).toHaveLength(3);
@@ -51,7 +51,7 @@ describe("IOSPageHeader", () => {
     ];
 
     const { getByLabelText } = render(
-      <IOSPageHeader title="Reptiles" actions={actions} />,
+      <PageHeader title="Reptiles" actions={actions} />,
     );
 
     const button = getByLabelText("Add reptile");

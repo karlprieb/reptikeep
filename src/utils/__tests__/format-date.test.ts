@@ -86,7 +86,7 @@ describe("daysSince", () => {
     for (let month = 0; month < 12; month += 1) {
       for (const day of [1, 15, 28, 31]) {
         const start = new Date(Date.UTC(2026, month, day));
-        if (start.getUTCMonth() !== month) continue; // skip Feb 31 and friends
+        if (start.getUTCMonth() !== month) continue;
 
         const now = new Date(start);
         now.setUTCDate(now.getUTCDate() + DAYS_BEFORE_MONTHS);

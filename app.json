@@ -15,6 +15,18 @@
         "usesNonExemptEncryption": false
       }
     },
+    "android": {
+      "package": "app.reptikeep",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "monochromeImage": "./assets/adaptive-icon-monochrome.png",
+        "backgroundColor": "#FBF7EE"
+      },
+      "versionCode": 1,
+      "predictiveBackGestureEnabled": true,
+      "allowBackup": false,
+      "blockedPermissions": ["android.permission.RECORD_AUDIO"]
+    },
     "plugins": [
       "expo-router",
       [
@@ -44,6 +56,13 @@
         {
           "photosPermission": "Attach a photo or a document to a reptile's profile.",
           "cameraPermission": "Take a picture of a document to attach it to a reptile."
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/notification-icon.png",
+          "color": "#C98A4B"
         }
       ],
       "expo-localization",

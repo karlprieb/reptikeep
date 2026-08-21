@@ -6,20 +6,20 @@ import { useTheme } from "@/hooks/use-theme";
 
 type StackToolbarButtonProps = ComponentProps<typeof Stack.Toolbar.Button>;
 
-type IOSPageHeaderAction = Pick<
+type PageHeaderAction = Pick<
   StackToolbarButtonProps,
   "accessibilityHint" | "accessibilityLabel" | "icon" | "onPress" | "tintColor"
 > & {
   key: string;
 };
 
-export type IOSPageHeaderProps = {
+export type PageHeaderProps = {
   title: string;
-  actions?: readonly IOSPageHeaderAction[];
+  actions?: readonly PageHeaderAction[];
   menu?: ReactNode;
 };
 
-export function IOSPageHeader({ title, actions, menu }: IOSPageHeaderProps) {
+export function PageHeader({ title, actions, menu }: PageHeaderProps) {
   const theme = useTheme();
   const hasActions = actions && actions.length > 0;
 

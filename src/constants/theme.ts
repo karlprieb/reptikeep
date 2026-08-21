@@ -190,15 +190,15 @@ export const TypeScale: Record<
   TypographyAlias,
   { textStyle: TextStyleAnchor; maxMultiplier: number }
 > = {
-  displayXl: { textStyle: "largeTitle", maxMultiplier: 1.56 }, // 53 / 34
-  display: { textStyle: "title", maxMultiplier: 1.57 }, //      44 / 28
-  title: { textStyle: "title2", maxMultiplier: 1.55 }, //       34 / 22
-  heading: { textStyle: "headline", maxMultiplier: 2.59 }, //   44 / 17
-  bodyL: { textStyle: "body", maxMultiplier: 3.12 }, //         53 / 17
-  body: { textStyle: "subheadline", maxMultiplier: 3.27 }, //   49 / 15
-  bodyS: { textStyle: "footnote", maxMultiplier: 3.38 }, //     44 / 13
-  label: { textStyle: "caption2", maxMultiplier: 3.82 }, //     42 / 11
-  data: { textStyle: "subheadline", maxMultiplier: 3.27 }, //   49 / 15
+  displayXl: { textStyle: "largeTitle", maxMultiplier: 1.56 },
+  display: { textStyle: "title", maxMultiplier: 1.57 },
+  title: { textStyle: "title2", maxMultiplier: 1.55 },
+  heading: { textStyle: "headline", maxMultiplier: 2.59 },
+  bodyL: { textStyle: "body", maxMultiplier: 3.12 },
+  body: { textStyle: "subheadline", maxMultiplier: 3.27 },
+  bodyS: { textStyle: "footnote", maxMultiplier: 3.38 },
+  label: { textStyle: "caption2", maxMultiplier: 3.82 },
+  data: { textStyle: "subheadline", maxMultiplier: 3.27 },
 };
 
 export const Spacing = {

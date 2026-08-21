@@ -31,11 +31,11 @@ import { router } from "expo-router";
 import { StyleSheet } from "react-native";
 import { useTranslation } from "react-i18next";
 
-import { SEX_SYMBOLS } from "@/components/animal-card";
 import { Radius, Spacing, type Theme } from "@/constants/theme";
 import { typeFont } from "@/constants/type-font";
 import type { Animal } from "@/state/animal";
 import { useTheme } from "@/hooks/use-theme";
+import { SEX_SYMBOLS } from "@/utils/animal-card-status";
 import { getAnimalPhotoUri } from "@/utils/animal-photo-storage";
 import { feedingStatus } from "@/utils/feeding-status";
 
