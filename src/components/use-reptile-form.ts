@@ -234,13 +234,6 @@ export function useReptileForm(animal?: Animal) {
     setSaveError(undefined);
 
     try {
-      const permission =
-        await ImagePicker.requestMediaLibraryPermissionsAsync();
-      if (!permission.granted) {
-        setSaveError(t("reptileForm.photoPermissionError"));
-        return;
-      }
-
       const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ["images"],
       });

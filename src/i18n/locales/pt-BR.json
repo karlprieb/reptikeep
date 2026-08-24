@@ -408,8 +408,7 @@
     "details": "Detalhes",
     "nameRequired": "Dê um nome a este réptil para salvar",
     "selectDate": "Escolher data",
-    "photoPickError": "Não foi possível abrir sua galeria de fotos. Tente novamente.",
-    "photoPermissionError": "O ReptiKeep precisa de acesso às suas fotos para adicionar uma."
+    "photoPickError": "Não foi possível abrir sua galeria de fotos. Tente novamente."
   },
   "feedingSchedule": {
     "section": "Rotina de alimentação",

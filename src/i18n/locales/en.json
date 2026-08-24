@@ -408,8 +408,7 @@
     "details": "Details",
     "nameRequired": "Give this reptile a name to save",
     "selectDate": "Select date",
-    "photoPickError": "We couldn't open your photo library. Try again.",
-    "photoPermissionError": "ReptiKeep needs access to your photos to add one."
+    "photoPickError": "We couldn't open your photo library. Try again."
   },
   "feedingSchedule": {
     "section": "Feeding schedule",

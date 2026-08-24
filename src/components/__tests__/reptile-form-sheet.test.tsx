@@ -363,7 +363,7 @@ describe("ReptileFormSheet photo persistence", () => {
     expect(router.back).not.toHaveBeenCalled();
   });
 
-  it("explains a denied photo permission instead of doing nothing", async () => {
+  it("picks without asking for broad media-library access", async () => {
     mockRequestMediaLibraryPermissionsAsync.mockResolvedValue({
       granted: false,
       status: ImagePicker.PermissionStatus.DENIED,
@@ -374,19 +374,17 @@ describe("ReptileFormSheet photo persistence", () => {
     const screen = render(<ReptileFormSheet />);
     fireEvent.changeText(screen.getByPlaceholderText("Name"), "Willow");
 
-    fireEvent.press(screen.getByLabelText("Add photo"));
+    await pickPhoto(screen);
 
-    await screen.findByText(
-      "ReptiKeep needs access to your photos to add one.",
-    );
-    expect(mockLaunchImageLibraryAsync).not.toHaveBeenCalled();
-    expect(screen.getByLabelText("Add photo")).toBeTruthy();
+    expect(mockRequestMediaLibraryPermissionsAsync).not.toHaveBeenCalled();
 
     fireEvent.press(screen.getByLabelText("Save"));
     await waitFor(() => {
       expect(Object.values(animalState.animals$.peek())).toHaveLength(1);
     });
-    expect(Object.values(animalState.animals$.peek())[0].photo).toBeUndefined();
+    expect(Object.values(animalState.animals$.peek())[0].photo).toBe(
+      MANAGED_PHOTO,
+    );
   });
 
   it("reports a picker that rejects and leaves the form usable", async () => {
@@ -405,16 +403,21 @@ describe("ReptileFormSheet photo persistence", () => {
     expect(screen.queryByText(/couldn't open your photo library/)).toBeNull();
   });
 
-  it("reports a permission request that rejects", async () => {
-    mockRequestMediaLibraryPermissionsAsync.mockRejectedValueOnce(
-      new Error("permission service down"),
-    );
+  it("keeps a cancelled pick from disturbing the form", async () => {
+    mockLaunchImageLibraryAsync.mockResolvedValueOnce({
+      canceled: true,
+      assets: null,
+    });
     const screen = render(<ReptileFormSheet />);
+    fireEvent.changeText(screen.getByPlaceholderText("Name"), "Willow");
 
     fireEvent.press(screen.getByLabelText("Add photo"));
 
-    await screen.findByText("We couldn't open your photo library. Try again.");
-    expect(mockLaunchImageLibraryAsync).not.toHaveBeenCalled();
+    await waitFor(() => {
+      expect(mockLaunchImageLibraryAsync).toHaveBeenCalled();
+    });
+    expect(screen.getByLabelText("Add photo")).toBeTruthy();
+    expect(screen.queryByText(/couldn't open your photo library/)).toBeNull();
   });
 });
 
