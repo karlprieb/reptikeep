@@ -25,7 +25,6 @@ import { formatAxisDate } from "@/utils/format-date";
 import type { WeightChartPoint } from "@/utils/weight-chart";
 
 const PLOT_HEIGHT = 132;
-// SwiftUI symbolSize(_ area:) takes an area, not a diameter — this is a ~12pt dot.
 const SYMBOL_AREA = 116;
 const LINE_WIDTH = 4;
 const AXIS_TYPE_CEILING = "large";

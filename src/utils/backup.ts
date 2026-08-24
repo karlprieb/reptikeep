@@ -36,7 +36,6 @@ import { TEXT_LIMITS, clampTextFields } from "@/utils/text-limits";
 const FORMAT = "app.reptikeep.backup";
 const VERSION = 4;
 const SUPPORTED_VERSIONS = [1, 2, 3, 4];
-// whole archive is decoded in memory, so these ceilings are RAM-bound; streaming zip is the upgrade path if keepers hit them.
 const MAX_ARCHIVE_BYTES = 80 * 1024 * 1024;
 const MAX_EXPANDED_BYTES = 160 * 1024 * 1024;
 const MAX_ENTRY_BYTES = MAX_DOCUMENT_BYTES;
@@ -1100,7 +1099,6 @@ export async function parseBackup(file: File): Promise<ParsedBackup> {
   return parsed;
 }
 
-// runtime rollback covers caught failures only; add a generation journal if photo commits must survive process termination.
 export async function restoreBackup(file: File): Promise<RestoredBackup> {
   await waitForHydration();
 

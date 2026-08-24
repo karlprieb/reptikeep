@@ -26,11 +26,9 @@ export type DocumentKind = (typeof DOCUMENT_KINDS)[number];
 export interface AnimalDocument {
   id: string;
   animalId: string;
-  /** An instant: full UTC ISO, `YYYY-MM-DDTHH:MM:SS.sssZ`. */
   createdAt: string;
   title: string;
   kind: DocumentKind;
-  /** A calendar date: bare `YYYY-MM-DD`, no time and no zone. */
   issuedDate?: string;
   file: string;
   extension: DocumentExtension;

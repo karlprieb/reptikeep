@@ -1,5 +1,8 @@
 import { Stack } from "expo-router/stack";
+import { Platform } from "react-native";
 import { useTranslation } from "react-i18next";
+
+import { useTheme } from "@/hooks/use-theme";
 
 export const unstable_settings = {
   initialRouteName: "index",
@@ -34,6 +37,7 @@ const ACTIVITY_SHEET_OPTIONS = {
 
 export default function TabStackLayout({ segment }: { segment: string }) {
   const { t } = useTranslation();
+  const theme = useTheme();
   const screenName =
     ROOT_SCREEN_BY_GROUP[segment as RootGroup] ??
     ROOT_SCREEN_BY_GROUP["(index)"];
@@ -41,14 +45,21 @@ export default function TabStackLayout({ segment }: { segment: string }) {
   return (
     <Stack
       screenOptions={{
-        headerTransparent: true,
+        headerTransparent: Platform.OS === "ios",
+        headerStyle:
+          Platform.OS === "android" ? { backgroundColor: theme.bg } : undefined,
         headerShadowVisible: false,
         headerLargeTitleShadowVisible: false,
         headerBlurEffect: "none",
         headerLargeStyle: { backgroundColor: "transparent" },
       }}
     >
-      <Stack.Screen name={screenName} />
+      <Stack.Screen
+        name={screenName}
+        options={{
+          headerShown: !(Platform.OS === "android" && screenName === "index"),
+        }}
+      />
       <Stack.Screen
         name="about"
         options={{

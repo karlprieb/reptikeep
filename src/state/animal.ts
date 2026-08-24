@@ -23,16 +23,13 @@ import type { AnimalLoggingDefaults } from "./logging-defaults";
 
 export interface Animal {
   id: string;
-  /** An instant: full UTC ISO, `YYYY-MM-DDTHH:MM:SS.sssZ`. */
   createdAt: string;
   photo?: string;
   name: string;
   commonName?: string;
   scientificName?: string;
   sex: "unknown" | "male" | "female";
-  /** A calendar date: bare `YYYY-MM-DD`, no time and no zone. */
   birthDate?: string;
-  /** A calendar date: bare `YYYY-MM-DD`, no time and no zone. */
   acquiredDate?: string;
   defaults?: AnimalLoggingDefaults;
   feedingSchedule?: CareSchedule;

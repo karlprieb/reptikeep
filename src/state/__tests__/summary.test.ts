@@ -38,7 +38,6 @@ function habitat(
   };
 }
 
-/** The summary must always equal what a fresh scan of the records would say. */
 function expectSummaryMatchesRecords() {
   const fed = lastFedByAnimal(feedingStore.$.peek());
   const care = lastCareByAnimal(habitatStore.$.peek());

@@ -13,7 +13,6 @@ export type CareReminder = {
   animalId: string;
   animalName: string;
   routine: CareRoutine;
-  /** A calendar date: bare `YYYY-MM-DD`, the day the routine comes due. */
   dueOn: string;
 };
 

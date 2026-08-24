@@ -7,6 +7,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **Android, in progress** — ReptiKeep now runs on Android. It is built in
+  the platform's own vocabulary rather than ported from the iPhone: a top
+  app bar that collapses as you scroll, a floating add button, Material
+  list rows, and the system back gesture. The warm palette, the slab-serif
+  names and the monospaced numbers are the same on both phones.
+- The **Reptiles tab is the only screen finished so far**. Reminders,
+  Settings, a reptile's detail screen and every form say so plainly instead
+  of showing an empty page. There is no way to add a reptile on Android
+  yet, so treat this as a preview rather than a second home for your
+  collection — iPhone remains the complete app.
+- Reminder notifications on Android arrive under their own **"Care
+  reminders"** channel, so you can change their sound, importance or mute
+  them from Android's notification settings without silencing anything else.
+- An Android app icon, including the monochrome version Android 13 and
+  later use when you turn on themed icons.
+
+### Changed
+
+- Nothing changes on iPhone. The iOS screens were moved so the two
+  platforms can sit side by side, but they look and behave exactly as they
+  did in 0.4.0.
+- Android will not copy app data into Google's automatic cloud backup.
+  Your records stay on the device and in the backup files you export
+  yourself.
+
 ## [0.4.0] - 2026-08-19
 
 ### Added

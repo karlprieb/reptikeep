@@ -1,8 +1,9 @@
 import { useSelector as useValue } from "@legendapp/state/react";
 import { router } from "expo-router";
-import { memo, useCallback, useState } from "react";
+import { memo, useCallback, useMemo, useState } from "react";
 import {
-  ScrollView,
+  Animated,
+  Platform,
   StyleSheet,
   View,
   useWindowDimensions,
@@ -11,11 +12,7 @@ import {
 } from "react-native";
 import { useTranslation } from "react-i18next";
 
-import {
-  AnimalCard,
-  CARD_ASPECT_RATIO,
-  overdueCount,
-} from "@/components/animal-card";
+import { AnimalCard } from "@/components/animal-card";
 import { EmptyState } from "@/components/empty-state";
 import { ReptileRows } from "@/components/reptile-rows";
 import { MaxContentWidth, Spacing, type Theme } from "@/constants/theme";
@@ -27,24 +24,34 @@ import {
   type CareSchedule,
 } from "@/state/care-schedule";
 import type { ReptileViewMode } from "@/state/settings";
+import { CARD_ASPECT_RATIO, overdueCount } from "@/utils/animal-card-status";
 
 export type ReptileEmptyStateProps = {
   onAddPress: () => void;
+  showAction?: boolean;
 };
 
-export function ReptileEmptyState({ onAddPress }: ReptileEmptyStateProps) {
+export function ReptileEmptyState({
+  onAddPress,
+  showAction = true,
+}: ReptileEmptyStateProps) {
   const { t } = useTranslation();
+  const offersAdd = showAction && Platform.OS !== "android";
 
   return (
     <EmptyState
       title={t("reptiles.empty.title")}
       description={t("reptiles.empty.subtitle")}
-      action={{
-        label: t("reptiles.add"),
-        accessibilityLabel: t("a11y.addReptile.label"),
-        accessibilityHint: t("a11y.addReptile.hint"),
-        onPress: onAddPress,
-      }}
+      action={
+        offersAdd
+          ? {
+              label: t("reptiles.add"),
+              accessibilityLabel: t("a11y.addReptile.label"),
+              accessibilityHint: t("a11y.addReptile.hint"),
+              onPress: onAddPress,
+            }
+          : undefined
+      }
     />
   );
 }
@@ -56,6 +63,9 @@ export type ReptileListProps = {
   lastClean?: Record<string, string>;
   viewMode?: ReptileViewMode;
   onAddPress: () => void;
+  scrollY?: Animated.Value;
+  contentInsetTop?: number;
+  contentInsetBottom?: number;
 };
 
 const CARD_GAP = Spacing.md;
@@ -115,6 +125,9 @@ export function ReptileList({
   lastClean,
   viewMode = "single",
   onAddPress,
+  scrollY,
+  contentInsetTop,
+  contentInsetBottom,
 }: ReptileListProps) {
   const { width, fontScale } = useWindowDimensions();
   const theme = useTheme();
@@ -140,28 +153,63 @@ export function ReptileList({
     [animals.length],
   );
 
+  const handleScroll = useMemo(
+    () =>
+      scrollY
+        ? Animated.event([{ nativeEvent: { contentOffset: { y: scrollY } } }], {
+            useNativeDriver: true,
+            listener: growNearEnd,
+          })
+        : growNearEnd,
+    [scrollY, growNearEnd],
+  );
+
+  const trackScrollOnly = useMemo(
+    () =>
+      scrollY
+        ? Animated.event([{ nativeEvent: { contentOffset: { y: scrollY } } }], {
+            useNativeDriver: true,
+          })
+        : undefined,
+    [scrollY],
+  );
+
+  const insetStyle =
+    contentInsetTop || contentInsetBottom
+      ? {
+          paddingTop: contentInsetTop || undefined,
+          paddingBottom: contentInsetBottom || undefined,
+        }
+      : null;
+
   if (animals.length === 0) {
     return (
-      <ScrollView
+      <Animated.ScrollView
         style={[styles.scroll, { backgroundColor: theme.bg }]}
         contentInsetAdjustmentBehavior="never"
         alwaysBounceVertical={false}
-        contentContainerStyle={[styles.content, styles.emptyContent]}
+        contentContainerStyle={[
+          styles.content,
+          styles.emptyContent,
+          insetStyle,
+        ]}
       >
         <ReptileEmptyState onAddPress={onAddPress} />
-      </ScrollView>
+      </Animated.ScrollView>
     );
   }
 
   if (viewMode === "list") {
     return (
-      <ScrollView
+      <Animated.ScrollView
         style={[styles.scroll, { backgroundColor: theme.bg }]}
         contentInsetAdjustmentBehavior="automatic"
-        contentContainerStyle={styles.content}
+        contentContainerStyle={[styles.content, insetStyle]}
+        onScroll={trackScrollOnly}
+        scrollEventThrottle={16}
       >
         <ReptileRows animals={animals} lastFed={lastFed} />
-      </ScrollView>
+      </Animated.ScrollView>
     );
   }
 
@@ -204,12 +252,12 @@ export function ReptileList({
   );
 
   return (
-    <ScrollView
+    <Animated.ScrollView
       style={[styles.scroll, { backgroundColor: theme.bg }]}
       contentInsetAdjustmentBehavior="automatic"
-      contentContainerStyle={styles.content}
-      onScroll={growNearEnd}
-      scrollEventThrottle={64}
+      contentContainerStyle={[styles.content, insetStyle]}
+      onScroll={handleScroll}
+      scrollEventThrottle={16}
     >
       <View style={styles.grid}>
         {cards.map((card, index) => (
@@ -235,7 +283,7 @@ export function ReptileList({
           />
         ))}
       </View>
-    </ScrollView>
+    </Animated.ScrollView>
   );
 }
 
@@ -253,12 +301,6 @@ type ReptileCardCellProps = {
   onOpen: (id: string) => void;
 };
 
-/**
- * Memoized so a `setLimit` grow re-renders `ReptileList` without re-bridging
- * the props of every already-mounted card Host. `onOpen` is stable, and every
- * other prop is a primitive or a pass-through ref, so existing cells skip
- * re-rendering; only the newly appended cells mount.
- */
 const ReptileCardCell = memo(function ReptileCardCell({
   animal,
   cardWidth,

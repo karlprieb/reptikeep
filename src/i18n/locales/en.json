@@ -5,8 +5,13 @@
     "settings": "Settings",
     "search": "Search"
   },
+  "android": {
+    "title": "Not on Android yet",
+    "description": "This screen is still being rebuilt for Android. It's available on iOS today."
+  },
   "settings": {
     "title": "Settings",
+    "androidComingSoon": "Settings is being rebuilt for Android and isn't ready here yet.",
     "general": "General",
     "subtitle": "Language and backup options for this device.",
     "language": "Language",
@@ -101,6 +106,7 @@
   },
   "reminders": {
     "title": "Reminders",
+    "androidComingSoon": "Reminders is being rebuilt for Android and isn't ready here yet.",
     "enabled": "Remind me",
     "dueToday": "Due today",
     "dueIn_one": "In {{count}} day",
@@ -109,6 +115,9 @@
     "routine": {
       "water": "Water change",
       "cleaning": "Enclosure cleaning"
+    },
+    "channel": {
+      "name": "Care reminders"
     },
     "section": {
       "overdue": "Overdue",
@@ -578,6 +587,7 @@
       "water": "Turn off to log enclosure upkeep without a water change",
       "cleaning": "Turn on to count this toward the enclosure cleaning schedule"
     },
+    "selected": "Selected",
     "waterSchedule": {
       "enabled": {
         "hint": "Sets one water change cadence for every reptile in the collection"

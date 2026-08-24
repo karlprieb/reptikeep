@@ -6,7 +6,7 @@ import { ScrollView, StyleSheet } from "react-native";
 import { useTranslation } from "react-i18next";
 
 import { EmptyState } from "@/components/empty-state";
-import { IOSPageHeader } from "@/components/page-header";
+import { PageHeader } from "@/components/page-header";
 import { ReptileEmptyState } from "@/components/reptile-list";
 import { ReptileRows } from "@/components/reptile-rows";
 import { MaxContentWidth, Spacing } from "@/constants/theme";
@@ -67,7 +67,7 @@ export default function SearchScreen() {
           <ReptileRows animals={results} lastFed={lastFed} />
         )}
       </ScrollView>
-      <IOSPageHeader title={t("search.title")} />
+      <PageHeader title={t("search.title")} />
       <Stack.SearchBar
         ref={searchBarRef}
         autoCapitalize="none"
