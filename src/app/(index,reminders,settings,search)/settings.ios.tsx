@@ -24,13 +24,13 @@ import { useTranslation } from "react-i18next";
 
 import { DefaultPicker, useFormModifiers } from "@/components/form-sheet";
 import { PageHeader } from "@/components/page-header";
+import { ScheduleFields } from "@/components/schedule-fields";
 import {
   careScheduleFromFields,
   isScheduleValid,
-  ScheduleFields,
   scheduleCustomDays,
   type ScheduleSelection,
-} from "@/components/schedule-fields";
+} from "@/utils/schedule";
 import { useTheme } from "@/hooks/use-theme";
 import { careSchedules$ } from "@/state/care-schedule";
 import { DEFECATION_TYPES } from "@/state/defecation";

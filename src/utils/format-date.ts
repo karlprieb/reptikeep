@@ -59,6 +59,10 @@ export function toCalendarDate(date: Date): string {
   return `${year}-${month}-${day}`;
 }
 
+export function fromUtcMidnight(date: Date): Date {
+  return new Date(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate());
+}
+
 export function fromCalendarDate(value: string): Date | null {
   const parsed = parseIsoCalendarDate(value);
   if (!parsed) return null;

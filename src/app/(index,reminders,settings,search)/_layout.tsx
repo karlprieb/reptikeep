@@ -29,6 +29,15 @@ const FORM_SHEET_OPTIONS = {
   headerBlurEffect: "systemChromeMaterial",
 } as const;
 
+const REPTILE_FORM_OPTIONS =
+  Platform.OS === "android"
+    ? ({
+        presentation: "card",
+        animation: "slide_from_bottom",
+        headerShown: false,
+      } as const)
+    : FORM_SHEET_OPTIONS;
+
 const ACTIVITY_SHEET_OPTIONS = {
   sheetAllowedDetents: [0.85, 1],
   sheetInitialDetentIndex: "last" as const,
@@ -76,7 +85,7 @@ export default function TabStackLayout({ segment }: { segment: string }) {
       />
       <Stack.Screen
         name="add-reptile"
-        options={{ ...FORM_SHEET_OPTIONS, title: t("newReptile.title") }}
+        options={{ ...REPTILE_FORM_OPTIONS, title: t("newReptile.title") }}
       />
       <Stack.Screen
         name="animal/[id]"
@@ -114,7 +123,7 @@ export default function TabStackLayout({ segment }: { segment: string }) {
       />
       <Stack.Screen
         name="animal/[id]/edit"
-        options={{ ...FORM_SHEET_OPTIONS, title: t("editReptile.title") }}
+        options={{ ...REPTILE_FORM_OPTIONS, title: t("editReptile.title") }}
       />
       <Stack.Screen
         name="animal/[id]/feed"

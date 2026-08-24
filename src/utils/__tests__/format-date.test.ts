@@ -5,6 +5,7 @@ import {
   formatAbsoluteDate,
   formatAbsoluteTime,
   fromCalendarDate,
+  fromUtcMidnight,
   relativeYearsMonths,
   toCalendarDate,
 } from "@/utils/format-date";
@@ -217,5 +218,30 @@ describe("calendar dates", () => {
 
   it("accepts February 29 in a leap year", () => {
     expect(fromCalendarDate("2024-02-29")?.getDate()).toBe(29);
+  });
+});
+
+describe("fromUtcMidnight", () => {
+  it("keeps the calendar day the Android picker reported", () => {
+    for (const [month, day] of [
+      [0, 1],
+      [7, 24],
+      [11, 31],
+    ] as const) {
+      const picked = new Date(Date.UTC(2026, month, day));
+
+      expect(toCalendarDate(fromUtcMidnight(picked))).toBe(
+        toCalendarDate(new Date(2026, month, day)),
+      );
+    }
+  });
+
+  it("returns local midnight so stored and displayed days agree", () => {
+    const local = fromUtcMidnight(new Date(Date.UTC(2026, 7, 24)));
+
+    expect(local.getFullYear()).toBe(2026);
+    expect(local.getMonth()).toBe(7);
+    expect(local.getDate()).toBe(24);
+    expect(local.getHours()).toBe(0);
   });
 });
