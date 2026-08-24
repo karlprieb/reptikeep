@@ -1,3 +1,5 @@
+export const FAB_CLEARANCE = 0;
+
 export type AddReptileFabProps = {
   onPress: () => void;
   accessibilityLabel: string;

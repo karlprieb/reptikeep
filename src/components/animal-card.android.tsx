@@ -246,7 +246,12 @@ function AnimalCardBase({
                     tint={theme.danger}
                     size={iconSize}
                   />
-                  <Text style={composeTextStyle("bodyS")} color={theme.danger}>
+                  <Text
+                    style={composeTextStyle("bodyS")}
+                    color={theme.danger}
+                    maxLines={2}
+                    overflow="ellipsis"
+                  >
                     {task.label}
                   </Text>
                 </Row>
@@ -261,7 +266,12 @@ function AnimalCardBase({
                   tint={feedingColor}
                   size={iconSize}
                 />
-                <Text style={composeTextStyle("bodyS")} color={feedingColor}>
+                <Text
+                  style={composeTextStyle("bodyS")}
+                  color={feedingColor}
+                  maxLines={2}
+                  overflow="ellipsis"
+                >
                   {feeding.line}
                 </Text>
               </Row>
@@ -280,7 +290,12 @@ function AnimalCardBase({
               verticalAlignment="center"
               horizontalArrangement={{ spacedBy: Spacing["2xs"] }}
             >
-              <Text style={composeTextStyle("title")} color={titleColor}>
+              <Text
+                style={composeTextStyle("title")}
+                color={titleColor}
+                maxLines={1}
+                overflow="ellipsis"
+              >
                 {animal.name}
               </Text>
               {symbol ? (
@@ -291,7 +306,12 @@ function AnimalCardBase({
             </Row>
 
             {animal.commonName ? (
-              <Text style={composeTextStyle("body")} color={subtitleColor}>
+              <Text
+                style={composeTextStyle("body")}
+                color={subtitleColor}
+                maxLines={2}
+                overflow="ellipsis"
+              >
                 {animal.commonName}
               </Text>
             ) : null}
@@ -300,6 +320,8 @@ function AnimalCardBase({
               <Text
                 style={{ ...composeTextStyle("bodyS"), fontStyle: "italic" }}
                 color={subtitleColor}
+                maxLines={1}
+                overflow="ellipsis"
               >
                 {animal.scientificName}
               </Text>

@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import { Animated } from "react-native";
 import { useTranslation } from "react-i18next";
 
-import { AddReptileFab } from "@/components/add-reptile-fab";
+import { AddReptileFab, FAB_CLEARANCE } from "@/components/add-reptile-fab";
 import {
   MaterialAppBar,
   type AppBarMenuItem,
@@ -101,6 +101,7 @@ export default function ReptilesScreen() {
         onAddPress={handleAdd}
         scrollY={scrollY}
         contentInsetTop={appBarHeight}
+        contentInsetBottom={FAB_CLEARANCE}
       />
 
       <AddReptileFab

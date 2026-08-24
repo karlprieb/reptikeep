@@ -65,6 +65,7 @@ export type ReptileListProps = {
   onAddPress: () => void;
   scrollY?: Animated.Value;
   contentInsetTop?: number;
+  contentInsetBottom?: number;
 };
 
 const CARD_GAP = Spacing.md;
@@ -126,6 +127,7 @@ export function ReptileList({
   onAddPress,
   scrollY,
   contentInsetTop,
+  contentInsetBottom,
 }: ReptileListProps) {
   const { width, fontScale } = useWindowDimensions();
   const theme = useTheme();
@@ -172,7 +174,13 @@ export function ReptileList({
     [scrollY],
   );
 
-  const insetStyle = contentInsetTop ? { paddingTop: contentInsetTop } : null;
+  const insetStyle =
+    contentInsetTop || contentInsetBottom
+      ? {
+          paddingTop: contentInsetTop || undefined,
+          paddingBottom: contentInsetBottom || undefined,
+        }
+      : null;
 
   if (animals.length === 0) {
     return (
