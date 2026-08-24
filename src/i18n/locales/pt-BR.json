@@ -405,7 +405,10 @@
     "changePhoto": "Alterar foto",
     "removePhoto": "Remover foto",
     "photoSaveError": "Não foi possível salvar esta foto. Tente novamente ou remova-a para salvar sem foto.",
-    "details": "Detalhes"
+    "details": "Detalhes",
+    "nameRequired": "Dê um nome a este réptil para salvar",
+    "selectDate": "Escolher data",
+    "photoPickError": "Não foi possível abrir sua galeria de fotos. Tente novamente."
   },
   "feedingSchedule": {
     "section": "Rotina de alimentação",

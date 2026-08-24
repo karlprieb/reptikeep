@@ -44,6 +44,7 @@ export type FormSheetChromeProps = {
   animalName?: string;
   editing?: boolean;
   saveDisabled: boolean;
+  cancelDisabled?: boolean;
   onSave: () => void;
 };
 
@@ -52,6 +53,7 @@ export function FormSheetChrome({
   animalName,
   editing = false,
   saveDisabled,
+  cancelDisabled = false,
   onSave,
 }: FormSheetChromeProps) {
   const theme = useTheme();
@@ -69,6 +71,7 @@ export function FormSheetChrome({
           tintColor={theme.textSecondary}
           accessibilityLabel={t(`${namespace}.cancel`)}
           accessibilityHint={t(`${namespace}.cancelHint`)}
+          disabled={cancelDisabled}
           onPress={() => router.back()}
         >
           {t(`${namespace}.cancel`)}

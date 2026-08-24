@@ -1,1 +1,5 @@
-export { default } from "@/components/android-pending";
+import { ReptileFormSheet } from "@/components/reptile-form-sheet";
+
+export default function AddReptileScreen() {
+  return <ReptileFormSheet />;
+}

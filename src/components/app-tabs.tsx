@@ -1,16 +1,22 @@
+import { usePathname } from "expo-router";
 import { NativeTabs } from "expo-router/unstable-native-tabs";
+import { Platform } from "react-native";
 import { useTranslation } from "react-i18next";
 
 import { useTheme } from "@/hooks/use-theme";
 
 const REPTILES_ICON = require("@/assets/images/tabIcons/reptiles.png");
 
+const FULL_SCREEN_ROUTES = /^\/add-reptile$|^\/animal\/[^/]+\/edit$/;
+
 export default function AppTabs() {
   const colors = useTheme();
   const { t } = useTranslation();
+  const pathname = usePathname();
 
   return (
     <NativeTabs
+      hidden={Platform.OS === "android" && FULL_SCREEN_ROUTES.test(pathname)}
       backgroundColor={colors.bg}
       indicatorColor={colors.surface}
       iconColor={{ default: colors.textSecondary, selected: colors.primary }}

@@ -405,7 +405,10 @@
     "changePhoto": "Change photo",
     "removePhoto": "Remove photo",
     "photoSaveError": "We couldn't save this photo. Try again or remove it to save without a photo.",
-    "details": "Details"
+    "details": "Details",
+    "nameRequired": "Give this reptile a name to save",
+    "selectDate": "Select date",
+    "photoPickError": "We couldn't open your photo library. Try again."
   },
   "feedingSchedule": {
     "section": "Feeding schedule",
