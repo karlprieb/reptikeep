@@ -584,6 +584,7 @@ export function ReptileFormSheet({ animal }: ReptileFormSheetProps) {
           >
             <IconButton
               onClick={() => router.back()}
+              enabled={!form.isSaving}
               colors={{ contentColor: theme.textSecondary }}
             >
               <Icon
@@ -959,7 +960,7 @@ function DateField({
               source={CALENDAR_ICON}
               tint={theme.textSecondary}
               size={iconSize}
-              contentDescription={t("reptileForm.selectDate")}
+              contentDescription={`${label}: ${t("reptileForm.selectDate")}`}
             />
           </IconButton>
         </OutlinedTextField.TrailingIcon>

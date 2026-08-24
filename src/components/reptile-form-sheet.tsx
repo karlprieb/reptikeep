@@ -144,6 +144,7 @@ export function ReptileFormSheet({ animal }: ReptileFormSheetProps) {
     waterReminder,
     cleaningReminder,
     canSave,
+    isSaving,
     saveError,
     waterFooter,
     cleaningFooter,
@@ -170,6 +171,7 @@ export function ReptileFormSheet({ animal }: ReptileFormSheetProps) {
         namespace={animal ? "editReptile" : "newReptile"}
         animalName={animal?.name}
         saveDisabled={!canSave}
+        cancelDisabled={isSaving}
         onSave={handleConfirm}
       />
 

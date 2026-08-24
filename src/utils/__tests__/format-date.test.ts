@@ -222,17 +222,19 @@ describe("calendar dates", () => {
 });
 
 describe("fromUtcMidnight", () => {
+  it("shifts a UTC midnight into the previous local day without it", () => {
+    expect(toCalendarDate(new Date(Date.UTC(2026, 7, 24)))).toBe("2026-08-23");
+  });
+
   it("keeps the calendar day the Android picker reported", () => {
-    for (const [month, day] of [
-      [0, 1],
-      [7, 24],
-      [11, 31],
+    for (const [month, day, expected] of [
+      [0, 1, "2026-01-01"],
+      [7, 24, "2026-08-24"],
+      [11, 31, "2026-12-31"],
     ] as const) {
       const picked = new Date(Date.UTC(2026, month, day));
 
-      expect(toCalendarDate(fromUtcMidnight(picked))).toBe(
-        toCalendarDate(new Date(2026, month, day)),
-      );
+      expect(toCalendarDate(fromUtcMidnight(picked))).toBe(expected);
     }
   });
 
