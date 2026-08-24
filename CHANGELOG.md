@@ -34,6 +34,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   Your records stay on the device and in the backup files you export
   yourself.
 
+### Fixed
+
+- Replacing a reptile's photo no longer shows the old picture until you
+  restart the app. The image cache now notices the new file immediately.
+
 ## [0.4.0] - 2026-08-19
 
 ### Added

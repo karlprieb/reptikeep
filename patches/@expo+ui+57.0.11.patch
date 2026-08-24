@@ -31,10 +31,10 @@ index 664eb10..44b7fb9 100644
    }
  }
 diff --git a/node_modules/@expo/ui/ios/ImageView.swift b/node_modules/@expo/ui/ios/ImageView.swift
-index 170de73..94980d8 100644
+index 170de73..1e67acf 100644
 --- a/node_modules/@expo/ui/ios/ImageView.swift
 +++ b/node_modules/@expo/ui/ios/ImageView.swift
-@@ -12,6 +12,35 @@ public final class ImageViewProps: UIBaseViewProps {
+@@ -12,6 +12,37 @@ public final class ImageViewProps: UIBaseViewProps {
    var onTap = EventDispatcher()
  }
  
@@ -50,8 +50,10 @@ index 170de73..94980d8 100644
 +      return nil
 +    }
 +
-+    let modified = (try? FileManager.default.attributesOfItem(atPath: url.path))?[.modificationDate] as? Date
-+    let key = "\(url.absoluteString)@\(modified?.timeIntervalSince1970 ?? 0)" as NSString
++    let attributes = try? FileManager.default.attributesOfItem(atPath: url.path)
++    let size = (attributes?[.size] as? NSNumber)?.int64Value ?? 0
++    let modified = (attributes?[.modificationDate] as? Date)?.timeIntervalSinceReferenceDate ?? 0
++    let key = "\(url.absoluteString)@\(size):\(String(format: "%.6f", modified))" as NSString
 +
 +    if let cached = shared.object(forKey: key) {
 +      return cached
@@ -70,7 +72,7 @@ index 170de73..94980d8 100644
  public struct ImageView: ExpoSwiftUI.View {
    @ObservedObject public var props: ImageViewProps
  
-@@ -41,10 +70,7 @@ public struct ImageView: ExpoSwiftUI.View {
+@@ -41,10 +72,7 @@ public struct ImageView: ExpoSwiftUI.View {
        symbolImage
          .applyImageModifiers(props.modifiers, appContext: props.appContext)
          .applyOnTapGesture(useTapGesture: props.useTapGesture, eventDispatcher: props.onTap)
