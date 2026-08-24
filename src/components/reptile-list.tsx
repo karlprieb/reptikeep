@@ -36,13 +36,14 @@ export function ReptileEmptyState({
   showAction = true,
 }: ReptileEmptyStateProps) {
   const { t } = useTranslation();
+  const offersAdd = showAction && Platform.OS !== "android";
 
   return (
     <EmptyState
       title={t("reptiles.empty.title")}
       description={t("reptiles.empty.subtitle")}
       action={
-        showAction
+        offersAdd
           ? {
               label: t("reptiles.add"),
               accessibilityLabel: t("a11y.addReptile.label"),
@@ -161,6 +162,16 @@ export function ReptileList({
     [scrollY, growNearEnd],
   );
 
+  const trackScrollOnly = useMemo(
+    () =>
+      scrollY
+        ? Animated.event([{ nativeEvent: { contentOffset: { y: scrollY } } }], {
+            useNativeDriver: true,
+          })
+        : undefined,
+    [scrollY],
+  );
+
   const insetStyle = contentInsetTop ? { paddingTop: contentInsetTop } : null;
 
   if (animals.length === 0) {
@@ -175,10 +186,7 @@ export function ReptileList({
           insetStyle,
         ]}
       >
-        <ReptileEmptyState
-          onAddPress={onAddPress}
-          showAction={Platform.OS !== "android"}
-        />
+        <ReptileEmptyState onAddPress={onAddPress} />
       </Animated.ScrollView>
     );
   }
@@ -189,7 +197,7 @@ export function ReptileList({
         style={[styles.scroll, { backgroundColor: theme.bg }]}
         contentInsetAdjustmentBehavior="automatic"
         contentContainerStyle={[styles.content, insetStyle]}
-        onScroll={handleScroll}
+        onScroll={trackScrollOnly}
         scrollEventThrottle={16}
       >
         <ReptileRows animals={animals} lastFed={lastFed} />

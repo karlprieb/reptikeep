@@ -17,6 +17,7 @@ import {
   type LayoutChangeEvent,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useTranslation } from "react-i18next";
 
 import { Spacing } from "@/constants/theme";
 import { useColorScheme, useTheme } from "@/hooks/use-theme";
@@ -172,6 +173,7 @@ export function MaterialAppBar({
 type AppBarMenuProps = NonNullable<MaterialAppBarProps["menu"]>;
 
 function AppBarMenu({ icon, accessibilityLabel, items }: AppBarMenuProps) {
+  const { t } = useTranslation();
   const theme = useTheme();
   const [expanded, setExpanded] = useState(false);
 
@@ -219,6 +221,7 @@ function AppBarMenu({ icon, accessibilityLabel, items }: AppBarMenuProps) {
                         source={CHECK_ICON}
                         tint={theme.primary}
                         size={ACTION_ICON_SIZE}
+                        contentDescription={t("a11y.selected")}
                       />
                     </DropdownMenuItem.TrailingIcon>
                   ) : null}

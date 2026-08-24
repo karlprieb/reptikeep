@@ -82,7 +82,10 @@ export default function ReptilesScreen() {
       type: "item",
       label: t(`reptiles.view.${mode}`),
       selected: view === mode,
-      onPress: () => setReptileView(mode),
+      onPress: () => {
+        scrollY.setValue(0);
+        setReptileView(mode);
+      },
     })),
   ];
 

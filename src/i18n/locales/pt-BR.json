@@ -587,6 +587,7 @@
       "water": "Desative para registrar manutenção do terrário sem troca de água",
       "cleaning": "Ative para contar isto na rotina de limpeza do terrário"
     },
+    "selected": "Selecionado",
     "waterSchedule": {
       "enabled": {
         "hint": "Define uma frequência de troca de água para todos os répteis da coleção"

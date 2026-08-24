@@ -231,14 +231,14 @@ function AnimalCardBase({
                   verticalAlignment="center"
                   horizontalArrangement={{ spacedBy: Spacing["2xs"] }}
                   modifiers={[
+                    clip(Shapes.RoundedCorner(Radius.pill)),
+                    background(theme.dangerSurface),
                     padding(
                       Spacing.xs,
                       Spacing["2xs"],
                       Spacing.xs,
                       Spacing["2xs"],
                     ),
-                    background(theme.dangerSurface),
-                    clip(Shapes.RoundedCorner(Radius.pill)),
                   ]}
                 >
                   <Icon

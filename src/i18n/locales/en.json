@@ -587,6 +587,7 @@
       "water": "Turn off to log enclosure upkeep without a water change",
       "cleaning": "Turn on to count this toward the enclosure cleaning schedule"
     },
+    "selected": "Selected",
     "waterSchedule": {
       "enabled": {
         "hint": "Sets one water change cadence for every reptile in the collection"
