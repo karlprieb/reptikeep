@@ -511,7 +511,7 @@ export function ReptileFormSheet({ animal }: ReptileFormSheetProps) {
                       : "defaults.frozenNo",
                   )
                 }
-                inherited={form.frozenTag(globalDefaults.frozen)}
+                inherited={frozenTag(globalDefaults.frozen)}
                 value={
                   defaults.frozen === undefined
                     ? undefined

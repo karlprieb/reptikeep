@@ -362,6 +362,60 @@ describe("ReptileFormSheet photo persistence", () => {
     expect(animalState.animals$.peek()).toEqual({});
     expect(router.back).not.toHaveBeenCalled();
   });
+
+  it("explains a denied photo permission instead of doing nothing", async () => {
+    mockRequestMediaLibraryPermissionsAsync.mockResolvedValue({
+      granted: false,
+      status: ImagePicker.PermissionStatus.DENIED,
+      expires: "never",
+      canAskAgain: true,
+      accessPrivileges: "none",
+    });
+    const screen = render(<ReptileFormSheet />);
+    fireEvent.changeText(screen.getByPlaceholderText("Name"), "Willow");
+
+    fireEvent.press(screen.getByLabelText("Add photo"));
+
+    await screen.findByText(
+      "ReptiKeep needs access to your photos to add one.",
+    );
+    expect(mockLaunchImageLibraryAsync).not.toHaveBeenCalled();
+    expect(screen.getByLabelText("Add photo")).toBeTruthy();
+
+    fireEvent.press(screen.getByLabelText("Save"));
+    await waitFor(() => {
+      expect(Object.values(animalState.animals$.peek())).toHaveLength(1);
+    });
+    expect(Object.values(animalState.animals$.peek())[0].photo).toBeUndefined();
+  });
+
+  it("reports a picker that rejects and leaves the form usable", async () => {
+    mockLaunchImageLibraryAsync.mockRejectedValueOnce(
+      new Error("picker unavailable"),
+    );
+    const screen = render(<ReptileFormSheet />);
+    fireEvent.changeText(screen.getByPlaceholderText("Name"), "Willow");
+
+    fireEvent.press(screen.getByLabelText("Add photo"));
+
+    await screen.findByText("We couldn't open your photo library. Try again.");
+    expect(screen.getByLabelText("Add photo")).toBeTruthy();
+
+    await pickPhoto(screen);
+    expect(screen.queryByText(/couldn't open your photo library/)).toBeNull();
+  });
+
+  it("reports a permission request that rejects", async () => {
+    mockRequestMediaLibraryPermissionsAsync.mockRejectedValueOnce(
+      new Error("permission service down"),
+    );
+    const screen = render(<ReptileFormSheet />);
+
+    fireEvent.press(screen.getByLabelText("Add photo"));
+
+    await screen.findByText("We couldn't open your photo library. Try again.");
+    expect(mockLaunchImageLibraryAsync).not.toHaveBeenCalled();
+  });
 });
 
 const EXISTING_PHOTO = "file:///documents/animal-photos/willow.webp";
