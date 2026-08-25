@@ -10,15 +10,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - **Android, in progress** — ReptiKeep now runs on Android. It is built in
-  the platform's own vocabulary rather than ported from the iPhone: a top
-  app bar that collapses as you scroll, a floating add button, Material
-  list rows, and the system back gesture. The warm palette, the slab-serif
-  names and the monospaced numbers are the same on both phones.
-- The **Reptiles tab is the only screen finished so far**. Reminders,
-  Settings, a reptile's detail screen and every form say so plainly instead
-  of showing an empty page. There is no way to add a reptile on Android
-  yet, so treat this as a preview rather than a second home for your
-  collection — iPhone remains the complete app.
+  the platform's own vocabulary rather than ported from the iPhone: a
+  Material top app bar, a floating add button, Material list rows, and the
+  system back gesture. The warm palette, the slab-serif names and the
+  monospaced numbers are the same on both phones.
+- **Adding and editing a reptile now works on Android**, as a full-screen
+  page rather than a sheet, the way Android opens a new contact. A close
+  button, the title and Save sit together in the header; the photo is a
+  round well you tap; the name, species, sex, dates, schedules and logging
+  defaults use Material's own fields, menus and date picker. Species
+  suggestions fill in the common and scientific name as you type.
+- The **Reptiles tab and the add-and-edit form are the screens finished so
+  far**. Reminders, Settings and a reptile's detail screen still say so
+  plainly instead of showing an empty page, so treat this as a preview
+  rather than a second home for your collection — iPhone remains the
+  complete app.
 - Reminder notifications on Android arrive under their own **"Care
   reminders"** channel, so you can change their sound, importance or mute
   them from Android's notification settings without silencing anything else.
@@ -27,6 +33,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- The Android Reptiles screen sits closer to Material's own patterns. The
+  screen title shares one line with the menu button instead of stacking
+  above it. List view gives each reptile its own rounded row, grouped into
+  a single block the way Android groups settings. Cards fade more smoothly
+  over a photo, and a reptile without one no longer leaves a gap in the
+  middle of the card.
+- TalkBack reads a row in list view as one reptile, giving the name,
+  species, sex and feeding status together instead of stopping on each
+  piece in turn.
 - Nothing changes on iPhone. The iOS screens were moved so the two
   platforms can sit side by side, but they look and behave exactly as they
   did in 0.4.0.
