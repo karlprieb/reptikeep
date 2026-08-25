@@ -20,11 +20,19 @@ import {
   width,
 } from "@expo/ui/jetpack-compose/modifiers";
 import { memo } from "react";
-import { Image, Pressable, useWindowDimensions } from "react-native";
+import {
+  Image,
+  Pressable,
+  StyleSheet,
+  useWindowDimensions,
+} from "react-native";
 import { useTranslation } from "react-i18next";
 
 import { Radius, Spacing, type Theme } from "@/constants/theme";
-import { composeTextStyle } from "@/constants/type-font-compose";
+import {
+  composeSexSymbolStyle,
+  composeTextStyle,
+} from "@/constants/type-font-compose";
 import type { Animal } from "@/state/animal";
 import type { CareSchedule } from "@/state/care-schedule";
 import { overdueRoutines, SEX_SYMBOLS } from "@/utils/animal-card-status";
@@ -32,7 +40,8 @@ import { getAnimalPhotoUri } from "@/utils/animal-photo-storage";
 import { feedingStatus } from "@/utils/feeding-status";
 
 const SCRIM_COLOR = "14,9,4";
-const SCRIM_BANDS = 6;
+const SCRIM_BANDS = 16;
+const SCRIM_MAX_ALPHA = 0.92;
 const ON_PHOTO_TEXT = "#FFFFFF";
 const ON_PHOTO_TEXT_SECONDARY = "rgba(255, 255, 255, 0.82)";
 const ICON_MAX_SCALE = 2;
@@ -70,13 +79,13 @@ function ScrimBands({
   cardWidth: number;
   scrimHeight: number;
 }) {
-  const bandHeight = scrimHeight / SCRIM_BANDS;
+  const bandHeight = Math.ceil(scrimHeight / SCRIM_BANDS);
   return (
     <Column
       modifiers={[width(cardWidth), height(scrimHeight), align("bottomStart")]}
     >
       {Array.from({ length: SCRIM_BANDS }, (_, i) => {
-        const bandAlpha = i / (SCRIM_BANDS - 1);
+        const bandAlpha = (i / (SCRIM_BANDS - 1)) * SCRIM_MAX_ALPHA;
         return (
           <Box
             key={i}
@@ -180,7 +189,7 @@ function AnimalCardBase({
           modifiers={[
             width(cardWidth),
             height(cardHeight),
-            clip(Shapes.RoundedCorner(Radius.lg)),
+            clip(Shapes.RoundedCorner(Radius.md)),
             clickable(onPress),
           ]}
         >
@@ -188,8 +197,9 @@ function AnimalCardBase({
             <RNHostView modifiers={[matchParentSize()]}>
               <Image
                 source={{ uri: getAnimalPhotoUri(animal.photo) }}
-                style={{ width: cardWidth, height: cardHeight }}
+                style={styles.photo}
                 resizeMode="cover"
+                accessibilityIgnoresInvertColors
               />
             </RNHostView>
           ) : (
@@ -286,24 +296,19 @@ function AnimalCardBase({
             ]}
             verticalArrangement={{ spacedBy: Spacing["2xs"] }}
           >
-            <Row
-              verticalAlignment="center"
-              horizontalArrangement={{ spacedBy: Spacing["2xs"] }}
+            <Text
+              style={composeTextStyle("title")}
+              color={titleColor}
+              maxLines={1}
+              overflow="ellipsis"
             >
-              <Text
-                style={composeTextStyle("title")}
-                color={titleColor}
-                maxLines={1}
-                overflow="ellipsis"
-              >
-                {animal.name}
-              </Text>
+              {animal.name}
               {symbol ? (
-                <Text style={composeTextStyle("title")} color={titleColor}>
-                  {symbol}
-                </Text>
+                <Text
+                  style={composeSexSymbolStyle("title")}
+                >{` ${symbol}`}</Text>
               ) : null}
-            </Row>
+            </Text>
 
             {animal.commonName ? (
               <Text
@@ -332,5 +337,12 @@ function AnimalCardBase({
     </Pressable>
   );
 }
+
+const styles = StyleSheet.create({
+  photo: {
+    width: "100%",
+    height: "100%",
+  },
+});
 
 export const AnimalCard = memo(AnimalCardBase);

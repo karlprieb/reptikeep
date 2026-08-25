@@ -92,15 +92,15 @@
     "sort": {
       "by": "Ordenar por",
       "name": "Nome",
-      "commonName": "Nome Popular",
-      "scientificName": "Nome Científico",
-      "lastActivity": "Última Atividade",
+      "commonName": "Nome popular",
+      "scientificName": "Nome científico",
+      "lastActivity": "Última atividade",
       "ascending": "Crescente",
       "descending": "Decrescente"
     },
     "view": {
       "grid": "Grade",
-      "single": "Coluna Única",
+      "single": "Coluna única",
       "list": "Lista"
     }
   },

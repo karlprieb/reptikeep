@@ -14,7 +14,6 @@ import {
   StyleSheet,
   View,
   type ImageSourcePropType,
-  type LayoutChangeEvent,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTranslation } from "react-i18next";
@@ -23,12 +22,6 @@ import { Spacing } from "@/constants/theme";
 import { useColorScheme, useTheme } from "@/hooks/use-theme";
 
 const CHECK_ICON = require("@/assets/images/icons/check.xml");
-
-const HEADLINE_MEDIUM = {
-  fontFamily: "Solway-ExtraBold",
-  fontSize: 28,
-  lineHeight: 36,
-} as const;
 
 const TITLE_LARGE = {
   fontFamily: "Solway-Bold",
@@ -44,9 +37,8 @@ const LABEL_LARGE = {
   letterSpacing: 0.1,
 } as const;
 
-const TOP_ROW_HEIGHT = 64;
-const TITLE_LINE_HEIGHT = HEADLINE_MEDIUM.lineHeight;
-const TITLE_BOTTOM_PADDING = 12;
+const BAR_HEIGHT = 64;
+const LIFT_RANGE = 8;
 const EDGE_INSET = 4;
 const TOUCH_TARGET = 48;
 const ACTION_ICON_SIZE = 24;
@@ -81,42 +73,25 @@ export function MaterialAppBar({
   const theme = useTheme();
   const scheme = useColorScheme();
   const insets = useSafeAreaInsets();
-  const [titleHeight, setTitleHeight] = useState<number>(TITLE_LINE_HEIGHT);
 
-  const range = Math.max(1, titleHeight + TITLE_BOTTOM_PADDING);
-  const expandedHeight = insets.top + TOP_ROW_HEIGHT + range;
+  const barHeight = insets.top + BAR_HEIGHT;
 
   useEffect(() => {
-    onHeightChange(expandedHeight);
-  }, [expandedHeight, onHeightChange]);
+    onHeightChange(barHeight);
+  }, [barHeight, onHeightChange]);
 
-  const { lift, pin, expandedTitle, collapsedTitle, lifted } = useMemo(() => {
-    const clamped = (inputRange: number[], outputRange: number[]) =>
-      scrollY.interpolate({ inputRange, outputRange, extrapolate: "clamp" });
-
-    return {
-      lift: clamped([0, range], [0, -range]),
-      pin: clamped([0, range], [0, range]),
-      expandedTitle: clamped([0, range * 0.6], [1, 0]),
-      collapsedTitle: clamped([range * 0.5, range], [0, 1]),
-      lifted: clamped([0, range], [0, 1]),
-    };
-  }, [scrollY, range]);
-
-  const measureTitle = (event: LayoutChangeEvent) =>
-    setTitleHeight(event.nativeEvent.layout.height);
+  const lifted = useMemo(
+    () =>
+      scrollY.interpolate({
+        inputRange: [0, LIFT_RANGE],
+        outputRange: [0, 1],
+        extrapolate: "clamp",
+      }),
+    [scrollY],
+  );
 
   return (
-    <Animated.View
-      style={[
-        styles.bar,
-        {
-          height: expandedHeight,
-          backgroundColor: theme.bg,
-          transform: [{ translateY: lift }],
-        },
-      ]}
-    >
+    <View style={[styles.bar, { height: barHeight, paddingTop: insets.top }]}>
       <StatusBar
         translucent
         backgroundColor="transparent"
@@ -125,48 +100,33 @@ export function MaterialAppBar({
 
       <Animated.View
         pointerEvents="none"
+        style={[StyleSheet.absoluteFill, { backgroundColor: theme.bg }]}
+      />
+      <Animated.View
+        pointerEvents="none"
         style={[
           StyleSheet.absoluteFill,
           { backgroundColor: theme.surface, opacity: lifted },
         ]}
       />
 
-      <Animated.Text
-        numberOfLines={1}
-        onLayout={measureTitle}
-        style={[
-          styles.expandedTitle,
-          HEADLINE_MEDIUM,
-          {
-            top: insets.top + TOP_ROW_HEIGHT,
-            color: theme.text,
-            opacity: expandedTitle,
-          },
-        ]}
-      >
-        {title}
-      </Animated.Text>
-
-      <Animated.View
-        style={[
-          styles.topRow,
-          { marginTop: insets.top, transform: [{ translateY: pin }] },
-        ]}
-      >
-        <Animated.Text
-          numberOfLines={1}
-          style={[
-            styles.collapsedTitle,
-            TITLE_LARGE,
-            { color: theme.text, opacity: collapsedTitle },
-          ]}
-        >
-          {title}
-        </Animated.Text>
+      <View style={styles.row}>
+        <View style={styles.title}>
+          <Host matchContents={{ horizontal: false, vertical: true }}>
+            <ComposeText
+              style={TITLE_LARGE}
+              color={theme.text}
+              maxLines={1}
+              overflow="ellipsis"
+            >
+              {title}
+            </ComposeText>
+          </Host>
+        </View>
 
         {menu ? <AppBarMenu {...menu} /> : null}
-      </Animated.View>
-    </Animated.View>
+      </View>
+    </View>
   );
 }
 
@@ -242,20 +202,15 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
   },
-  topRow: {
-    height: TOP_ROW_HEIGHT,
+  row: {
+    flex: 1,
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: EDGE_INSET,
   },
-  collapsedTitle: {
+  title: {
     flex: 1,
     paddingHorizontal: Spacing.sm,
-  },
-  expandedTitle: {
-    position: "absolute",
-    left: Spacing.md,
-    right: Spacing.md,
   },
   menu: {
     minWidth: TOUCH_TARGET,

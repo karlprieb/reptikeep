@@ -90,17 +90,17 @@
     "options": "Options",
     "optionsHint": "Sort, filter and change how your reptiles are shown",
     "sort": {
-      "by": "Sort By",
+      "by": "Sort by",
       "name": "Name",
-      "commonName": "Common Name",
-      "scientificName": "Scientific Name",
-      "lastActivity": "Last Activity",
+      "commonName": "Common name",
+      "scientificName": "Scientific name",
+      "lastActivity": "Last activity",
       "ascending": "Ascending",
       "descending": "Descending"
     },
     "view": {
       "grid": "Grid",
-      "single": "Single Column",
+      "single": "Single column",
       "list": "List"
     }
   },

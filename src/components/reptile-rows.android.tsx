@@ -2,105 +2,174 @@ import {
   Box,
   Column,
   Host,
-  HorizontalDivider,
   ListItem,
   RNHostView,
+  Row,
+  Shape,
   Surface,
   Text,
 } from "@expo/ui/jetpack-compose";
 import {
   background,
   clip,
-  height,
+  fillMaxSize,
+  fillMaxWidth,
+  semantics,
   Shapes,
-  width,
+  size,
 } from "@expo/ui/jetpack-compose/modifiers";
 import { router } from "expo-router";
-import { Image } from "react-native";
+import { Image, StyleSheet } from "react-native";
 import { useTranslation } from "react-i18next";
 
-import { Radius, type Theme } from "@/constants/theme";
-import { composeTextStyle } from "@/constants/type-font-compose";
+import { Radius, Spacing, type Theme } from "@/constants/theme";
+import {
+  composeSexSymbolStyle,
+  composeTextStyle,
+} from "@/constants/type-font-compose";
 import type { Animal } from "@/state/animal";
 import { useTheme } from "@/hooks/use-theme";
 import { SEX_SYMBOLS } from "@/utils/animal-card-status";
 import { getAnimalPhotoUri } from "@/utils/animal-photo-storage";
 import { feedingStatus } from "@/utils/feeding-status";
 
-const THUMBNAIL_SIZE = 44;
+const THUMBNAIL_SIZE = 56;
+
+const LIST_HEADLINE = {
+  fontFamily: "Solway-Bold",
+  fontSize: 16,
+  lineHeight: 24,
+} as const;
+
+const GROUP_OUTER_RADIUS = Radius.lg;
+const GROUP_INNER_RADIUS = Radius.xs;
+
+function groupShape(first: boolean, last: boolean) {
+  const top = first ? GROUP_OUTER_RADIUS : GROUP_INNER_RADIUS;
+  const bottom = last ? GROUP_OUTER_RADIUS : GROUP_INNER_RADIUS;
+
+  return Shape.RoundedCorner({
+    cornerRadii: {
+      topStart: top,
+      topEnd: top,
+      bottomStart: bottom,
+      bottomEnd: bottom,
+    },
+  });
+}
 
 type ReptileRowProps = {
   animal: Animal;
   lastFedAt?: string;
   theme: Theme;
-  divided: boolean;
+  first: boolean;
+  last: boolean;
 };
 
-function ReptileRow({ animal, lastFedAt, theme, divided }: ReptileRowProps) {
+function ReptileRow({
+  animal,
+  lastFedAt,
+  theme,
+  first,
+  last,
+}: ReptileRowProps) {
   const { t } = useTranslation();
   const feeding = feedingStatus(t, lastFedAt, animal.feedingSchedule);
   const feedingColor = feeding.overdue ? theme.danger : theme.textSecondary;
   const symbol = SEX_SYMBOLS[animal.sex];
+  const sex = animal.sex === "unknown" ? null : t(`sex.${animal.sex}`);
   const monogram = animal.name.trim().slice(0, 1).toLocaleUpperCase();
+
+  const label = [
+    animal.name,
+    animal.commonName,
+    animal.scientificName,
+    sex,
+    feeding.line,
+  ]
+    .filter((part): part is string => Boolean(part))
+    .join(", ");
 
   const openDetail = () => router.push(`/animal/${animal.id}`);
 
   return (
-    <>
-      {divided ? <HorizontalDivider color={theme.border} /> : null}
-      <Surface onClick={openDetail} color="transparent">
-        <ListItem
-          colors={{
-            containerColor: theme.surface,
-            contentColor: theme.text,
-            leadingContentColor: theme.textMuted,
-            supportingContentColor: feedingColor,
-          }}
-        >
-          <ListItem.LeadingContent>
+    <Surface
+      onClick={openDetail}
+      color={theme.surface}
+      shape={groupShape(first, last)}
+      border={{ width: 1, color: theme.border }}
+      modifiers={[
+        fillMaxWidth(),
+        semantics({
+          contentDescription: label,
+          role: "button",
+          mergeDescendants: true,
+        }),
+      ]}
+    >
+      <ListItem
+        colors={{
+          containerColor: theme.surface,
+          contentColor: theme.text,
+          supportingContentColor: feedingColor,
+        }}
+        modifiers={[fillMaxWidth()]}
+      >
+        <ListItem.LeadingContent>
+          <Box
+            modifiers={[
+              size(THUMBNAIL_SIZE, THUMBNAIL_SIZE),
+              clip(Shapes.RoundedCorner(Radius.sm)),
+              background(theme.surfaceSunken),
+            ]}
+          >
             {animal.photo ? (
-              <RNHostView
-                modifiers={[width(THUMBNAIL_SIZE), height(THUMBNAIL_SIZE)]}
-              >
+              <RNHostView modifiers={[fillMaxSize()]}>
                 <Image
                   source={{ uri: getAnimalPhotoUri(animal.photo) }}
-                  style={{
-                    width: THUMBNAIL_SIZE,
-                    height: THUMBNAIL_SIZE,
-                    borderRadius: Radius.sm,
-                  }}
+                  style={styles.thumbnail}
                   resizeMode="cover"
+                  accessibilityIgnoresInvertColors
                 />
               </RNHostView>
             ) : (
               <Column
                 horizontalAlignment="center"
                 verticalArrangement="center"
-                modifiers={[
-                  width(THUMBNAIL_SIZE),
-                  height(THUMBNAIL_SIZE),
-                  clip(Shapes.RoundedCorner(Radius.sm)),
-                ]}
+                modifiers={[fillMaxSize()]}
               >
-                <Text style={composeTextStyle("body")} color={theme.textMuted}>
+                <Text
+                  style={composeTextStyle("body")}
+                  color={theme.textSecondary}
+                >
                   {monogram}
                 </Text>
               </Column>
             )}
-          </ListItem.LeadingContent>
-          <ListItem.HeadlineContent>
-            <Text style={composeTextStyle("title")} color={theme.text}>
-              {[animal.name, symbol].filter(Boolean).join(" ")}
-            </Text>
-          </ListItem.HeadlineContent>
-          <ListItem.SupportingContent>
-            <Text style={composeTextStyle("bodyS")} color={feedingColor}>
-              {feeding.line}
-            </Text>
-          </ListItem.SupportingContent>
-        </ListItem>
-      </Surface>
-    </>
+          </Box>
+        </ListItem.LeadingContent>
+        <ListItem.HeadlineContent>
+          <Text
+            style={LIST_HEADLINE}
+            color={theme.text}
+            maxLines={1}
+            overflow="ellipsis"
+          >
+            {animal.name}
+            {symbol ? (
+              <Text style={composeSexSymbolStyle(LIST_HEADLINE)}>
+                {` ${symbol}`}
+              </Text>
+            ) : null}
+          </Text>
+        </ListItem.HeadlineContent>
+        <ListItem.SupportingContent>
+          <Text style={composeTextStyle("body")} color={feedingColor}>
+            {feeding.line}
+          </Text>
+        </ListItem.SupportingContent>
+      </ListItem>
+    </Surface>
   );
 }
 
@@ -114,33 +183,34 @@ export function ReptileRows({ animals, lastFed }: ReptileRowsProps) {
 
   return (
     <Host
-      style={{ width: "100%" }}
+      style={styles.host}
       matchContents={{ horizontal: false, vertical: true }}
     >
-      <Box
-        modifiers={[
-          clip(Shapes.RoundedCorner(Radius.lg)),
-          background(theme.surface),
-        ]}
+      <Column
+        modifiers={[fillMaxWidth()]}
+        verticalArrangement={{ spacedBy: Spacing["2xs"] }}
       >
-        <Surface
-          color="transparent"
-          border={{ width: 1, color: theme.border }}
-          modifiers={[clip(Shapes.RoundedCorner(Radius.lg))]}
-        >
-          <Column>
-            {animals.map((animal, index) => (
-              <ReptileRow
-                key={animal.id}
-                animal={animal}
-                lastFedAt={lastFed?.[animal.id]}
-                theme={theme}
-                divided={index > 0}
-              />
-            ))}
-          </Column>
-        </Surface>
-      </Box>
+        {animals.map((animal, index) => (
+          <ReptileRow
+            key={animal.id}
+            animal={animal}
+            lastFedAt={lastFed?.[animal.id]}
+            theme={theme}
+            first={index === 0}
+            last={index === animals.length - 1}
+          />
+        ))}
+      </Column>
     </Host>
   );
 }
+
+const styles = StyleSheet.create({
+  host: {
+    width: "100%",
+  },
+  thumbnail: {
+    width: "100%",
+    height: "100%",
+  },
+});

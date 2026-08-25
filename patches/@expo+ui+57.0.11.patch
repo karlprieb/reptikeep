@@ -1,3 +1,90 @@
+diff --git a/node_modules/@expo/ui/android/src/main/java/expo/modules/ui/ModifierRegistry.kt b/node_modules/@expo/ui/android/src/main/java/expo/modules/ui/ModifierRegistry.kt
+index d442c5e..674b66a 100644
+--- a/node_modules/@expo/ui/android/src/main/java/expo/modules/ui/ModifierRegistry.kt
++++ b/node_modules/@expo/ui/android/src/main/java/expo/modules/ui/ModifierRegistry.kt
+@@ -63,7 +63,9 @@ import androidx.compose.ui.layout.onVisibilityChanged
+ import androidx.compose.ui.layout.positionInWindow
+ import androidx.compose.ui.platform.LocalDensity
+ import androidx.compose.ui.semantics.Role
++import androidx.compose.ui.semantics.contentDescription
+ import androidx.compose.ui.semantics.contentType
++import androidx.compose.ui.semantics.role
+ import androidx.compose.ui.semantics.semantics
+ import androidx.compose.ui.unit.DpOffset
+ import androidx.compose.ui.unit.dp
+@@ -657,9 +659,19 @@ object ModifierRegistry {
+ 
+     register("semantics") { map, _, _, _ ->
+       val params = recordFromMap<SemanticsParams>(map)
+-      params.contentType.toContentType()?.let { ct ->
+-        Modifier.semantics { contentType = ct }
+-      } ?: Modifier
++      val resolvedContentType = params.contentType.toContentType()
++      val description = params.contentDescription
++      val resolvedRole = params.role.toSemanticsRole()
++
++      if (resolvedContentType == null && description == null && resolvedRole == null && !params.mergeDescendants) {
++        Modifier
++      } else {
++        Modifier.semantics(mergeDescendants = params.mergeDescendants) {
++          resolvedContentType?.let { contentType = it }
++          description?.let { contentDescription = it }
++          resolvedRole?.let { role = it }
++        }
++      }
+     }
+ 
+     register("clip") { map, _, _, _ ->
+diff --git a/node_modules/@expo/ui/android/src/main/java/expo/modules/ui/SemanticsModifier.kt b/node_modules/@expo/ui/android/src/main/java/expo/modules/ui/SemanticsModifier.kt
+index fd8cfe5..52e8d27 100644
+--- a/node_modules/@expo/ui/android/src/main/java/expo/modules/ui/SemanticsModifier.kt
++++ b/node_modules/@expo/ui/android/src/main/java/expo/modules/ui/SemanticsModifier.kt
+@@ -1,15 +1,30 @@
+ package expo.modules.ui
+ 
+ import androidx.compose.ui.autofill.ContentType
++import androidx.compose.ui.semantics.Role
+ import expo.modules.kotlin.records.Field
+ import expo.modules.kotlin.records.Record
+ import expo.modules.kotlin.types.OptimizedRecord
+ 
+ @OptimizedRecord
+ internal data class SemanticsParams(
+-  @Field val contentType: String? = null
++  @Field val contentType: String? = null,
++  @Field val contentDescription: String? = null,
++  @Field val role: String? = null,
++  @Field val mergeDescendants: Boolean = false
+ ) : Record
+ 
++internal fun String?.toSemanticsRole(): Role? = when (this) {
++  "button" -> Role.Button
++  "checkbox" -> Role.Checkbox
++  "switch" -> Role.Switch
++  "radioButton" -> Role.RadioButton
++  "tab" -> Role.Tab
++  "image" -> Role.Image
++  "dropdownList" -> Role.DropdownList
++  else -> null
++}
++
+ internal fun String?.toContentType(): ContentType? = when (this) {
+   "email" -> ContentType.EmailAddress
+   "username" -> ContentType.Username
+diff --git a/node_modules/@expo/ui/build/jetpack-compose/modifiers/index.d.ts b/node_modules/@expo/ui/build/jetpack-compose/modifiers/index.d.ts
+index e09bd93..9f0dc0c 100644
+--- a/node_modules/@expo/ui/build/jetpack-compose/modifiers/index.d.ts
++++ b/node_modules/@expo/ui/build/jetpack-compose/modifiers/index.d.ts
+@@ -307,6 +307,9 @@ export declare const testID: (tag: string) => import("./createModifier").Modifie
+  */
+ export declare const semantics: (params: {
+     contentType?: string;
++    contentDescription?: string;
++    role?: 'button' | 'checkbox' | 'switch' | 'radioButton' | 'tab' | 'image' | 'dropdownList';
++    mergeDescendants?: boolean;
+ }) => import("./createModifier").ModifierConfig;
+ type MaterialShapeName = 'cookie4Sided' | 'cookie6Sided' | 'cookie7Sided' | 'cookie9Sided' | 'cookie12Sided' | 'clover4Leaf' | 'clover8Leaf' | 'softBurst' | 'boom' | 'oval' | 'pill' | 'triangle' | 'diamond' | 'pentagon' | 'sunny' | 'verySunny' | 'fan' | 'pixelCircle' | 'pixelTriangle' | 'ghostish' | 'bun' | 'heart' | 'arch' | 'slanted' | 'puffy' | 'puffyDiamond';
+ type CornerRadii = {
 diff --git a/node_modules/@expo/ui/ios/ChartView.swift b/node_modules/@expo/ui/ios/ChartView.swift
 index 664eb10..44b7fb9 100644
 --- a/node_modules/@expo/ui/ios/ChartView.swift
@@ -84,3 +171,34 @@ index 170de73..1e67acf 100644
        Image(uiImage: uiImage)
          .applyImageModifiers(props.modifiers, appContext: props.appContext)
          .applyOnTapGesture(useTapGesture: props.useTapGesture, eventDispatcher: props.onTap)
+diff --git a/node_modules/@expo/ui/src/jetpack-compose/modifiers/index.ts b/node_modules/@expo/ui/src/jetpack-compose/modifiers/index.ts
+index 398f80a..1884869 100644
+--- a/node_modules/@expo/ui/src/jetpack-compose/modifiers/index.ts
++++ b/node_modules/@expo/ui/src/jetpack-compose/modifiers/index.ts
+@@ -445,8 +445,24 @@ export const testID = (tag: string) => createModifier('testID', { testID: tag })
+ 
+ /**
+  * Applies semantic properties. Wraps `Modifier.semantics { ... }`.
+- */
+-export const semantics = (params: { contentType?: string }) => createModifier('semantics', params);
++ * @param params.contentType - Autofill content type hint.
++ * @param params.contentDescription - Accessible name announced by TalkBack.
++ * @param params.role - Semantic role: 'button', 'checkbox', 'switch', 'radioButton', 'tab', 'image', or 'dropdownList'.
++ * @param params.mergeDescendants - Merge child semantics into this node so it is announced as one element.
++ */
++export const semantics = (params: {
++  contentType?: string;
++  contentDescription?: string;
++  role?:
++    | 'button'
++    | 'checkbox'
++    | 'switch'
++    | 'radioButton'
++    | 'tab'
++    | 'image'
++    | 'dropdownList';
++  mergeDescendants?: boolean;
++}) => createModifier('semantics', params);
+ 
+ // =============================================================================
+ // Clip Modifier & Shapes

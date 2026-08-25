@@ -54,6 +54,9 @@
       "exclude": [
         "react-native-reanimated",
         "react-native-worklets"
+      ],
+      "buildFromSource": [
+        "expo-ui"
       ]
     }
   },

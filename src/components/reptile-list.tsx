@@ -73,7 +73,7 @@ const CARD_GAP = Spacing.md;
 const CARD_PAGE = 8;
 
 const SQUARE_ASPECT_RATIO = 1;
-export const NO_PHOTO_SINGLE_COLUMN_HEIGHT = 176;
+export const NO_PHOTO_SINGLE_COLUMN_HEIGHT = 148;
 
 const TEXT_BLOCK_HEIGHT = 148;
 const MAX_TEXT_SCALE = 2;
