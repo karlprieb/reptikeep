@@ -20,11 +20,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   round well you tap; the name, species, sex, dates, schedules and logging
   defaults use Material's own fields, menus and date picker. Species
   suggestions fill in the common and scientific name as you type.
-- The **Reptiles tab and the add-and-edit form are the screens finished so
-  far**. Reminders, Settings and a reptile's detail screen still say so
-  plainly instead of showing an empty page, so treat this as a preview
-  rather than a second home for your collection — iPhone remains the
-  complete app.
+- **Settings now works on Android.** Logging defaults, the daily reminder
+  time, the water change and enclosure cleaning schedules, and the app
+  language are all set from Material's own rows, switches, menus and time
+  picker. A care routine takes a frequency, or "Custom" with the number of
+  days in between.
+- **Backup & restore now works on Android.** Export the whole collection or
+  a chosen set of reptiles — with or without preferences — to a file you can
+  share, and restore one back after a confirmation of what it contains.
+  "Reset app data" lives under its own advanced options, as on iPhone.
+- **The About screen now works on Android**, with the app version and a link
+  to the repository.
+- The **Reptiles tab, the add-and-edit form, Settings, Backup & restore and
+  About are the screens finished so far**. Reminders and a reptile's detail
+  screen still say so plainly instead of showing an empty page, so treat
+  this as a preview rather than a second home for your collection — iPhone
+  remains the complete app.
 - Reminder notifications on Android arrive under their own **"Care
   reminders"** channel, so you can change their sound, importance or mute
   them from Android's notification settings without silencing anything else.
@@ -53,6 +64,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Replacing a reptile's photo no longer shows the old picture until you
   restart the app. The image cache now notices the new file immediately.
+- Choosing a custom care schedule with no valid number of days no longer
+  saves a broken interval that never reminded you. The picker keeps
+  "Custom" selected and marks the days field until the number is valid.
 
 ## [0.4.0] - 2026-08-19
 
