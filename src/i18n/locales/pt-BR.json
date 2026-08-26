@@ -23,7 +23,8 @@
     "resetFooter": "Exclui permanentemente todos os répteis e registros de atividade deste dispositivo. O idioma não será alterado.",
     "resetMessage": "Esta ação não pode ser desfeita.",
     "resetConfirm": "Apagar dados",
-    "cancel": "Cancelar"
+    "cancel": "Cancelar",
+    "ok": "OK"
   },
   "backup": {
     "title": "Backup e restauração",

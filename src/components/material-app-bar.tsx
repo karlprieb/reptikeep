@@ -19,22 +19,15 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTranslation } from "react-i18next";
 
 import { Spacing } from "@/constants/theme";
+import { SECTION_LABEL } from "@/constants/type-font-compose";
 import { useColorScheme, useTheme } from "@/hooks/use-theme";
 
-const CHECK_ICON = require("@/assets/images/icons/check.xml");
+import CHECK_ICON from "@/assets/images/icons/check.xml";
 
 const TITLE_LARGE = {
   fontFamily: "Solway-Bold",
   fontSize: 22,
   lineHeight: 28,
-} as const;
-
-const LABEL_LARGE = {
-  fontFamily: "default",
-  fontSize: 14,
-  fontWeight: "500",
-  lineHeight: 20,
-  letterSpacing: 0.1,
 } as const;
 
 const BAR_HEIGHT = 64;
@@ -171,7 +164,7 @@ function AppBarMenu({ icon, accessibilityLabel, items }: AppBarMenuProps) {
                   }}
                 >
                   <DropdownMenuItem.Text>
-                    <ComposeText style={LABEL_LARGE} color={theme.text}>
+                    <ComposeText style={SECTION_LABEL} color={theme.text}>
                       {item.label}
                     </ComposeText>
                   </DropdownMenuItem.Text>

@@ -18,21 +18,15 @@ import {
 } from "@expo/ui/swift-ui/modifiers";
 import { useValue } from "@legendapp/state/react";
 import { router } from "expo-router";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { StyleSheet } from "react-native";
 import { useTranslation } from "react-i18next";
 
 import { DefaultPicker, useFormModifiers } from "@/components/form-sheet";
 import { PageHeader } from "@/components/page-header";
 import { ScheduleFields } from "@/components/schedule-fields";
-import {
-  careScheduleFromFields,
-  isScheduleValid,
-  scheduleCustomDays,
-  type ScheduleSelection,
-} from "@/utils/schedule";
+import { useCareScheduleEditor } from "@/hooks/use-care-schedule-editor";
 import { useTheme } from "@/hooks/use-theme";
-import { careSchedules$ } from "@/state/care-schedule";
 import { DEFECATION_TYPES } from "@/state/defecation";
 import { defaults$, FEEDING_MEASURES } from "@/state/logging-defaults";
 import { reminders$ } from "@/state/reminders";
@@ -52,51 +46,13 @@ export default function SettingsScreen() {
   const formModifiers = useFormModifiers();
   const currentLanguage = useValue(settings$.language);
   const globalDefaults = useValue(defaults$);
-  const water = useValue(careSchedules$.water);
-  const cleaning = useValue(careSchedules$.cleaning);
+  const water = useCareScheduleEditor("water");
+  const cleaning = useCareScheduleEditor("cleaning");
   const reminderTime = useValue(reminders$);
   const reminderDate = useMemo(
     () => atClockTime(new Date(), reminderTime.hour, reminderTime.minute),
     [reminderTime.hour, reminderTime.minute],
   );
-  const [waterDays, setWaterDays] = useState(() => scheduleCustomDays(water));
-  const [cleaningDays, setCleaningDays] = useState(() =>
-    scheduleCustomDays(cleaning),
-  );
-
-  const waterValid = isScheduleValid(water?.frequency ?? "weekly", waterDays);
-  const cleaningValid = isScheduleValid(
-    cleaning?.frequency ?? "weekly",
-    cleaningDays,
-  );
-
-  const handleWaterSelection = (selection: ScheduleSelection) =>
-    careSchedules$.water.set(careScheduleFromFields(selection, waterDays));
-
-  const handleWaterDays = (value: string) => {
-    setWaterDays(value);
-    if (isScheduleValid("custom", value)) {
-      careSchedules$.water.set({
-        frequency: "custom",
-        days: Number(value.trim()),
-      });
-    }
-  };
-
-  const handleCleaningSelection = (selection: ScheduleSelection) =>
-    careSchedules$.cleaning.set(
-      careScheduleFromFields(selection, cleaningDays),
-    );
-
-  const handleCleaningDays = (value: string) => {
-    setCleaningDays(value);
-    if (isScheduleValid("custom", value)) {
-      careSchedules$.cleaning.set({
-        frequency: "custom",
-        days: Number(value.trim()),
-      });
-    }
-  };
 
   return (
     <>
@@ -189,11 +145,11 @@ export default function SettingsScreen() {
               <Text
                 modifiers={[
                   foregroundStyle(
-                    waterValid ? theme.textSecondary : theme.danger,
+                    water.valid ? theme.textSecondary : theme.danger,
                   ),
                 ]}
               >
-                {waterValid
+                {water.valid
                   ? t("waterSchedule.globalFooter")
                   : t("schedule.invalidDays")}
               </Text>
@@ -201,26 +157,22 @@ export default function SettingsScreen() {
           >
             <Toggle
               label={t("waterSchedule.enabled")}
-              isOn={Boolean(water)}
-              onIsOnChange={(on) =>
-                careSchedules$.water.set(
-                  on ? { frequency: "weekly" } : undefined,
-                )
-              }
+              isOn={Boolean(water.schedule)}
+              onIsOnChange={water.setEnabled}
               modifiers={[
                 listRowBackground(theme.surface),
                 accessibilityHint(t("a11y.waterSchedule.enabled.hint")),
               ]}
             />
-            {water ? (
+            {water.schedule ? (
               <ScheduleFields
                 subject={t("waterSchedule.section")}
                 hint={t("a11y.waterSchedule.frequency.hint")}
                 daysHint={t("a11y.waterSchedule.customDays.hint")}
-                selection={water.frequency}
-                onSelectionChange={handleWaterSelection}
-                customDays={waterDays}
-                onCustomDaysChange={handleWaterDays}
+                selection={water.selection}
+                onSelectionChange={water.setSelection}
+                customDays={water.days}
+                onCustomDaysChange={water.setDays}
               />
             ) : null}
           </Section>
@@ -235,11 +187,11 @@ export default function SettingsScreen() {
               <Text
                 modifiers={[
                   foregroundStyle(
-                    cleaningValid ? theme.textSecondary : theme.danger,
+                    cleaning.valid ? theme.textSecondary : theme.danger,
                   ),
                 ]}
               >
-                {cleaningValid
+                {cleaning.valid
                   ? t("cleaningSchedule.globalFooter")
                   : t("schedule.invalidDays")}
               </Text>
@@ -247,26 +199,22 @@ export default function SettingsScreen() {
           >
             <Toggle
               label={t("cleaningSchedule.enabled")}
-              isOn={Boolean(cleaning)}
-              onIsOnChange={(on) =>
-                careSchedules$.cleaning.set(
-                  on ? { frequency: "weekly" } : undefined,
-                )
-              }
+              isOn={Boolean(cleaning.schedule)}
+              onIsOnChange={cleaning.setEnabled}
               modifiers={[
                 listRowBackground(theme.surface),
                 accessibilityHint(t("a11y.cleaningSchedule.enabled.hint")),
               ]}
             />
-            {cleaning ? (
+            {cleaning.schedule ? (
               <ScheduleFields
                 subject={t("cleaningSchedule.section")}
                 hint={t("a11y.cleaningSchedule.frequency.hint")}
                 daysHint={t("a11y.cleaningSchedule.customDays.hint")}
-                selection={cleaning.frequency}
-                onSelectionChange={handleCleaningSelection}
-                customDays={cleaningDays}
-                onCustomDaysChange={handleCleaningDays}
+                selection={cleaning.selection}
+                onSelectionChange={cleaning.setSelection}
+                customDays={cleaning.days}
+                onCustomDaysChange={cleaning.setDays}
               />
             ) : null}
           </Section>

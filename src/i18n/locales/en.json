@@ -23,7 +23,8 @@
     "resetFooter": "Permanently deletes every reptile and activity record stored on this device. Your language setting will not change.",
     "resetMessage": "This action cannot be undone.",
     "resetConfirm": "Reset data",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "ok": "OK"
   },
   "backup": {
     "title": "Backup & restore",
