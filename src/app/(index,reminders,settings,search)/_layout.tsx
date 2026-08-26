@@ -12,6 +12,8 @@ export const unstable_settings = {
   search: { anchor: "search" },
 };
 
+const SELF_HEADED_ANDROID = new Set(["index", "settings"]);
+
 const ROOT_SCREEN_BY_GROUP = {
   "(index)": "index",
   "(reminders)": "reminders",
@@ -66,7 +68,9 @@ export default function TabStackLayout({ segment }: { segment: string }) {
       <Stack.Screen
         name={screenName}
         options={{
-          headerShown: !(Platform.OS === "android" && screenName === "index"),
+          headerShown: !(
+            Platform.OS === "android" && SELF_HEADED_ANDROID.has(screenName)
+          ),
         }}
       />
       <Stack.Screen

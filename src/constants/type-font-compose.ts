@@ -15,6 +15,14 @@ export function composeTextStyle(alias: TypographyAlias): ComposeTextStyle {
   };
 }
 
+export const SECTION_LABEL = {
+  fontFamily: "default",
+  fontSize: 14,
+  fontWeight: "500",
+  lineHeight: 20,
+  letterSpacing: 0.1,
+} as const;
+
 const SEX_SYMBOL_SCALE = 1.3;
 
 export function composeSexSymbolStyle(
