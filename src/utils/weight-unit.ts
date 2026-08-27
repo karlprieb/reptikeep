@@ -29,10 +29,13 @@ export function gramsToField(
 export function weightFieldToGrams(
   text: string,
   unit: WeightUnit,
-  original?: { grams: number; unit: WeightUnit },
+  originalGrams?: number,
 ): number | undefined {
-  if (original && unit === original.unit) {
-    if (text === gramsToField(original.grams, unit)) return original.grams;
+  if (
+    originalGrams !== undefined &&
+    text === gramsToField(originalGrams, unit)
+  ) {
+    return originalGrams;
   }
 
   const parsed = weightInputToGrams(text, unit);

@@ -1,5 +1,6 @@
 import {
   convertWeightFieldOnUnitChange,
+  weightFieldToGrams,
   weightInputToGrams,
 } from "@/utils/weight-unit";
 
@@ -44,5 +45,21 @@ describe("convertWeightFieldOnUnitChange", () => {
     expect(
       convertWeightFieldOnUnitChange("not a number", "g", "kg", undefined),
     ).toBe("not a number");
+  });
+});
+
+describe("weightFieldToGrams", () => {
+  it("preserves the original grams when saving in a different unit than it was stored in", () => {
+    // Same scenario as convertWeightFieldOnUnitChange: 450 g switched to
+    // lb displays as "0.99", which must not reparse to 449 on save.
+    expect(weightFieldToGrams("0.99", "lb", 450)).toBe(450);
+  });
+
+  it("reparses when the text no longer matches the original", () => {
+    expect(weightFieldToGrams("1", "lb", 450)).toBe(454);
+  });
+
+  it("reparses when there is no original value (new record)", () => {
+    expect(weightFieldToGrams("1", "kg", undefined)).toBe(1000);
   });
 });

@@ -325,6 +325,7 @@ function DocumentFormSheet({ animalId, document }: DocumentFormSheetProps) {
               >
                 <DropdownMenu.Trigger>
                   <Box
+                    contentAlignment="center"
                     modifiers={[
                       fillMaxWidth(),
                       height(FILE_WELL_HEIGHT),

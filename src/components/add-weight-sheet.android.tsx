@@ -96,11 +96,7 @@ export function AddWeightSheet({
   const notesText = useNativeState(activity?.notes ?? "");
   const { lifted, onScroll } = useScrollLift();
 
-  const grams = weightFieldToGrams(
-    draft.weight,
-    draft.unit,
-    activity && { grams: activity.weight, unit: weightUnit },
-  );
+  const grams = weightFieldToGrams(draft.weight, draft.unit, activity?.weight);
   const canSave = grams !== undefined && grams >= MIN_WEIGHT_GRAMS;
   const invalid = draft.weight.trim().length > 0 && !canSave;
 

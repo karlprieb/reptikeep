@@ -111,9 +111,7 @@ export function AddFeedingSheet({
   const parsedWeight = weightFieldToGrams(
     draft.weight,
     draft.weightUnit,
-    activity?.weight == null
-      ? undefined
-      : { grams: activity.weight, unit: defaults.weightUnit },
+    activity?.weight,
   );
   const invalidWeight =
     draft.measure === "weight" &&
