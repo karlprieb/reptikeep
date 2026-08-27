@@ -270,7 +270,13 @@ function ActivityRow({
               padding(Spacing.md, 0, Spacing.md, 0),
               clickable(openDetail),
               semantics({
-                contentDescription: [typeName, date, detail, change?.spoken]
+                contentDescription: [
+                  typeName,
+                  date,
+                  detail,
+                  change?.spoken,
+                  t("timeline.openHint"),
+                ]
                   .filter((part): part is string => Boolean(part))
                   .join(", "),
                 role: "button",
@@ -373,6 +379,11 @@ function SeeAllRow({
             fillMaxSize(),
             padding(Spacing.md, 0, Spacing.md, 0),
             clickable(onPress),
+            semantics({
+              contentDescription: [label, t("timeline.showAllHint")].join(", "),
+              role: "button",
+              mergeDescendants: true,
+            }),
           ]}
         >
           <Row

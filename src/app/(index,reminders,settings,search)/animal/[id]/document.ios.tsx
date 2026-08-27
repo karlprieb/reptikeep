@@ -490,7 +490,7 @@ export default function DocumentFormScreen() {
   const candidate = documentId ? documents[documentId] : undefined;
   const document = candidate?.animalId === animal?.id ? candidate : undefined;
 
-  if (!animal) return <AnimalNotFound />;
+  if (!animal || (documentId && !document)) return <AnimalNotFound />;
 
   return (
     <DocumentFormSheet

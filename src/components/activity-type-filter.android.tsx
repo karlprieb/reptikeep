@@ -1,5 +1,8 @@
 import { FilterChip, Host, Icon, Row, Text } from "@expo/ui/jetpack-compose";
-import { horizontalScroll } from "@expo/ui/jetpack-compose/modifiers";
+import {
+  horizontalScroll,
+  semantics,
+} from "@expo/ui/jetpack-compose/modifiers";
 import { StyleSheet } from "react-native";
 import { useTranslation } from "react-i18next";
 
@@ -58,6 +61,15 @@ export function ActivityTypeFilter({
           onClick={() => onSelect(null)}
           colors={chipColors}
           border={selected === null ? undefined : { color: theme.border }}
+          modifiers={[
+            semantics({
+              contentDescription: [
+                t("timeline.filter.all"),
+                t("timeline.filter.allHint"),
+              ].join(", "),
+              mergeDescendants: true,
+            }),
+          ]}
         >
           <FilterChip.Label>
             <Text style={composeTextStyle("bodyS")}>
@@ -76,6 +88,15 @@ export function ActivityTypeFilter({
             onClick={() => onSelect(selected === type ? null : type)}
             colors={chipColors}
             border={selected === type ? undefined : { color: theme.border }}
+            modifiers={[
+              semantics({
+                contentDescription: [
+                  t(`activity.type.${type}`),
+                  t("timeline.filter.hint"),
+                ].join(", "),
+                mergeDescendants: true,
+              }),
+            ]}
           >
             <FilterChip.Label>
               <Text style={composeTextStyle("bodyS")}>

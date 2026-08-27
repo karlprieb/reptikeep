@@ -16,6 +16,7 @@ import {
   fillMaxWidth,
   height,
   padding,
+  semantics,
   Shapes,
   weight,
   width,
@@ -133,6 +134,12 @@ function StatBox({ stat, theme }: { stat: Stat; theme: Theme }) {
         background(theme.surface),
         border(StyleSheet.hairlineWidth, theme.border),
         padding(Spacing.md, Spacing.md, Spacing.md, Spacing.md),
+        semantics({
+          contentDescription: [stat.label, stat.value, stat.secondary]
+            .filter((part): part is string => Boolean(part))
+            .join(", "),
+          mergeDescendants: true,
+        }),
       ]}
     >
       <ComposeText

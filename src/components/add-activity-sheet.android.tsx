@@ -16,6 +16,7 @@ import {
   defaultMinSize,
   fillMaxWidth,
   padding,
+  semantics,
   Shapes,
   size,
   verticalScroll,
@@ -183,7 +184,10 @@ export function AddActivitySheet({
                 source={CLOSE_ICON}
                 tint={theme.textSecondary}
                 size={iconSize}
-                contentDescription={t("addRecord.close")}
+                contentDescription={[
+                  t("addRecord.close"),
+                  t("addRecord.closeHint"),
+                ].join(", ")}
               />
             </IconButton>
           </Row>
@@ -240,6 +244,14 @@ function ActivityCardButton({
         clip(Shapes.RoundedCorner(Radius.xl)),
         background(theme.surface),
         clickable(onPress),
+        semantics({
+          contentDescription: [
+            accessibilityLabel,
+            accessibilityDescription,
+          ].join(", "),
+          role: "button",
+          mergeDescendants: true,
+        }),
       ]}
     >
       <Column

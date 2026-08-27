@@ -14,6 +14,7 @@ import {
   fillMaxWidth,
   height,
   padding,
+  semantics,
   Shapes,
 } from "@expo/ui/jetpack-compose/modifiers";
 import { useState } from "react";
@@ -87,6 +88,10 @@ export function WeightTrendChart({
           clip(Shapes.RoundedCorner(Radius.lg)),
           background(theme.surface),
           padding(Spacing.md, Spacing.md, Spacing.md, Spacing.md),
+          semantics({
+            contentDescription: summaryLabel,
+            mergeDescendants: true,
+          }),
         ]}
       >
         <Text
@@ -119,8 +124,7 @@ export function WeightTrendChart({
           <RNHostView modifiers={[fillMaxSize()]}>
             <View
               style={styles.sparklineHost}
-              accessible
-              accessibilityLabel={summaryLabel}
+              importantForAccessibility="no-hide-descendants"
             >
               <Sparkline
                 points={points}

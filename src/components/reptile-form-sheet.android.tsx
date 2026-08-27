@@ -30,6 +30,7 @@ import {
   fillMaxWidth,
   menuAnchor,
   padding,
+  semantics,
   size,
   Shapes,
   toggleable,
@@ -308,6 +309,7 @@ export function ReptileFormSheet({ animal }: ReptileFormSheetProps) {
                 checked={form.usesFeedingSchedule}
                 onCheckedChange={form.setUsesFeedingSchedule}
                 theme={theme}
+                hint={t("a11y.feedingSchedule.enabled.hint")}
               />
               {form.usesFeedingSchedule ? (
                 <ScheduleFields
@@ -347,6 +349,7 @@ export function ReptileFormSheet({ animal }: ReptileFormSheetProps) {
                   checked={form.waterReminder}
                   onCheckedChange={form.handleWaterReminder}
                   theme={theme}
+                  hint={t("a11y.reminders.water.hint")}
                 />
               ) : null}
             </Section>
@@ -375,6 +378,7 @@ export function ReptileFormSheet({ animal }: ReptileFormSheetProps) {
                   checked={form.cleaningReminder}
                   onCheckedChange={form.handleCleaningReminder}
                   theme={theme}
+                  hint={t("a11y.reminders.cleaning.hint")}
                 />
               ) : null}
             </Section>
@@ -389,6 +393,7 @@ export function ReptileFormSheet({ animal }: ReptileFormSheetProps) {
             >
               <MenuField
                 label={t("defaults.mealMeasure")}
+                hint={t("a11y.defaults.mealMeasure.hint")}
                 value={
                   form.defaults.mealMeasure === undefined
                     ? t("defaults.followGlobal", {
@@ -430,6 +435,7 @@ export function ReptileFormSheet({ animal }: ReptileFormSheetProps) {
 
               <MenuField
                 label={t("defaults.frozen")}
+                hint={t("a11y.defaults.frozen.hint")}
                 value={
                   form.defaults.frozen === undefined
                     ? t("defaults.followGlobal", {
@@ -469,6 +475,7 @@ export function ReptileFormSheet({ animal }: ReptileFormSheetProps) {
 
               <MenuField
                 label={t("defaults.weightUnit")}
+                hint={t("a11y.defaults.weightUnit.hint")}
                 value={
                   form.defaults.weightUnit === undefined
                     ? t("defaults.followGlobal", {
@@ -510,6 +517,7 @@ export function ReptileFormSheet({ animal }: ReptileFormSheetProps) {
 
               <MenuField
                 label={t("defaults.poopType")}
+                hint={t("a11y.defaults.poopType.hint")}
                 value={
                   form.defaults.poopType === undefined
                     ? t("defaults.followGlobal", {
@@ -791,6 +799,7 @@ function MenuField<T extends string>({
   iconSize,
   items,
   onSelect,
+  hint,
 }: {
   label: string;
   value: string;
@@ -798,6 +807,7 @@ function MenuField<T extends string>({
   iconSize: number;
   items: { value: T; label: string; selected: boolean }[];
   onSelect: (value: T) => void;
+  hint?: string;
 }) {
   const [expanded, setExpanded] = useState(false);
   const text = useNativeState(value);
@@ -817,7 +827,14 @@ function MenuField<T extends string>({
         readOnly
         singleLine
         colors={fieldColors(theme)}
-        modifiers={[menuAnchor(), fillMaxWidth()]}
+        modifiers={[
+          menuAnchor(),
+          fillMaxWidth(),
+          semantics({
+            contentDescription: [label, value, hint].filter(Boolean).join(", "),
+            mergeDescendants: true,
+          }),
+        ]}
       >
         <OutlinedTextField.Label>
           <Text>{label}</Text>
@@ -869,11 +886,13 @@ function SwitchRow({
   checked,
   onCheckedChange,
   theme,
+  hint,
 }: {
   label: string;
   checked: boolean;
   onCheckedChange: (value: boolean) => void;
   theme: FormTheme;
+  hint?: string;
 }) {
   return (
     <Box
@@ -882,6 +901,10 @@ function SwitchRow({
         clip(Shapes.RoundedCorner(Radius.md)),
         toggleable(checked, () => onCheckedChange(!checked), {
           role: "switch",
+        }),
+        semantics({
+          contentDescription: [label, hint].filter(Boolean).join(", "),
+          mergeDescendants: true,
         }),
       ]}
     >
