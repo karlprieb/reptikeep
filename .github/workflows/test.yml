@@ -17,10 +17,23 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - run: npx tsc --noEmit
       - run: npm run lint
       - run: npx prettier --check "src/**/*.{ts,tsx,json}" "*.{js,json,md,ts,tsx}"
       - run: npm test -- --ci
+
+  typecheck:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        platform: [ios, android]
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run typecheck:${{ matrix.platform }}
 
   export:
     runs-on: ubuntu-latest

@@ -68,7 +68,10 @@
     "generate:performance-backup": "node scripts/generate-performance-backup.ts",
     "format": "prettier --write \"src/**/*.{ts,tsx,json}\" \"*.{js,json,md,ts,tsx}\"",
     "lint": "expo lint",
-    "test": "jest"
+    "test": "jest",
+    "typecheck:ios": "tsc --noEmit -p tsconfig.ios.json",
+    "typecheck:android": "tsc --noEmit -p tsconfig.android.json",
+    "typecheck": "npm run typecheck:ios && npm run typecheck:android"
   },
   "private": true
 }
