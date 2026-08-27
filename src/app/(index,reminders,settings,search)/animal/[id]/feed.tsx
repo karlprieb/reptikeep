@@ -10,7 +10,8 @@ export default function AddFeedingScreen() {
     activityId ? feedingStore.$[activityId].get() : undefined,
   );
 
-  if (!animal) return <AnimalNotFound />;
+  if (!animal || (activityId && activity?.animalId !== animal.id))
+    return <AnimalNotFound />;
 
   return (
     <AddFeedingSheet

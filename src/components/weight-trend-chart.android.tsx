@@ -115,6 +115,7 @@ export function WeightTrendChart({
           <RNHostView modifiers={[fillMaxSize()]}>
             <View
               style={styles.sparklineHost}
+              accessible
               accessibilityLabel={summaryLabel}
             >
               <Sparkline
@@ -155,12 +156,13 @@ function Sparkline({
   const minY = Math.min(...ys);
   const maxY = Math.max(...ys);
   const range = maxY - minY || 1;
-  const stepX = width > 0 ? width / (points.length - 1) : 0;
   const pad = DOT_RADIUS + LINE_WIDTH;
+  const plotWidth = width - pad * 2;
   const plotHeight = height - pad * 2;
+  const stepX = width > 0 ? plotWidth / (points.length - 1) : 0;
 
   const coords = points.map((point, index) => ({
-    x: index * stepX,
+    x: pad + index * stepX,
     y: pad + plotHeight - ((point.y - minY) / range) * plotHeight,
   }));
 

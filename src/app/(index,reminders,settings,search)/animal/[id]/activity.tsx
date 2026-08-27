@@ -8,7 +8,7 @@ import { activityStores } from "@/state/activity-stores";
 import { toActivity } from "@/utils/animal-activity";
 
 function isActivityType(value: string | undefined): value is ActivityType {
-  return value !== undefined && value in activityStores;
+  return value !== undefined && Object.hasOwn(activityStores, value);
 }
 
 export default function ActivityDetailScreen() {

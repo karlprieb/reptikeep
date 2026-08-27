@@ -643,13 +643,12 @@ export function DateTimeField({
           dismissButtonLabel={dismissLabel}
           color={theme.primary}
           onDateSelected={(picked) => {
-            onSelect(
-              atClockTime(
-                pendingDay,
-                picked.getUTCHours(),
-                picked.getUTCMinutes(),
-              ),
+            const next = atClockTime(
+              pendingDay,
+              picked.getHours(),
+              picked.getMinutes(),
             );
+            onSelect(maxDate && next > maxDate ? maxDate : next);
             setStage("none");
           }}
           onDismissRequest={() => setStage("none")}
