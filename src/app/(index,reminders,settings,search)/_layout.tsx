@@ -46,6 +46,24 @@ const ACTIVITY_SHEET_OPTIONS = {
   sheetExpandsWhenScrolledToEdge: true,
 };
 
+const ACTIVITY_FORM_OPTIONS =
+  Platform.OS === "android"
+    ? ({
+        presentation: "card",
+        animation: "slide_from_bottom",
+        headerShown: false,
+      } as const)
+    : { ...FORM_SHEET_OPTIONS, ...ACTIVITY_SHEET_OPTIONS };
+
+const DETAIL_SCREEN_OPTIONS =
+  Platform.OS === "android"
+    ? ({ headerShown: false } as const)
+    : {
+        headerTransparent: true,
+        headerTitle: "",
+        headerBackButtonDisplayMode: "minimal" as const,
+      };
+
 export default function TabStackLayout({ segment }: { segment: string }) {
   const { t } = useTranslation();
   const theme = useTheme();
@@ -91,35 +109,36 @@ export default function TabStackLayout({ segment }: { segment: string }) {
         name="add-reptile"
         options={{ ...REPTILE_FORM_OPTIONS, title: t("newReptile.title") }}
       />
-      <Stack.Screen
-        name="animal/[id]"
-        options={{
-          headerTransparent: true,
-          headerTitle: "",
-          headerBackButtonDisplayMode: "minimal",
-        }}
-      />
+      <Stack.Screen name="animal/[id]" options={DETAIL_SCREEN_OPTIONS} />
       <Stack.Screen
         name="animal/[id]/history"
-        options={{ headerBackButtonDisplayMode: "minimal" }}
+        options={
+          Platform.OS === "android"
+            ? { headerShown: false }
+            : { headerBackButtonDisplayMode: "minimal" }
+        }
       />
       <Stack.Screen
         name="animal/[id]/history-range"
         options={{
-          ...FORM_SHEET_OPTIONS,
+          ...ACTIVITY_FORM_OPTIONS,
           title: t("timeline.range.customTitle"),
         }}
       />
       <Stack.Screen
         name="animal/[id]/documents"
-        options={{
-          title: t("documents.title"),
-          headerBackButtonDisplayMode: "minimal",
-        }}
+        options={
+          Platform.OS === "android"
+            ? { headerShown: false }
+            : {
+                title: t("documents.title"),
+                headerBackButtonDisplayMode: "minimal",
+              }
+        }
       />
       <Stack.Screen
         name="animal/[id]/document"
-        options={{ ...FORM_SHEET_OPTIONS, title: t("documents.form.title") }}
+        options={{ ...ACTIVITY_FORM_OPTIONS, title: t("documents.form.title") }}
       />
       <Stack.Screen
         name="animal/[id]/document-preview"
@@ -131,57 +150,35 @@ export default function TabStackLayout({ segment }: { segment: string }) {
       />
       <Stack.Screen
         name="animal/[id]/feed"
-        options={{
-          ...FORM_SHEET_OPTIONS,
-          ...ACTIVITY_SHEET_OPTIONS,
-          title: t("feedingForm.title"),
-        }}
+        options={{ ...ACTIVITY_FORM_OPTIONS, title: t("feedingForm.title") }}
       />
       <Stack.Screen
         name="animal/[id]/weight"
-        options={{
-          ...FORM_SHEET_OPTIONS,
-          ...ACTIVITY_SHEET_OPTIONS,
-          title: t("weightForm.title"),
-        }}
+        options={{ ...ACTIVITY_FORM_OPTIONS, title: t("weightForm.title") }}
       />
       <Stack.Screen
         name="animal/[id]/shed"
-        options={{
-          ...FORM_SHEET_OPTIONS,
-          ...ACTIVITY_SHEET_OPTIONS,
-          title: t("shedForm.title"),
-        }}
+        options={{ ...ACTIVITY_FORM_OPTIONS, title: t("shedForm.title") }}
       />
       <Stack.Screen
         name="animal/[id]/poop"
         options={{
-          ...FORM_SHEET_OPTIONS,
-          ...ACTIVITY_SHEET_OPTIONS,
+          ...ACTIVITY_FORM_OPTIONS,
           title: t("defecationForm.title"),
         }}
       />
       <Stack.Screen
         name="animal/[id]/habitat"
-        options={{
-          ...FORM_SHEET_OPTIONS,
-          ...ACTIVITY_SHEET_OPTIONS,
-          title: t("habitatForm.title"),
-        }}
+        options={{ ...ACTIVITY_FORM_OPTIONS, title: t("habitatForm.title") }}
       />
       <Stack.Screen
         name="animal/[id]/medical"
-        options={{
-          ...FORM_SHEET_OPTIONS,
-          ...ACTIVITY_SHEET_OPTIONS,
-          title: t("medicalForm.title"),
-        }}
+        options={{ ...ACTIVITY_FORM_OPTIONS, title: t("medicalForm.title") }}
       />
       <Stack.Screen
         name="animal/[id]/activity"
         options={{
-          ...FORM_SHEET_OPTIONS,
-          ...ACTIVITY_SHEET_OPTIONS,
+          ...ACTIVITY_FORM_OPTIONS,
           title: t("activityDetail.title"),
         }}
       />

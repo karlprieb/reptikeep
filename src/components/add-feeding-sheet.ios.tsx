@@ -45,6 +45,7 @@ import {
   type LoggingDefaults,
 } from "@/state/logging-defaults";
 import {
+  convertWeightFieldOnUnitChange,
   gramsToField,
   WEIGHT_UNITS,
   type WeightUnit,
@@ -112,9 +113,7 @@ export function AddFeedingSheet({
   const parsedWeight = weightFieldToGrams(
     draft.weight,
     draft.weightUnit,
-    activity?.weight == null
-      ? undefined
-      : { grams: activity.weight, unit: defaults.weightUnit },
+    activity?.weight,
   );
   const invalidWeight =
     draft.measure === "weight" &&
@@ -247,9 +246,17 @@ export function AddFeedingSheet({
                   <Picker
                     label={t("feedingForm.weightUnit")}
                     selection={draft.weightUnit}
-                    onSelectionChange={(value) =>
-                      updateDraft({ weightUnit: value as WeightUnit })
-                    }
+                    onSelectionChange={(value) => {
+                      const weightUnit = value as WeightUnit;
+                      const nextWeight = convertWeightFieldOnUnitChange(
+                        draft.weight,
+                        draft.weightUnit,
+                        weightUnit,
+                        activity?.weight,
+                      );
+                      fields.weight.set(nextWeight);
+                      updateDraft({ weight: nextWeight, weightUnit });
+                    }}
                     modifiers={[pickerStyle("menu")]}
                   >
                     {WEIGHT_UNITS.map((unit) => (

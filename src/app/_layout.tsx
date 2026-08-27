@@ -7,6 +7,7 @@ import {
 } from "expo-router";
 import * as Notifications from "expo-notifications";
 import { InteractionManager } from "react-native";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { useEffect } from "react";
 
 import "@/i18n";
@@ -45,8 +46,10 @@ export default function TabLayout() {
   }, []);
 
   return (
-    <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
-      <AppTabs />
-    </ThemeProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
+        <AppTabs />
+      </ThemeProvider>
+    </GestureHandlerRootView>
   );
 }

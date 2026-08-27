@@ -51,6 +51,7 @@ import {
 } from "@/utils/format-number";
 import { previousRecord, weightChange } from "@/utils/weight-change";
 import {
+  convertWeightFieldOnUnitChange,
   gramsToField,
   WEIGHT_UNITS,
   type WeightUnit,
@@ -100,11 +101,7 @@ export function AddWeightSheet({
   const weightText = useNativeState(gramsToField(activity?.weight, weightUnit));
   const notesText = useNativeState(activity?.notes ?? "");
 
-  const grams = weightFieldToGrams(
-    draft.weight,
-    draft.unit,
-    activity && { grams: activity.weight, unit: weightUnit },
-  );
+  const grams = weightFieldToGrams(draft.weight, draft.unit, activity?.weight);
   const canSave = grams !== undefined && grams >= MIN_WEIGHT_GRAMS;
   const invalid = draft.weight.trim().length > 0 && !canSave;
 
@@ -185,9 +182,17 @@ export function AddWeightSheet({
               <Picker
                 label={t("weightForm.unit")}
                 selection={draft.unit}
-                onSelectionChange={(value) =>
-                  updateDraft({ unit: value as WeightUnit })
-                }
+                onSelectionChange={(value) => {
+                  const unit = value as WeightUnit;
+                  const nextWeight = convertWeightFieldOnUnitChange(
+                    draft.weight,
+                    draft.unit,
+                    unit,
+                    activity?.weight,
+                  );
+                  weightText.set(nextWeight);
+                  updateDraft({ weight: nextWeight, unit });
+                }}
                 modifiers={[
                   accessibilityLabel(t("weightForm.unit")),
                   pickerStyle("segmented"),

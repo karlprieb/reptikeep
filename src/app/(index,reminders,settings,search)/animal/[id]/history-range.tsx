@@ -1,1 +1,1 @@
-export { default } from "@/components/android-pending";
+export default () => null;
