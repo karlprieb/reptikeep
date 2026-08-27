@@ -27,6 +27,7 @@ import { useTranslation } from "react-i18next";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { AnimalNotFound, useAnimalRoute } from "@/components/animal-route";
+import { ThemedText } from "@/components/themed-text";
 import {
   ACTION_ICON_SIZE,
   DateField,
@@ -495,9 +496,14 @@ function DocumentFormSheet({ animalId, document }: DocumentFormSheetProps) {
             { borderTopColor: theme.border, bottom: insets.bottom },
           ]}
         >
-          <Text style={composeTextStyle("bodyS")} color={theme.danger}>
+          <ThemedText
+            accessibilityRole="alert"
+            accessibilityLiveRegion="assertive"
+            type="bodyS"
+            themeColor="danger"
+          >
             {saveError}
-          </Text>
+          </ThemedText>
         </View>
       ) : null}
     </View>

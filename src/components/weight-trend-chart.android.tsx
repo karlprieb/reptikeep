@@ -159,6 +159,7 @@ function Sparkline({
   const ys = points.map((point) => point.y);
   const minY = Math.min(...ys);
   const maxY = Math.max(...ys);
+  const flatY = maxY === minY;
   const rangeY = maxY - minY || 1;
 
   const xs = points.map((point) => new Date(point.x).getTime());
@@ -172,7 +173,8 @@ function Sparkline({
 
   const coords = points.map((point, index) => ({
     x: pad + ((xs[index] - minX) / rangeX) * plotWidth,
-    y: pad + plotHeight - ((point.y - minY) / rangeY) * plotHeight,
+    y:
+      pad + plotHeight - (flatY ? 0.5 : (point.y - minY) / rangeY) * plotHeight,
   }));
 
   return (
