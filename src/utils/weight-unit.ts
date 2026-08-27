@@ -51,3 +51,18 @@ export function weightInputToGrams(
 
   return parsed * GRAMS_PER_UNIT[unit];
 }
+
+export function convertWeightFieldOnUnitChange(
+  text: string,
+  fromUnit: WeightUnit,
+  toUnit: WeightUnit,
+  originalGrams?: number,
+): string {
+  const grams =
+    originalGrams !== undefined &&
+    text === gramsToField(originalGrams, fromUnit)
+      ? originalGrams
+      : weightInputToGrams(text, fromUnit);
+
+  return grams === undefined ? text : gramsToField(grams, toUnit);
+}

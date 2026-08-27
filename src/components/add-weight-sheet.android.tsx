@@ -44,11 +44,11 @@ import {
 } from "@/utils/format-number";
 import { previousRecord, weightChange } from "@/utils/weight-change";
 import {
+  convertWeightFieldOnUnitChange,
   gramsToField,
   WEIGHT_UNITS,
   type WeightUnit,
   weightFieldToGrams,
-  weightInputToGrams,
 } from "@/utils/weight-unit";
 
 const MIN_WEIGHT_GRAMS = 1;
@@ -195,16 +195,12 @@ export function AddWeightSheet({
                 options={WEIGHT_UNITS}
                 labelFor={(unit) => t(`weightForm.unitShort.${unit}`)}
                 onChange={(unit) => {
-                  const originalGrams = activity?.weight;
-                  const currentGrams =
-                    originalGrams !== undefined &&
-                    draft.weight === gramsToField(originalGrams, draft.unit)
-                      ? originalGrams
-                      : weightInputToGrams(draft.weight, draft.unit);
-                  const nextWeight =
-                    currentGrams === undefined
-                      ? draft.weight
-                      : gramsToField(currentGrams, unit);
+                  const nextWeight = convertWeightFieldOnUnitChange(
+                    draft.weight,
+                    draft.unit,
+                    unit,
+                    activity?.weight,
+                  );
                   weightText.set(nextWeight);
                   updateDraft({ weight: nextWeight, unit });
                 }}

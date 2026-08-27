@@ -41,11 +41,11 @@ import {
   type LoggingDefaults,
 } from "@/state/logging-defaults";
 import {
+  convertWeightFieldOnUnitChange,
   gramsToField,
   WEIGHT_UNITS,
   type WeightUnit,
   weightFieldToGrams,
-  weightInputToGrams,
 } from "@/utils/weight-unit";
 
 type AddFeedingSheetProps = {
@@ -254,17 +254,12 @@ export function AddFeedingSheet({
                       selected: unit === draft.weightUnit,
                     }))}
                     onSelect={(weightUnit) => {
-                      const originalGrams = activity?.weight;
-                      const currentGrams =
-                        originalGrams !== undefined &&
-                        draft.weight ===
-                          gramsToField(originalGrams, draft.weightUnit)
-                          ? originalGrams
-                          : weightInputToGrams(draft.weight, draft.weightUnit);
-                      const nextWeight =
-                        currentGrams === undefined
-                          ? draft.weight
-                          : gramsToField(currentGrams, weightUnit);
+                      const nextWeight = convertWeightFieldOnUnitChange(
+                        draft.weight,
+                        draft.weightUnit,
+                        weightUnit,
+                        activity?.weight,
+                      );
                       fields.weight.set(nextWeight);
                       updateDraft({ weight: nextWeight, weightUnit });
                     }}
