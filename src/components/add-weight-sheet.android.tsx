@@ -48,6 +48,7 @@ import {
   WEIGHT_UNITS,
   type WeightUnit,
   weightFieldToGrams,
+  weightInputToGrams,
 } from "@/utils/weight-unit";
 
 const MIN_WEIGHT_GRAMS = 1;
@@ -193,7 +194,18 @@ export function AddWeightSheet({
                 value={draft.unit}
                 options={WEIGHT_UNITS}
                 labelFor={(unit) => t(`weightForm.unitShort.${unit}`)}
-                onChange={(unit) => updateDraft({ unit })}
+                onChange={(unit) => {
+                  const currentGrams = weightInputToGrams(
+                    draft.weight,
+                    draft.unit,
+                  );
+                  const nextWeight =
+                    currentGrams === undefined
+                      ? draft.weight
+                      : gramsToField(currentGrams, unit);
+                  weightText.set(nextWeight);
+                  updateDraft({ weight: nextWeight, unit });
+                }}
                 theme={theme}
               />
 

@@ -1,6 +1,13 @@
 import { useSelector as useValue } from "@legendapp/state/react";
 import { router } from "expo-router";
-import { Box, Column, Host, RNHostView, Row } from "@expo/ui/jetpack-compose";
+import {
+  Box,
+  Column,
+  Host,
+  RNHostView,
+  Row,
+  Text as ComposeText,
+} from "@expo/ui/jetpack-compose";
 import {
   align,
   background,
@@ -29,7 +36,6 @@ import {
   presentTypes,
 } from "@/components/activity-type-filter";
 import { ThemedText } from "@/components/themed-text";
-import { Text as ComposeText } from "@expo/ui/jetpack-compose";
 import {
   Radius,
   Spacing,

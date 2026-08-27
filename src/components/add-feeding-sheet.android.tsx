@@ -45,6 +45,7 @@ import {
   WEIGHT_UNITS,
   type WeightUnit,
   weightFieldToGrams,
+  weightInputToGrams,
 } from "@/utils/weight-unit";
 
 type AddFeedingSheetProps = {
@@ -252,7 +253,18 @@ export function AddFeedingSheet({
                       label: t(`feedingForm.units.${unit}`),
                       selected: unit === draft.weightUnit,
                     }))}
-                    onSelect={(weightUnit) => updateDraft({ weightUnit })}
+                    onSelect={(weightUnit) => {
+                      const currentGrams = weightInputToGrams(
+                        draft.weight,
+                        draft.weightUnit,
+                      );
+                      const nextWeight =
+                        currentGrams === undefined
+                          ? draft.weight
+                          : gramsToField(currentGrams, weightUnit);
+                      fields.weight.set(nextWeight);
+                      updateDraft({ weight: nextWeight, weightUnit });
+                    }}
                   />
                 </>
               )}

@@ -30,6 +30,7 @@ import {
   CategoryColors,
   Radius,
   Spacing,
+  StackAboveFontScale,
   type ActivityType,
 } from "@/constants/theme";
 import { composeTextStyle } from "@/constants/type-font-compose";
@@ -88,7 +89,13 @@ const ACTIVITY_CARDS: ActivityCard[] = [
   },
 ];
 
-function cardRows(cards: ActivityCard[]): ActivityCard[][] {
+function selectCardColumns(fontScale: number): 1 | 2 {
+  return fontScale >= StackAboveFontScale ? 1 : 2;
+}
+
+function cardRows(cards: ActivityCard[], columns: 1 | 2): ActivityCard[][] {
+  if (columns === 1) return cards.map((card) => [card]);
+
   return cards.reduce<ActivityCard[][]>((rows, card, index) => {
     if (index % 2 === 0) rows.push([card]);
     else rows[rows.length - 1].push(card);
@@ -130,6 +137,7 @@ export function AddActivitySheet({
   if (!mounted) return null;
 
   const iconSize = 24 * Math.min(fontScale, 2);
+  const columns = selectCardColumns(fontScale);
 
   return (
     <Host style={styles.host} matchContents pointerEvents="box-none">
@@ -185,7 +193,7 @@ export function AddActivitySheet({
             verticalArrangement={{ spacedBy: Spacing.sm }}
             modifiers={[fillMaxWidth()]}
           >
-            {cardRows(ACTIVITY_CARDS).map((row) => (
+            {cardRows(ACTIVITY_CARDS, columns).map((row) => (
               <Row
                 key={row[0].type}
                 verticalAlignment="top"

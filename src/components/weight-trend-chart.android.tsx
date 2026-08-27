@@ -17,8 +17,12 @@ import {
   Shapes,
 } from "@expo/ui/jetpack-compose/modifiers";
 import { useState } from "react";
-import { StyleSheet, View, type LayoutChangeEvent } from "react-native";
-import type { ImageSourcePropType } from "react-native";
+import {
+  StyleSheet,
+  View,
+  type ImageSourcePropType,
+  type LayoutChangeEvent,
+} from "react-native";
 
 import { CategoryColors, Radius, Spacing } from "@/constants/theme";
 import { composeTextStyle } from "@/constants/type-font-compose";
@@ -155,15 +159,20 @@ function Sparkline({
   const ys = points.map((point) => point.y);
   const minY = Math.min(...ys);
   const maxY = Math.max(...ys);
-  const range = maxY - minY || 1;
+  const rangeY = maxY - minY || 1;
+
+  const xs = points.map((point) => new Date(point.x).getTime());
+  const minX = Math.min(...xs);
+  const maxX = Math.max(...xs);
+  const rangeX = maxX - minX || 1;
+
   const pad = DOT_RADIUS + LINE_WIDTH;
   const plotWidth = width - pad * 2;
   const plotHeight = height - pad * 2;
-  const stepX = width > 0 ? plotWidth / (points.length - 1) : 0;
 
   const coords = points.map((point, index) => ({
-    x: pad + index * stepX,
-    y: pad + plotHeight - ((point.y - minY) / range) * plotHeight,
+    x: pad + ((xs[index] - minX) / rangeX) * plotWidth,
+    y: pad + plotHeight - ((point.y - minY) / rangeY) * plotHeight,
   }));
 
   return (
