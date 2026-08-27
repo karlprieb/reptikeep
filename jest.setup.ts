@@ -1,4 +1,5 @@
 import "@/i18n";
+import "react-native-gesture-handler/jestSetup";
 
 type MockModifierList = { __modifier?: string; args?: unknown[] }[];
 type MockSlotProps = {
@@ -467,6 +468,145 @@ jest.mock("@expo/ui/swift-ui", () => {
 });
 
 jest.mock("@expo/ui/swift-ui/modifiers", () => {
+  const modifier = (name: string): unknown =>
+    new Proxy((...args: unknown[]) => ({ __modifier: name, args }), {
+      get: (target, key) =>
+        typeof key === "symbol" || key in target
+          ? Reflect.get(target, key)
+          : modifier(`${name}.${key}`),
+    });
+
+  return new Proxy(
+    {},
+    {
+      get: (_target, name) =>
+        name === "__esModule" ? true : modifier(String(name)),
+    },
+  );
+});
+
+jest.mock("@expo/ui/jetpack-compose", () => {
+  const React = require("react");
+  const { Pressable, Text, View } = require("react-native");
+
+  function a11yProps(modifiers?: MockModifierList) {
+    const args = modifiers?.find(
+      (modifier) => modifier?.__modifier === "semantics",
+    )?.args?.[0] as { contentDescription?: string } | undefined;
+
+    if (!args?.contentDescription) return {};
+
+    return { accessible: true, accessibilityLabel: args.contentDescription };
+  }
+
+  function clickProps(modifiers?: MockModifierList) {
+    const click = modifiers?.find(
+      (modifier) => modifier?.__modifier === "clickable",
+    );
+    if (!click) return undefined;
+
+    return { onPress: click.args?.[0] as (() => void) | undefined };
+  }
+
+  function container(testID: string) {
+    return function Container({ children, modifiers }: MockSlotProps) {
+      const click = clickProps(modifiers);
+
+      return React.createElement(
+        click ? Pressable : View,
+        {
+          testID,
+          ...(click ? { accessibilityRole: "button", ...click } : {}),
+          ...a11yProps(modifiers),
+        },
+        children,
+      );
+    };
+  }
+
+  const Host = container("expo-ui-host");
+  const Box = container("expo-ui-box");
+  const Column = container("expo-ui-column");
+  const Row = container("expo-ui-row");
+  const Surface = container("expo-ui-surface");
+
+  function UIText({ children }: MockSlotProps) {
+    return React.createElement(Text, null, children);
+  }
+
+  function Icon({ contentDescription }: { contentDescription?: string }) {
+    return React.createElement(View, {
+      testID: "expo-ui-icon",
+      ...(contentDescription
+        ? { accessible: true, accessibilityLabel: contentDescription }
+        : {}),
+    });
+  }
+
+  function ComposeButton({
+    onClick,
+    modifiers,
+    children,
+  }: MockSlotProps & { onClick?: () => void }) {
+    return React.createElement(
+      Pressable,
+      {
+        testID: "expo-ui-button",
+        accessibilityRole: "button",
+        onPress: onClick,
+        ...a11yProps(modifiers),
+      },
+      children,
+    );
+  }
+
+  function IconButton({
+    onClick,
+    children,
+  }: MockSlotProps & { onClick?: () => void }) {
+    return React.createElement(
+      Pressable,
+      {
+        testID: "expo-ui-icon-button",
+        accessibilityRole: "button",
+        onPress: onClick,
+      },
+      children,
+    );
+  }
+
+  function useNativeState(initialValue: unknown) {
+    return React.useRef({
+      _value: initialValue,
+      _listeners: new Set<MockStateListener>(),
+      get() {
+        return this._value;
+      },
+      set(nextValue: unknown) {
+        this._value = nextValue;
+        this._listeners.forEach((listener: MockStateListener) =>
+          listener(nextValue),
+        );
+      },
+    }).current;
+  }
+
+  return {
+    Host,
+    Box,
+    Column,
+    Row,
+    Surface,
+    Text: UIText,
+    Icon,
+    Button: ComposeButton,
+    IconButton,
+    RNHostView: container("expo-ui-rn-host-view"),
+    useNativeState,
+  };
+});
+
+jest.mock("@expo/ui/jetpack-compose/modifiers", () => {
   const modifier = (name: string): unknown =>
     new Proxy((...args: unknown[]) => ({ __modifier: name, args }), {
       get: (target, key) =>
