@@ -125,7 +125,7 @@ async function reschedule(): Promise<void> {
   }
 }
 
-function rescheduleSoon(): void {
+export function rescheduleSoon(): void {
   if (settling) clearTimeout(settling);
 
   settling = setTimeout(() => {

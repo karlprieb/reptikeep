@@ -20,7 +20,7 @@ import {
   weight,
 } from "@expo/ui/jetpack-compose/modifiers";
 import { router } from "expo-router";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Animated,
   AppState,
@@ -28,6 +28,8 @@ import {
   StyleSheet,
   useWindowDimensions,
   View,
+  type NativeScrollEvent,
+  type NativeSyntheticEvent,
 } from "react-native";
 import Swipeable from "react-native-gesture-handler/Swipeable";
 import { useTranslation } from "react-i18next";
@@ -44,12 +46,14 @@ import {
 } from "@/constants/theme";
 import { composeTextStyle } from "@/constants/type-font-compose";
 import { useTheme } from "@/hooks/use-theme";
+import { useToday } from "@/hooks/use-today";
 import { addAnimal, animals$, type Animal } from "@/state/animal";
 import { careSchedules$, type CareRoutine } from "@/state/care-schedule";
 import { createHabitatActivity, habitatStore } from "@/state/habitat";
 import {
   reminderPermission,
   requestReminderPermission,
+  rescheduleSoon,
   type ReminderPermission,
 } from "@/state/notifications";
 import { reminders$ } from "@/state/reminders";
@@ -60,7 +64,6 @@ import {
   formatAbsoluteDate,
   formatClockTime,
   fromCalendarDate,
-  toCalendarDate,
 } from "@/utils/format-date";
 import { panelRowHeight } from "@/utils/panel-row";
 import { useSelector as useValue } from "@legendapp/state/react";
@@ -82,6 +85,7 @@ const SYMBOL_RATIO = 0.6;
 const CHECKBOX_SYMBOL = 24;
 const CHECKBOX_HIT = 48;
 const SWIPE_ACTION_WIDTH = 96;
+const REMINDERS_PAGE = 60;
 const ROW_BLOCKS: Parameters<typeof panelRowHeight>[0] = [
   ["body", 1],
   ["bodyS", 1],
@@ -299,6 +303,7 @@ function ReminderRow({
                     routine,
                     state.text,
                     due,
+                    t("a11y.reminders.row.hint"),
                   ].join(", "),
                   role: "button",
                   mergeDescendants: true,
@@ -366,10 +371,12 @@ function ReminderRow({
                 source={RADIO_UNCHECKED_ICON}
                 tint={theme.primary}
                 size={CHECKBOX_SYMBOL}
-                contentDescription={t(
-                  `a11y.reminders.done.${reminder.routine}.label`,
-                  { animalName: reminder.animalName },
-                )}
+                contentDescription={[
+                  t(`a11y.reminders.done.${reminder.routine}.label`, {
+                    animalName: reminder.animalName,
+                  }),
+                  t(`a11y.reminders.done.${reminder.routine}.hint`),
+                ].join(", ")}
               />
             </IconButton>
           </Row>
@@ -503,7 +510,11 @@ function PermissionNotice({
           <Button
             onClick={() => {
               if (blocked) Linking.openSettings();
-              else void requestReminderPermission().then(onGrant);
+              else
+                void requestReminderPermission().then((next) => {
+                  onGrant(next);
+                  if (next === "granted") rescheduleSoon();
+                });
             }}
             colors={{
               containerColor: theme.primary,
@@ -542,6 +553,7 @@ export default function RemindersScreen() {
 
   const [scrollY] = useState(() => new Animated.Value(0));
   const [appBarHeight, setAppBarHeight] = useState(0);
+  const [limit, setLimit] = useState(REMINDERS_PAGE);
 
   useEffect(() => {
     const read = () => void reminderPermission().then(setPermission);
@@ -559,7 +571,7 @@ export default function RemindersScreen() {
     if (animal) stopReminding(animal, routine);
   };
 
-  const today = toCalendarDate(new Date());
+  const today = useToday();
   const reminders = useMemo(() => {
     const { lastWater, lastClean } = summaryLookups(summaries);
 
@@ -609,6 +621,28 @@ export default function RemindersScreen() {
     },
   ].filter((section) => section.items.length > 0);
 
+  let remainingLimit = limit;
+  const visibleSections = sections.map((section) => {
+    const visibleItems = section.items.slice(0, Math.max(0, remainingLimit));
+    remainingLimit -= visibleItems.length;
+    return { ...section, visibleItems };
+  });
+
+  const growNearEnd = useCallback(
+    ({ nativeEvent }: NativeSyntheticEvent<NativeScrollEvent>) => {
+      const { contentOffset, layoutMeasurement, contentSize } = nativeEvent;
+      const remaining =
+        contentSize.height - contentOffset.y - layoutMeasurement.height;
+
+      if (remaining < layoutMeasurement.height * 2) {
+        setLimit((current) =>
+          Math.min(current + REMINDERS_PAGE, reminders.length),
+        );
+      }
+    },
+    [reminders.length],
+  );
+
   const badgeSize = Math.round(
     BADGE_SIZE * Math.min(fontScale, BADGE_MAX_SCALE),
   );
@@ -623,7 +657,7 @@ export default function RemindersScreen() {
         scrollEventThrottle={16}
         onScroll={Animated.event(
           [{ nativeEvent: { contentOffset: { y: scrollY } } }],
-          { useNativeDriver: true },
+          { useNativeDriver: true, listener: growNearEnd },
         )}
       >
         {reminders.length === 0 ? (
@@ -642,7 +676,7 @@ export default function RemindersScreen() {
               />
             ) : null}
 
-            {sections.map((section) => (
+            {visibleSections.map((section) => (
               <View key={section.key} style={styles.section}>
                 <View style={styles.sectionHeader}>
                   <ThemedText type="label" themeColor="textMuted">
@@ -654,7 +688,7 @@ export default function RemindersScreen() {
                 </View>
 
                 <ReminderPanel
-                  items={section.items}
+                  items={section.visibleItems}
                   dueState={dueState}
                   theme={theme}
                   badgeSize={badgeSize}
