@@ -31,11 +31,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   "Reset app data" lives under its own advanced options, as on iPhone.
 - **The About screen now works on Android**, with the app version and a link
   to the repository.
-- The **Reptiles tab, the add-and-edit form, Settings, Backup & restore and
-  About are the screens finished so far**. Reminders and a reptile's detail
-  screen still say so plainly instead of showing an empty page, so treat
-  this as a preview rather than a second home for your collection — iPhone
-  remains the complete app.
+- **Reminders now works on Android.** Overdue, due today and upcoming sit in
+  their own sections. Swipe a row to open its schedule or turn off just
+  that routine, or tap the circle to mark it done without leaving the list.
+  A card asks once for notification permission and rebuilds the day's
+  alarms the moment you turn it on.
+- The **Reptiles tab, adding and editing a reptile, Settings, Backup &
+  restore, About, a reptile's detail screen and Reminders now all work on
+  Android** — the full app, not a preview.
 - Reminder notifications on Android arrive under their own **"Care
   reminders"** channel, so you can change their sound, importance or mute
   them from Android's notification settings without silencing anything else.

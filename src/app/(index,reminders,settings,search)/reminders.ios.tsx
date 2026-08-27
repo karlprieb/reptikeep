@@ -65,12 +65,14 @@ import {
 } from "@/constants/theme";
 import { typeFont } from "@/constants/type-font";
 import { useTheme } from "@/hooks/use-theme";
+import { useToday } from "@/hooks/use-today";
 import { addAnimal, animals$, type Animal } from "@/state/animal";
 import { careSchedules$, type CareRoutine } from "@/state/care-schedule";
 import { createHabitatActivity, habitatStore } from "@/state/habitat";
 import {
   reminderPermission,
   requestReminderPermission,
+  rescheduleSoon,
   type ReminderPermission,
 } from "@/state/notifications";
 import { reminders$ } from "@/state/reminders";
@@ -82,7 +84,6 @@ import {
   formatAbsoluteDate,
   formatClockTime,
   fromCalendarDate,
-  toCalendarDate,
 } from "@/utils/format-date";
 
 const ROUTINE_SYMBOLS: Record<CareRoutine, SFSymbolName> = {
@@ -495,7 +496,11 @@ function PermissionNotice({
           }
           onPress={() => {
             if (blocked) Linking.openSettings();
-            else void requestReminderPermission().then(onGrant);
+            else
+              void requestReminderPermission().then((next) => {
+                onGrant(next);
+                if (next === "granted") rescheduleSoon();
+              });
           }}
           modifiers={[
             typeFont("body"),
@@ -543,7 +548,7 @@ export default function RemindersScreen() {
     if (animal) stopReminding(animal, routine);
   };
 
-  const today = toCalendarDate(new Date());
+  const today = useToday();
   const reminders = useMemo(() => {
     const { lastWater, lastClean } = summaryLookups(summaries);
 
