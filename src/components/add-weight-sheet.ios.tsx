@@ -55,6 +55,7 @@ import {
   WEIGHT_UNITS,
   type WeightUnit,
   weightFieldToGrams,
+  weightInputToGrams,
 } from "@/utils/weight-unit";
 
 const MIN_WEIGHT_GRAMS = 1;
@@ -185,9 +186,21 @@ export function AddWeightSheet({
               <Picker
                 label={t("weightForm.unit")}
                 selection={draft.unit}
-                onSelectionChange={(value) =>
-                  updateDraft({ unit: value as WeightUnit })
-                }
+                onSelectionChange={(value) => {
+                  const unit = value as WeightUnit;
+                  const originalGrams = activity?.weight;
+                  const currentGrams =
+                    originalGrams !== undefined &&
+                    draft.weight === gramsToField(originalGrams, draft.unit)
+                      ? originalGrams
+                      : weightInputToGrams(draft.weight, draft.unit);
+                  const nextWeight =
+                    currentGrams === undefined
+                      ? draft.weight
+                      : gramsToField(currentGrams, unit);
+                  weightText.set(nextWeight);
+                  updateDraft({ weight: nextWeight, unit });
+                }}
                 modifiers={[
                   accessibilityLabel(t("weightForm.unit")),
                   pickerStyle("segmented"),
