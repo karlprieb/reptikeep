@@ -638,10 +638,10 @@
         }
       },
       "allow": {
-        "hint": "Asks iOS for permission to send reminders"
+        "hint": "Asks for permission to send reminders"
       },
       "openSettings": {
-        "hint": "Opens ReptiKeep in the iOS Settings app"
+        "hint": "Opens ReptiKeep in the device Settings app"
       }
     },
     "documents": {

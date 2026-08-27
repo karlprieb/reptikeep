@@ -12,7 +12,7 @@ export const unstable_settings = {
   search: { anchor: "search" },
 };
 
-const SELF_HEADED_ANDROID = new Set(["index", "settings"]);
+const SELF_HEADED_ANDROID = new Set(["index", "reminders", "settings"]);
 
 const ROOT_SCREEN_BY_GROUP = {
   "(index)": "index",

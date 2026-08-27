@@ -638,10 +638,10 @@
         }
       },
       "allow": {
-        "hint": "Pede ao iOS permissão para enviar lembretes"
+        "hint": "Pede permissão para enviar lembretes"
       },
       "openSettings": {
-        "hint": "Abre o ReptiKeep no app Ajustes do iOS"
+        "hint": "Abre o ReptiKeep no app de Ajustes do dispositivo"
       }
     },
     "documents": {
