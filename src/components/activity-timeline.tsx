@@ -47,7 +47,6 @@ import {
   type NativeSyntheticEvent,
 } from "react-native";
 import { useTranslation } from "react-i18next";
-import type { TFunction } from "i18next";
 
 import { EmptyStateContent } from "@/components/empty-state";
 import {
@@ -68,15 +67,9 @@ import {
   type AnimalActivity,
 } from "@/utils/animal-activity";
 import { confirmDeleteActivity } from "@/utils/confirm-delete-activity";
-import { daysSince, formatAbsoluteDate } from "@/utils/format-date";
-import {
-  formatPercent,
-  formatSignedPercent,
-  formatWeight,
-  formatWeightDelta,
-} from "@/utils/format-number";
+import { formatAbsoluteDate } from "@/utils/format-date";
+import { describeActivity, describeChange } from "@/utils/describe-activity";
 import { panelRowHeight } from "@/utils/panel-row";
-import { weightChange } from "@/utils/weight-change";
 import type { WeightUnit } from "@/utils/weight-unit";
 
 export const VISIBLE_LIMIT = 20;
@@ -94,102 +87,11 @@ const STACKED_ROW_BLOCKS: Parameters<typeof panelRowHeight>[0] = [
   ["bodyS", 2],
 ];
 
-function describeActivity(
-  entry: AnimalActivity,
-  t: TFunction,
-  unit: WeightUnit,
-): { detail: string | null; flagged: boolean } {
-  switch (entry.type) {
-    case "feed": {
-      const { foodType, amount, weight, refused } = entry.record;
-      const parts = [
-        refused ? t("timeline.refused") : null,
-        foodType,
-        amount,
-        weight != null ? formatWeight(weight, unit) : null,
-      ].filter((part): part is string => Boolean(part));
-
-      return { detail: parts.join(" · ") || null, flagged: refused };
-    }
-    case "weight":
-      return {
-        detail: formatWeight(entry.record.weight, unit),
-        flagged: false,
-      };
-    case "shed":
-      return {
-        detail: entry.record.issues ? t("timeline.issues") : null,
-        flagged: entry.record.issues,
-      };
-    case "poop": {
-      const { type, issues } = entry.record;
-      const parts = [
-        t(`timeline.poop.${type}`),
-        issues ? t("timeline.issues") : null,
-      ].filter((part): part is string => Boolean(part));
-
-      return { detail: parts.join(" · "), flagged: issues };
-    }
-    case "medical":
-      return { detail: entry.record.summary, flagged: false };
-    case "habitat": {
-      const parts = [
-        entry.record.water ? t("timeline.waterChanged") : null,
-        entry.record.cleaning ? t("timeline.enclosureCleaned") : null,
-      ].filter((part): part is string => Boolean(part));
-
-      return { detail: parts.join(" · ") || null, flagged: false };
-    }
-  }
-}
-
-type RowChange = {
-  text: string;
-  spoken: string;
-  color: string;
-  symbol?: SFSymbolName;
+const CHANGE_DIRECTION_SYMBOL: Record<"up" | "down" | "flat", SFSymbolName> = {
+  up: "arrow.up.right",
+  down: "arrow.down.right",
+  flat: "arrow.right",
 };
-
-function describeChange(
-  entry: AnimalActivity,
-  previous: AnimalActivity | undefined,
-  theme: Theme,
-  t: TFunction,
-  unit: WeightUnit,
-): RowChange | null {
-  if (!previous || entry.type === "medical") return null;
-
-  if (entry.type === "weight" && previous.type === "weight") {
-    const { deltaGrams, percent } = weightChange(
-      previous.record.weight,
-      entry.record.weight,
-    );
-
-    return {
-      text: `${formatWeight(Math.abs(deltaGrams), unit)} · ${formatPercent(percent)}`,
-      spoken: `${t("weightForm.change")}: ${formatWeightDelta(deltaGrams, unit)} (${formatSignedPercent(percent)})`,
-      color:
-        deltaGrams > 0
-          ? theme.success
-          : deltaGrams < 0
-            ? theme.danger
-            : theme.textSecondary,
-      symbol:
-        deltaGrams > 0
-          ? "arrow.up.right"
-          : deltaGrams < 0
-            ? "arrow.down.right"
-            : "arrow.right",
-    };
-  }
-
-  const days = daysSince(previous.occurredAt, new Date(entry.occurredAt));
-  if (days === null) return null;
-
-  const interval = t("timeline.sinceLast", { count: days });
-
-  return { text: interval, spoken: interval, color: theme.textMuted };
-}
 
 type ActivityRowProps = {
   entry: AnimalActivity;
@@ -263,9 +165,9 @@ function ActivityRow({
 
   const since = change ? (
     <HStack spacing={Spacing["2xs"]}>
-      {change.symbol ? (
+      {change.direction ? (
         <Image
-          systemName={change.symbol}
+          systemName={CHANGE_DIRECTION_SYMBOL[change.direction]}
           modifiers={[typeFont("bodyS"), foregroundStyle(change.color)]}
         />
       ) : null}

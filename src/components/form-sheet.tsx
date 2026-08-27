@@ -11,33 +11,15 @@ import {
   tint,
 } from "@expo/ui/swift-ui/modifiers";
 import { router, Stack } from "expo-router";
-import { useState } from "react";
 import { StyleSheet } from "react-native";
 import { useTranslation } from "react-i18next";
 
 import { Typography } from "@/constants/theme";
 import { typeFont } from "@/constants/type-font";
 import { useTheme } from "@/hooks/use-theme";
+import { asEditOf, optionalText, useDraft } from "@/utils/form-sheet-shared";
 
-export function useDraft<T extends object>(
-  initial: () => T,
-): [T, (patch: Partial<T>) => void] {
-  const [draft, setDraft] = useState(initial);
-
-  return [draft, (patch) => setDraft((current) => ({ ...current, ...patch }))];
-}
-
-export function optionalText(value: string): string | undefined {
-  const trimmed = value.trim();
-  return trimmed.length > 0 ? trimmed : undefined;
-}
-
-export function asEditOf<T extends { id: string; createdAt: string }>(
-  record: T,
-  existing: T,
-): T {
-  return { ...record, id: existing.id, createdAt: existing.createdAt };
-}
+export { asEditOf, optionalText, useDraft };
 
 export type FormSheetChromeProps = {
   namespace: string;
