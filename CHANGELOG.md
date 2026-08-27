@@ -20,6 +20,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   round well you tap; the name, species, sex, dates, schedules and logging
   defaults use Material's own fields, menus and date picker. Species
   suggestions fill in the common and scientific name as you type.
+- **A reptile's detail screen now works on Android.** Stats, the weight
+  trend chart and recent activity sit together the way they do on iPhone.
+  Swipe a record left or right to edit or delete it, filter the history by
+  type, or narrow it to a date range. Feeding, shed, waste, weight, habitat
+  and medical each get their own Material form, and documents attach and
+  preview the same way.
 - **Settings now works on Android.** Logging defaults, the daily reminder
   time, the water change and enclosure cleaning schedules, and the app
   language are all set from Material's own rows, switches, menus and time
