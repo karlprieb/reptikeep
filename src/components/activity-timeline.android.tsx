@@ -57,7 +57,7 @@ import TRENDING_DOWN_ICON from "@/assets/images/icons/trending-down.xml";
 import TRENDING_FLAT_ICON from "@/assets/images/icons/trending-flat.xml";
 import TRENDING_UP_ICON from "@/assets/images/icons/trending-up.xml";
 
-export const VISIBLE_LIMIT = 20;
+export const VISIBLE_LIMIT = 8;
 const BADGE_SIZE = 28;
 const BADGE_MAX_SCALE = 2;
 const SYMBOL_RATIO = 0.6;
