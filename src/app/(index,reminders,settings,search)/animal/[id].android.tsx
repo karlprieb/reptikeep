@@ -39,6 +39,10 @@ import DESCRIPTION_ICON from "@/assets/images/icons/description.xml";
 import MODE_EDIT_ICON from "@/assets/images/icons/mode-edit.xml";
 import MORE_VERT_ICON from "@/assets/images/icons/more-vert.xml";
 
+const PHOTO_SCRIM_COLOR = "rgba(20, 14, 8, 0.4)";
+const PHOTO_SCRIM_SOLID = "rgba(20, 14, 8, 0.92)";
+const ON_PHOTO_ICON = "#FFFFFF";
+
 export default function AnimalDetailScreen() {
   const theme = useTheme();
   const scheme = useColorScheme();
@@ -60,6 +64,7 @@ export default function AnimalDetailScreen() {
   if (!animal) return <AnimalNotFound />;
 
   const iconSize = ACTION_ICON_SIZE;
+  const toolbarIconTint = animal.photo ? ON_PHOTO_ICON : theme.text;
 
   const confirmDelete = () =>
     Alert.alert(
@@ -100,13 +105,27 @@ export default function AnimalDetailScreen() {
         <StatusBar
           translucent
           backgroundColor="transparent"
-          barStyle={scheme === "dark" ? "light-content" : "dark-content"}
+          barStyle={
+            animal.photo || scheme === "dark" ? "light-content" : "dark-content"
+          }
         />
+        {animal.photo ? (
+          <View
+            pointerEvents="none"
+            style={[
+              StyleSheet.absoluteFill,
+              { backgroundColor: PHOTO_SCRIM_COLOR },
+            ]}
+          />
+        ) : null}
         <Animated.View
           pointerEvents="none"
           style={[
             StyleSheet.absoluteFill,
-            { backgroundColor: theme.surface, opacity: lifted },
+            {
+              backgroundColor: animal.photo ? PHOTO_SCRIM_SOLID : theme.surface,
+              opacity: lifted,
+            },
           ]}
         />
         <Host
@@ -125,11 +144,11 @@ export default function AnimalDetailScreen() {
           >
             <IconButton
               onClick={() => router.back()}
-              colors={{ contentColor: theme.text }}
+              colors={{ contentColor: toolbarIconTint }}
             >
               <Icon
                 source={ARROW_BACK_ICON}
-                tint={theme.text}
+                tint={toolbarIconTint}
                 size={iconSize}
                 contentDescription={t("animal.back")}
               />
@@ -139,11 +158,11 @@ export default function AnimalDetailScreen() {
 
             <IconButton
               onClick={addActivity.open}
-              colors={{ contentColor: theme.primary }}
+              colors={{ contentColor: toolbarIconTint }}
             >
               <Icon
                 source={ADD_ICON}
-                tint={theme.primary}
+                tint={toolbarIconTint}
                 size={iconSize}
                 contentDescription={t("animal.addActivity")}
               />
@@ -157,11 +176,11 @@ export default function AnimalDetailScreen() {
               <DropdownMenu.Trigger>
                 <IconButton
                   onClick={() => setMenuOpen(true)}
-                  colors={{ contentColor: theme.text }}
+                  colors={{ contentColor: toolbarIconTint }}
                 >
                   <Icon
                     source={MORE_VERT_ICON}
-                    tint={theme.text}
+                    tint={toolbarIconTint}
                     size={iconSize}
                     contentDescription={t("animal.actions")}
                   />

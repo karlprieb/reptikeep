@@ -263,7 +263,6 @@ function ActivityCardButton({
             source={ActivityIcons[card.type]}
             tint={theme.onPrimary}
             size={Math.round(BADGE_DIAMETER * BADGE_SYMBOL_RATIO)}
-            contentDescription={accessibilityLabel}
           />
         </Box>
 

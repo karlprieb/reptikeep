@@ -195,10 +195,12 @@ export function AddWeightSheet({
                 options={WEIGHT_UNITS}
                 labelFor={(unit) => t(`weightForm.unitShort.${unit}`)}
                 onChange={(unit) => {
-                  const currentGrams = weightInputToGrams(
-                    draft.weight,
-                    draft.unit,
-                  );
+                  const originalGrams = activity?.weight;
+                  const currentGrams =
+                    originalGrams !== undefined &&
+                    draft.weight === gramsToField(originalGrams, draft.unit)
+                      ? originalGrams
+                      : weightInputToGrams(draft.weight, draft.unit);
                   const nextWeight =
                     currentGrams === undefined
                       ? draft.weight

@@ -254,10 +254,13 @@ export function AddFeedingSheet({
                       selected: unit === draft.weightUnit,
                     }))}
                     onSelect={(weightUnit) => {
-                      const currentGrams = weightInputToGrams(
-                        draft.weight,
-                        draft.weightUnit,
-                      );
+                      const originalGrams = activity?.weight;
+                      const currentGrams =
+                        originalGrams !== undefined &&
+                        draft.weight ===
+                          gramsToField(originalGrams, draft.weightUnit)
+                          ? originalGrams
+                          : weightInputToGrams(draft.weight, draft.weightUnit);
                       const nextWeight =
                         currentGrams === undefined
                           ? draft.weight
