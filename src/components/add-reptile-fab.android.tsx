@@ -18,6 +18,7 @@ export type AddReptileFabProps = {
 export function AddReptileFab({
   onPress,
   accessibilityLabel,
+  accessibilityHint,
 }: AddReptileFabProps) {
   const theme = useTheme();
 
@@ -35,7 +36,9 @@ export function AddReptileFab({
           <Icon
             source={ADD_ICON}
             tint={theme.onPrimary}
-            contentDescription={accessibilityLabel}
+            contentDescription={[accessibilityLabel, accessibilityHint].join(
+              ", ",
+            )}
           />
         </FloatingActionButton.Icon>
       </FloatingActionButton>

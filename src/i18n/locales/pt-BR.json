@@ -175,6 +175,8 @@
   "documents": {
     "title": "Documentos",
     "add": "Adicionar documento",
+    "notFound": "Documento não encontrado",
+    "notFoundSubtitle": "Este documento pode ter sido removido.",
     "empty": {
       "title": "Nenhum documento ainda",
       "description": "Notas fiscais, certificados e licenças deste réptil ficam aqui."

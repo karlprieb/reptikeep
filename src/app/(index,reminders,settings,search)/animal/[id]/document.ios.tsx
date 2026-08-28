@@ -484,6 +484,7 @@ function DocumentFormSheet({
 }
 
 export default function DocumentFormScreen() {
+  const { t } = useTranslation();
   const { animal } = useAnimalRoute();
   const { documentId } = useLocalSearchParams<{ documentId?: string }>();
   const documents = useValue(documents$);
@@ -491,6 +492,13 @@ export default function DocumentFormScreen() {
   const document = candidate?.animalId === animal?.id ? candidate : undefined;
 
   if (!animal) return <AnimalNotFound />;
+  if (documentId && !document)
+    return (
+      <AnimalNotFound
+        title={t("documents.notFound")}
+        description={t("documents.notFoundSubtitle")}
+      />
+    );
 
   return (
     <DocumentFormSheet

@@ -145,12 +145,14 @@ export function AddHabitatSheet({
                 checked={draft.water}
                 onCheckedChange={(water) => updateDraft({ water })}
                 theme={theme}
+                hint={t("a11y.habitatForm.water")}
               />
               <SwitchRow
                 label={t("habitatForm.cleaning")}
                 checked={draft.cleaning}
                 onCheckedChange={(cleaning) => updateDraft({ cleaning })}
                 theme={theme}
+                hint={t("a11y.habitatForm.cleaning")}
               />
             </Section>
 

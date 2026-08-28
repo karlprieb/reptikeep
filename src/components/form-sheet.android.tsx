@@ -28,6 +28,7 @@ import {
   fillMaxWidth,
   menuAnchor,
   padding,
+  semantics,
   Shapes,
   toggleable,
   weight,
@@ -310,11 +311,13 @@ export function SwitchRow({
   checked,
   onCheckedChange,
   theme,
+  hint,
 }: {
   label: string;
   checked: boolean;
   onCheckedChange: (value: boolean) => void;
   theme: FormTheme;
+  hint?: string;
 }) {
   return (
     <Box
@@ -323,6 +326,10 @@ export function SwitchRow({
         clip(Shapes.RoundedCorner(Radius.md)),
         toggleable(checked, () => onCheckedChange(!checked), {
           role: "switch",
+        }),
+        semantics({
+          contentDescription: [label, hint].filter(Boolean).join(", "),
+          mergeDescendants: true,
         }),
       ]}
     >
@@ -338,13 +345,18 @@ export function SwitchRow({
         <ListItem.TrailingContent>
           <Switch
             value={checked}
-            onCheckedChange={onCheckedChange}
+            enabled={false}
             colors={{
               checkedThumbColor: theme.onPrimary,
               checkedTrackColor: theme.primary,
               uncheckedThumbColor: theme.textMuted,
               uncheckedTrackColor: theme.surfaceSunken,
               uncheckedBorderColor: theme.textMuted,
+              disabledCheckedThumbColor: theme.onPrimary,
+              disabledCheckedTrackColor: theme.primary,
+              disabledUncheckedThumbColor: theme.textMuted,
+              disabledUncheckedTrackColor: theme.surfaceSunken,
+              disabledUncheckedBorderColor: theme.textMuted,
             }}
           />
         </ListItem.TrailingContent>
@@ -360,6 +372,7 @@ export function MenuField<T extends string>({
   iconSize,
   items,
   onSelect,
+  hint,
 }: {
   label: string;
   value: string;
@@ -367,6 +380,7 @@ export function MenuField<T extends string>({
   iconSize: number;
   items: { value: T; label: string; selected: boolean }[];
   onSelect: (value: T) => void;
+  hint?: string;
 }) {
   const [expanded, setExpanded] = useState(false);
   const text = useNativeState(value);
@@ -386,7 +400,14 @@ export function MenuField<T extends string>({
         readOnly
         singleLine
         colors={fieldColors(theme)}
-        modifiers={[menuAnchor(), fillMaxWidth()]}
+        modifiers={[
+          menuAnchor(),
+          fillMaxWidth(),
+          semantics({
+            contentDescription: [label, value, hint].filter(Boolean).join(", "),
+            mergeDescendants: true,
+          }),
+        ]}
       >
         <OutlinedTextField.Label>
           <Text>{label}</Text>

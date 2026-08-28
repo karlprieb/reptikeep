@@ -16,6 +16,7 @@ import {
   clip,
   fillMaxWidth,
   padding,
+  semantics,
   Shapes,
   weight,
 } from "@expo/ui/jetpack-compose/modifiers";
@@ -47,7 +48,12 @@ import {
   TOP_BAR_HEIGHT,
   useScrollLift,
 } from "@/components/form-sheet";
-import { Radius, Spacing, type ActivityType } from "@/constants/theme";
+import {
+  Radius,
+  Spacing,
+  StackAboveFontScale,
+  type ActivityType,
+} from "@/constants/theme";
 import { composeTextStyle } from "@/constants/type-font-compose";
 import { useAddActivity } from "@/hooks/use-add-activity";
 import { useColorScheme, useTheme } from "@/hooks/use-theme";
@@ -78,11 +84,13 @@ function RangeSummaryRow({
   from,
   to,
   count,
+  stacked,
   onClear,
 }: {
   from: string;
   to: string;
   count: number;
+  stacked: boolean;
   onClear: () => void;
 }) {
   const theme = useTheme();
@@ -94,34 +102,71 @@ function RangeSummaryRow({
   });
   const countText = t("timeline.filtered.count", { count });
 
+  const summary = (
+    <Column
+      horizontalAlignment="start"
+      verticalArrangement={{ spacedBy: Spacing["2xs"] }}
+      modifiers={[
+        ...(stacked ? [fillMaxWidth()] : []),
+        semantics({
+          contentDescription: [spanText, countText].join(", "),
+          mergeDescendants: true,
+        }),
+      ]}
+    >
+      <Text style={composeTextStyle("data")} color={theme.text}>
+        {spanText}
+      </Text>
+      <Text style={composeTextStyle("bodyS")} color={theme.textMuted}>
+        {countText}
+      </Text>
+    </Column>
+  );
+
+  const clearButton = (
+    <TextButton
+      onClick={onClear}
+      colors={{ contentColor: theme.primary }}
+      modifiers={[
+        semantics({
+          contentDescription: [
+            t("timeline.range.clear"),
+            t("timeline.range.clearHint"),
+          ].join(", "),
+          mergeDescendants: true,
+        }),
+      ]}
+    >
+      <Text style={composeTextStyle("body")} color={theme.primary}>
+        {t("timeline.range.clear")}
+      </Text>
+    </TextButton>
+  );
+
   return (
     <Host
       style={historyStyles.rangeHost}
       matchContents={{ horizontal: false, vertical: true }}
     >
-      <Row
-        verticalAlignment="center"
-        horizontalArrangement="spaceBetween"
-        modifiers={[fillMaxWidth()]}
-      >
+      {stacked ? (
         <Column
           horizontalAlignment="start"
-          verticalArrangement={{ spacedBy: Spacing["2xs"] }}
+          verticalArrangement={{ spacedBy: Spacing.xs }}
+          modifiers={[fillMaxWidth()]}
         >
-          <Text style={composeTextStyle("data")} color={theme.text}>
-            {spanText}
-          </Text>
-          <Text style={composeTextStyle("bodyS")} color={theme.textMuted}>
-            {countText}
-          </Text>
+          {summary}
+          {clearButton}
         </Column>
-
-        <TextButton onClick={onClear} colors={{ contentColor: theme.primary }}>
-          <Text style={composeTextStyle("body")} color={theme.primary}>
-            {t("timeline.range.clear")}
-          </Text>
-        </TextButton>
-      </Row>
+      ) : (
+        <Row
+          verticalAlignment="center"
+          horizontalArrangement="spaceBetween"
+          modifiers={[fillMaxWidth()]}
+        >
+          {summary}
+          {clearButton}
+        </Row>
+      )}
     </Host>
   );
 }
@@ -274,6 +319,7 @@ export default function AnimalHistoryScreen() {
             from={range.from}
             to={range.to}
             count={shown.length}
+            stacked={fontScale >= StackAboveFontScale}
             onClear={() => setPreset("all")}
           />
         ) : null}

@@ -175,6 +175,8 @@
   "documents": {
     "title": "Documents",
     "add": "Add document",
+    "notFound": "Document not found",
+    "notFoundSubtitle": "This document may have been removed.",
     "empty": {
       "title": "No documents yet",
       "description": "Invoices, certificates and permits for this reptile live here."

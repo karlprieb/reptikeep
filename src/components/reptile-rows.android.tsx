@@ -80,12 +80,14 @@ function ReptileRow({
   const sex = animal.sex === "unknown" ? null : t(`sex.${animal.sex}`);
   const monogram = animal.name.trim().slice(0, 1).toLocaleUpperCase();
 
+  const hint = t("a11y.animalCard.hint", { animalName: animal.name });
   const label = [
     animal.name,
     animal.commonName,
     animal.scientificName,
     sex,
     feeding.line,
+    hint,
   ]
     .filter((part): part is string => Boolean(part))
     .join(", ");

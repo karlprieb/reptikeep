@@ -30,6 +30,7 @@ import {
   fillMaxWidth,
   menuAnchor,
   padding,
+  semantics,
   size,
   Shapes,
   toggleable,
@@ -308,6 +309,7 @@ export function ReptileFormSheet({ animal }: ReptileFormSheetProps) {
                 checked={form.usesFeedingSchedule}
                 onCheckedChange={form.setUsesFeedingSchedule}
                 theme={theme}
+                hint={t("a11y.feedingSchedule.enabled.hint")}
               />
               {form.usesFeedingSchedule ? (
                 <ScheduleFields
@@ -319,6 +321,8 @@ export function ReptileFormSheet({ animal }: ReptileFormSheetProps) {
                   theme={theme}
                   iconSize={iconSize}
                   showInherit={false}
+                  hint={t("a11y.feedingSchedule.frequency.hint")}
+                  daysHint={t("a11y.feedingSchedule.customDays.hint")}
                 />
               ) : null}
             </Section>
@@ -340,6 +344,8 @@ export function ReptileFormSheet({ animal }: ReptileFormSheetProps) {
                 inheritedLabel={t("defaults.followGlobal", {
                   value: describeSchedule(form.collectionWater, t),
                 })}
+                hint={t("a11y.waterSchedule.frequency.hint")}
+                daysHint={t("a11y.waterSchedule.customDays.hint")}
               />
               {form.waterScheduled ? (
                 <SwitchRow
@@ -347,6 +353,7 @@ export function ReptileFormSheet({ animal }: ReptileFormSheetProps) {
                   checked={form.waterReminder}
                   onCheckedChange={form.handleWaterReminder}
                   theme={theme}
+                  hint={t("a11y.reminders.water.hint")}
                 />
               ) : null}
             </Section>
@@ -368,6 +375,8 @@ export function ReptileFormSheet({ animal }: ReptileFormSheetProps) {
                 inheritedLabel={t("defaults.followGlobal", {
                   value: describeSchedule(form.collectionCleaning, t),
                 })}
+                hint={t("a11y.cleaningSchedule.frequency.hint")}
+                daysHint={t("a11y.cleaningSchedule.customDays.hint")}
               />
               {form.cleaningScheduled ? (
                 <SwitchRow
@@ -375,6 +384,7 @@ export function ReptileFormSheet({ animal }: ReptileFormSheetProps) {
                   checked={form.cleaningReminder}
                   onCheckedChange={form.handleCleaningReminder}
                   theme={theme}
+                  hint={t("a11y.reminders.cleaning.hint")}
                 />
               ) : null}
             </Section>
@@ -389,6 +399,7 @@ export function ReptileFormSheet({ animal }: ReptileFormSheetProps) {
             >
               <MenuField
                 label={t("defaults.mealMeasure")}
+                hint={t("a11y.defaults.mealMeasure.hint")}
                 value={
                   form.defaults.mealMeasure === undefined
                     ? t("defaults.followGlobal", {
@@ -430,6 +441,7 @@ export function ReptileFormSheet({ animal }: ReptileFormSheetProps) {
 
               <MenuField
                 label={t("defaults.frozen")}
+                hint={t("a11y.defaults.frozen.hint")}
                 value={
                   form.defaults.frozen === undefined
                     ? t("defaults.followGlobal", {
@@ -469,6 +481,7 @@ export function ReptileFormSheet({ animal }: ReptileFormSheetProps) {
 
               <MenuField
                 label={t("defaults.weightUnit")}
+                hint={t("a11y.defaults.weightUnit.hint")}
                 value={
                   form.defaults.weightUnit === undefined
                     ? t("defaults.followGlobal", {
@@ -510,6 +523,7 @@ export function ReptileFormSheet({ animal }: ReptileFormSheetProps) {
 
               <MenuField
                 label={t("defaults.poopType")}
+                hint={t("a11y.defaults.poopType.hint")}
                 value={
                   form.defaults.poopType === undefined
                     ? t("defaults.followGlobal", {
@@ -791,6 +805,7 @@ function MenuField<T extends string>({
   iconSize,
   items,
   onSelect,
+  hint,
 }: {
   label: string;
   value: string;
@@ -798,6 +813,7 @@ function MenuField<T extends string>({
   iconSize: number;
   items: { value: T; label: string; selected: boolean }[];
   onSelect: (value: T) => void;
+  hint?: string;
 }) {
   const [expanded, setExpanded] = useState(false);
   const text = useNativeState(value);
@@ -817,7 +833,14 @@ function MenuField<T extends string>({
         readOnly
         singleLine
         colors={fieldColors(theme)}
-        modifiers={[menuAnchor(), fillMaxWidth()]}
+        modifiers={[
+          menuAnchor(),
+          fillMaxWidth(),
+          semantics({
+            contentDescription: [label, value, hint].filter(Boolean).join(", "),
+            mergeDescendants: true,
+          }),
+        ]}
       >
         <OutlinedTextField.Label>
           <Text>{label}</Text>
@@ -869,11 +892,13 @@ function SwitchRow({
   checked,
   onCheckedChange,
   theme,
+  hint,
 }: {
   label: string;
   checked: boolean;
   onCheckedChange: (value: boolean) => void;
   theme: FormTheme;
+  hint?: string;
 }) {
   return (
     <Box
@@ -882,6 +907,10 @@ function SwitchRow({
         clip(Shapes.RoundedCorner(Radius.md)),
         toggleable(checked, () => onCheckedChange(!checked), {
           role: "switch",
+        }),
+        semantics({
+          contentDescription: [label, hint].filter(Boolean).join(", "),
+          mergeDescendants: true,
         }),
       ]}
     >
@@ -897,13 +926,18 @@ function SwitchRow({
         <ListItem.TrailingContent>
           <Switch
             value={checked}
-            onCheckedChange={onCheckedChange}
+            enabled={false}
             colors={{
               checkedThumbColor: theme.onPrimary,
               checkedTrackColor: theme.primary,
               uncheckedThumbColor: theme.textMuted,
               uncheckedTrackColor: theme.surfaceSunken,
               uncheckedBorderColor: theme.textMuted,
+              disabledCheckedThumbColor: theme.onPrimary,
+              disabledCheckedTrackColor: theme.primary,
+              disabledUncheckedThumbColor: theme.textMuted,
+              disabledUncheckedTrackColor: theme.surfaceSunken,
+              disabledUncheckedBorderColor: theme.textMuted,
             }}
           />
         </ListItem.TrailingContent>
@@ -1075,6 +1109,8 @@ function ScheduleFields({
   iconSize,
   showInherit,
   inheritedLabel,
+  hint,
+  daysHint,
 }: {
   selection: ScheduleSelection;
   onSelectionChange: (value: ScheduleSelection) => void;
@@ -1085,6 +1121,8 @@ function ScheduleFields({
   iconSize: number;
   showInherit?: boolean;
   inheritedLabel?: string;
+  hint?: string;
+  daysHint?: string;
 }) {
   const { t } = useTranslation();
   const customDaysState = useNativeState(customDays);
@@ -1124,6 +1162,7 @@ function ScheduleFields({
           selected: row.value === selection,
         }))}
         onSelect={onSelectionChange}
+        hint={hint}
       />
       {selection === "custom" ? (
         <OutlinedTextField
@@ -1134,7 +1173,15 @@ function ScheduleFields({
           textStyle={DATA_STYLE}
           isError={!valid}
           singleLine
-          modifiers={[fillMaxWidth()]}
+          modifiers={[
+            fillMaxWidth(),
+            semantics({
+              contentDescription: [t("schedule.customDays"), daysHint]
+                .filter(Boolean)
+                .join(", "),
+              mergeDescendants: true,
+            }),
+          ]}
         >
           <OutlinedTextField.Label>
             <Text>{t("schedule.customDays")}</Text>
