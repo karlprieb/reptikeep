@@ -18,7 +18,7 @@ export default function AppTabs() {
     <NativeTabs
       hidden={Platform.OS === "android" && FULL_SCREEN_ROUTES.test(pathname)}
       backgroundColor={colors.bg}
-      indicatorColor={colors.surface}
+      indicatorColor={colors.primarySurface}
       iconColor={{ default: colors.textSecondary, selected: colors.primary }}
       labelStyle={{
         default: { color: colors.textSecondary },
