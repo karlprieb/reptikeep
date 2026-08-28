@@ -106,7 +106,13 @@ function RangeSummaryRow({
     <Column
       horizontalAlignment="start"
       verticalArrangement={{ spacedBy: Spacing["2xs"] }}
-      modifiers={stacked ? [fillMaxWidth()] : []}
+      modifiers={[
+        ...(stacked ? [fillMaxWidth()] : []),
+        semantics({
+          contentDescription: [spanText, countText].join(", "),
+          mergeDescendants: true,
+        }),
+      ]}
     >
       <Text style={composeTextStyle("data")} color={theme.text}>
         {spanText}

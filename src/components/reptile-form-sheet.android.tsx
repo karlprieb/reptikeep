@@ -321,6 +321,8 @@ export function ReptileFormSheet({ animal }: ReptileFormSheetProps) {
                   theme={theme}
                   iconSize={iconSize}
                   showInherit={false}
+                  hint={t("a11y.feedingSchedule.frequency.hint")}
+                  daysHint={t("a11y.feedingSchedule.customDays.hint")}
                 />
               ) : null}
             </Section>
@@ -342,6 +344,8 @@ export function ReptileFormSheet({ animal }: ReptileFormSheetProps) {
                 inheritedLabel={t("defaults.followGlobal", {
                   value: describeSchedule(form.collectionWater, t),
                 })}
+                hint={t("a11y.waterSchedule.frequency.hint")}
+                daysHint={t("a11y.waterSchedule.customDays.hint")}
               />
               {form.waterScheduled ? (
                 <SwitchRow
@@ -371,6 +375,8 @@ export function ReptileFormSheet({ animal }: ReptileFormSheetProps) {
                 inheritedLabel={t("defaults.followGlobal", {
                   value: describeSchedule(form.collectionCleaning, t),
                 })}
+                hint={t("a11y.cleaningSchedule.frequency.hint")}
+                daysHint={t("a11y.cleaningSchedule.customDays.hint")}
               />
               {form.cleaningScheduled ? (
                 <SwitchRow
@@ -1103,6 +1109,8 @@ function ScheduleFields({
   iconSize,
   showInherit,
   inheritedLabel,
+  hint,
+  daysHint,
 }: {
   selection: ScheduleSelection;
   onSelectionChange: (value: ScheduleSelection) => void;
@@ -1113,6 +1121,8 @@ function ScheduleFields({
   iconSize: number;
   showInherit?: boolean;
   inheritedLabel?: string;
+  hint?: string;
+  daysHint?: string;
 }) {
   const { t } = useTranslation();
   const customDaysState = useNativeState(customDays);
@@ -1152,6 +1162,7 @@ function ScheduleFields({
           selected: row.value === selection,
         }))}
         onSelect={onSelectionChange}
+        hint={hint}
       />
       {selection === "custom" ? (
         <OutlinedTextField
@@ -1162,7 +1173,15 @@ function ScheduleFields({
           textStyle={DATA_STYLE}
           isError={!valid}
           singleLine
-          modifiers={[fillMaxWidth()]}
+          modifiers={[
+            fillMaxWidth(),
+            semantics({
+              contentDescription: [t("schedule.customDays"), daysHint]
+                .filter(Boolean)
+                .join(", "),
+              mergeDescendants: true,
+            }),
+          ]}
         >
           <OutlinedTextField.Label>
             <Text>{t("schedule.customDays")}</Text>
