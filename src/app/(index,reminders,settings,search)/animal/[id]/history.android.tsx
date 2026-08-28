@@ -16,6 +16,7 @@ import {
   clip,
   fillMaxWidth,
   padding,
+  semantics,
   Shapes,
   weight,
 } from "@expo/ui/jetpack-compose/modifiers";
@@ -117,7 +118,19 @@ function RangeSummaryRow({
   );
 
   const clearButton = (
-    <TextButton onClick={onClear} colors={{ contentColor: theme.primary }}>
+    <TextButton
+      onClick={onClear}
+      colors={{ contentColor: theme.primary }}
+      modifiers={[
+        semantics({
+          contentDescription: [
+            t("timeline.range.clear"),
+            t("timeline.range.clearHint"),
+          ].join(", "),
+          mergeDescendants: true,
+        }),
+      ]}
+    >
       <Text style={composeTextStyle("body")} color={theme.primary}>
         {t("timeline.range.clear")}
       </Text>
