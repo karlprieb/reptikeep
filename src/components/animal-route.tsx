@@ -18,15 +18,20 @@ export function useAnimalRoute() {
   return { id, animal, activityId };
 }
 
-export function AnimalNotFound() {
+export type AnimalNotFoundProps = {
+  title?: string;
+  description?: string;
+};
+
+export function AnimalNotFound({ title, description }: AnimalNotFoundProps) {
   const theme = useTheme();
   const { t } = useTranslation();
 
   return (
     <View style={[styles.notFound, { backgroundColor: theme.bg }]}>
       <EmptyState
-        title={t("animal.notFound")}
-        description={t("animal.notFoundSubtitle")}
+        title={title ?? t("animal.notFound")}
+        description={description ?? t("animal.notFoundSubtitle")}
         systemImage="questionmark.circle"
       />
     </View>
