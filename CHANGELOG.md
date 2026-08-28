@@ -76,6 +76,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Choosing a custom care schedule with no valid number of days no longer
   saves a broken interval that never reminded you. The picker keeps
   "Custom" selected and marks the days field until the number is valid.
+- Opening a document link to one that no longer exists said the whole
+  reptile had been removed. It now says the document itself is
+  unavailable, on both Android and iPhone.
+- TalkBack now reads Android's reptile cards, add button, activity rows,
+  filter chips, feeding and reminder switches, and schedule menus as one
+  announcement each, with what tapping them does, instead of stopping on
+  each piece separately or staying silent.
+- The date-range summary on a reptile's Android history screen no longer
+  overlaps the "Clear" button at large text sizes; it drops to its own
+  line instead.
 
 ## [0.4.0] - 2026-08-19
 
