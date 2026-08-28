@@ -345,13 +345,18 @@ export function SwitchRow({
         <ListItem.TrailingContent>
           <Switch
             value={checked}
-            onCheckedChange={onCheckedChange}
+            enabled={false}
             colors={{
               checkedThumbColor: theme.onPrimary,
               checkedTrackColor: theme.primary,
               uncheckedThumbColor: theme.textMuted,
               uncheckedTrackColor: theme.surfaceSunken,
               uncheckedBorderColor: theme.textMuted,
+              disabledCheckedThumbColor: theme.onPrimary,
+              disabledCheckedTrackColor: theme.primary,
+              disabledUncheckedThumbColor: theme.textMuted,
+              disabledUncheckedTrackColor: theme.surfaceSunken,
+              disabledUncheckedBorderColor: theme.textMuted,
             }}
           />
         </ListItem.TrailingContent>
