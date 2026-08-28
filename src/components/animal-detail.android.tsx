@@ -154,6 +154,7 @@ function StatBox({ stat, theme }: { stat: Stat; theme: Theme }) {
         <ComposeText
           style={composeTextStyle("bodyS")}
           color={stat.secondaryColor ?? theme.textSecondary}
+          minLines={2}
         >
           {stat.secondary}
         </ComposeText>
