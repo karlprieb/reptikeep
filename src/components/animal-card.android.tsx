@@ -19,6 +19,7 @@ import {
   Shapes,
   width,
 } from "@expo/ui/jetpack-compose/modifiers";
+import { LinearGradient } from "expo-linear-gradient";
 import { memo } from "react";
 import {
   Image,
@@ -40,7 +41,6 @@ import { getAnimalPhotoUri } from "@/utils/animal-photo-storage";
 import { feedingStatus } from "@/utils/feeding-status";
 
 const SCRIM_COLOR = "14,9,4";
-const SCRIM_BANDS = 16;
 const SCRIM_MAX_ALPHA = 0.92;
 const ON_PHOTO_TEXT = "#FFFFFF";
 const ON_PHOTO_TEXT_SECONDARY = "rgba(255, 255, 255, 0.82)";
@@ -72,32 +72,29 @@ export type AnimalCardProps = {
   onPress: () => void;
 };
 
-function ScrimBands({
+function PhotoScrim({
   cardWidth,
   scrimHeight,
 }: {
   cardWidth: number;
   scrimHeight: number;
 }) {
-  const bandHeight = Math.ceil(scrimHeight / SCRIM_BANDS);
   return (
-    <Column
+    <Box
       modifiers={[width(cardWidth), height(scrimHeight), align("bottomStart")]}
     >
-      {Array.from({ length: SCRIM_BANDS }, (_, i) => {
-        const bandAlpha = (i / (SCRIM_BANDS - 1)) * SCRIM_MAX_ALPHA;
-        return (
-          <Box
-            key={i}
-            modifiers={[
-              width(cardWidth),
-              height(bandHeight),
-              background(`rgba(${SCRIM_COLOR}, ${bandAlpha.toFixed(2)})`),
-            ]}
-          />
-        );
-      })}
-    </Column>
+      <RNHostView modifiers={[matchParentSize()]}>
+        <LinearGradient
+          colors={[
+            `rgba(${SCRIM_COLOR}, 0)`,
+            `rgba(${SCRIM_COLOR}, ${SCRIM_MAX_ALPHA})`,
+          ]}
+          start={{ x: 0.5, y: 0 }}
+          end={{ x: 0.5, y: 1 }}
+          style={styles.scrimGradient}
+        />
+      </RNHostView>
+    </Box>
   );
 }
 
@@ -223,7 +220,7 @@ function AnimalCardBase({
               {monogram}
             </Text>
           ) : (
-            <ScrimBands cardWidth={cardWidth} scrimHeight={cardHeight / 1.5} />
+            <PhotoScrim cardWidth={cardWidth} scrimHeight={cardHeight / 1.5} />
           )}
 
           <Column
@@ -340,6 +337,10 @@ function AnimalCardBase({
 
 const styles = StyleSheet.create({
   photo: {
+    width: "100%",
+    height: "100%",
+  },
+  scrimGradient: {
     width: "100%",
     height: "100%",
   },
