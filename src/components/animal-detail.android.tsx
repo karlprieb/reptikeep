@@ -20,6 +20,7 @@ import {
   weight,
   width,
 } from "@expo/ui/jetpack-compose/modifiers";
+import { LinearGradient } from "expo-linear-gradient";
 import { useCallback, useMemo, useState } from "react";
 import {
   Image,
@@ -63,7 +64,6 @@ import { WeightTrendChart } from "@/components/weight-trend-chart";
 import { weightChartData } from "@/utils/weight-chart";
 
 const GRADIENT_BAND_FRACTION = 0.55;
-const SCRIM_BANDS = 16;
 
 function hexToRgb(hex: string): string {
   const value = hex.replace("#", "");
@@ -83,26 +83,20 @@ function HeroScrim({
   scrimHeight: number;
 }) {
   const rgb = hexToRgb(bg);
-  const bandHeight = Math.ceil(scrimHeight / SCRIM_BANDS);
 
   return (
-    <Column
+    <Box
       modifiers={[width(cardWidth), height(scrimHeight), align("bottomStart")]}
     >
-      {Array.from({ length: SCRIM_BANDS }, (_, i) => {
-        const bandAlpha = i / (SCRIM_BANDS - 1);
-        return (
-          <Box
-            key={i}
-            modifiers={[
-              width(cardWidth),
-              height(bandHeight),
-              background(`rgba(${rgb}, ${bandAlpha.toFixed(2)})`),
-            ]}
-          />
-        );
-      })}
-    </Column>
+      <RNHostView modifiers={[width(cardWidth), height(scrimHeight)]}>
+        <LinearGradient
+          colors={[`rgba(${rgb}, 0)`, `rgba(${rgb}, 1)`]}
+          start={{ x: 0.5, y: 0 }}
+          end={{ x: 0.5, y: 1 }}
+          style={{ width: cardWidth, height: scrimHeight }}
+        />
+      </RNHostView>
+    </Box>
   );
 }
 
