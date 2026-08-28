@@ -73,6 +73,11 @@ export default function SearchScreen() {
         autoCapitalize="none"
         placeholder={t("search.placeholder")}
         placement="integrated"
+        barTintColor={theme.surface}
+        textColor={theme.text}
+        hintTextColor={theme.textMuted}
+        headerIconColor={theme.textSecondary}
+        tintColor={theme.primary}
         onChangeText={(event) => setQuery(event.nativeEvent.text)}
         onCancelButtonPress={handleCancel}
       />
