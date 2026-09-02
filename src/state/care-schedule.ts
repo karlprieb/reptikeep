@@ -23,6 +23,9 @@ export type AnimalSchedule = CareSchedule | { frequency: "off" };
 export const CARE_ROUTINES = ["water", "cleaning"] as const;
 export type CareRoutine = (typeof CARE_ROUTINES)[number];
 
+export const REMINDER_ROUTINES = ["water", "cleaning", "feed"] as const;
+export type ReminderRoutine = (typeof REMINDER_ROUTINES)[number];
+
 export const careSchedules$ = observable<
   Partial<Record<CareRoutine, CareSchedule>>
 >({});

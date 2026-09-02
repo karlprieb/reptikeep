@@ -120,6 +120,9 @@ export function useReptileForm(animal?: Animal) {
   const [feedingDays, setFeedingDays] = useState(
     scheduleCustomDays(animal?.feedingSchedule),
   );
+  const [feedingReminder, setFeedingReminder] = useState(
+    animal ? animal.reminders?.feed === true : true,
+  );
   const [waterSelection, setWaterSelection] = useState<ScheduleSelection>(
     scheduleSelection(animal?.waterSchedule, SCHEDULE_INHERIT),
   );
@@ -216,7 +219,11 @@ export function useReptileForm(animal?: Animal) {
           : undefined,
         waterSchedule: scheduleFromFields(waterSelection, waterDays),
         cleaningSchedule: scheduleFromFields(cleaningSelection, cleaningDays),
-        reminders: { water: waterReminder, cleaning: cleaningReminder },
+        reminders: {
+          feed: feedingReminder,
+          water: waterReminder,
+          cleaning: cleaningReminder,
+        },
       };
       if (animal) await saveEdit(animal, fields);
       else await saveNew(fields);
@@ -262,6 +269,11 @@ export function useReptileForm(animal?: Animal) {
     setScientificSuggestionsDismissed(true);
   };
 
+  const handleFeedingReminder = (on: boolean) => {
+    setFeedingReminder(on);
+    if (on) void requestReminderPermission();
+  };
+
   const handleWaterReminder = (on: boolean) => {
     setWaterReminder(on);
     if (on) void requestReminderPermission();
@@ -271,6 +283,17 @@ export function useReptileForm(animal?: Animal) {
     setCleaningReminder(on);
     if (on) void requestReminderPermission();
   };
+
+  const feedingFooter = [
+    t("feedingSchedule.footer"),
+    usesFeedingSchedule && feedingReminder
+      ? t("reminders.timeFooter", {
+          time: formatClockTime(reminderTime.hour, reminderTime.minute),
+        })
+      : null,
+  ]
+    .filter((part): part is string => Boolean(part))
+    .join(" ");
 
   const waterFooter = !waterValid
     ? t("schedule.invalidDays")
@@ -347,6 +370,8 @@ export function useReptileForm(animal?: Animal) {
     feedingDays,
     setFeedingDays,
     feedingValid,
+    feedingReminder,
+    feedingFooter,
     waterSelection,
     setWaterSelection,
     waterDays,
@@ -370,6 +395,7 @@ export function useReptileForm(animal?: Animal) {
     handlePickPhoto,
     handleRemovePhoto,
     handleSelectSpecies,
+    handleFeedingReminder,
     handleWaterReminder,
     handleCleaningReminder,
   };

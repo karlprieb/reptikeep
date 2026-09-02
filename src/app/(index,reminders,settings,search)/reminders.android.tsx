@@ -20,10 +20,9 @@ import {
   weight,
 } from "@expo/ui/jetpack-compose/modifiers";
 import { router } from "expo-router";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import {
   Animated,
-  AppState,
   Linking,
   StyleSheet,
   useWindowDimensions,
@@ -46,38 +45,35 @@ import {
 } from "@/constants/theme";
 import { composeTextStyle } from "@/constants/type-font-compose";
 import { useTheme } from "@/hooks/use-theme";
-import { useToday } from "@/hooks/use-today";
-import { addAnimal, animals$, type Animal } from "@/state/animal";
-import { careSchedules$, type CareRoutine } from "@/state/care-schedule";
-import { createHabitatActivity, habitatStore } from "@/state/habitat";
+import { useReminderPermission } from "@/hooks/use-reminder-permission";
+import { useRemindersData, type DueState } from "@/hooks/use-reminders-data";
+import { type ReminderRoutine } from "@/state/care-schedule";
 import {
-  reminderPermission,
   requestReminderPermission,
   rescheduleSoon,
   type ReminderPermission,
 } from "@/state/notifications";
-import { reminders$ } from "@/state/reminders";
-import { summaries$, summaryLookups } from "@/state/summary";
-import { careReminders, type CareReminder } from "@/utils/care-reminders";
+import { type CareReminder } from "@/utils/care-reminders";
 import {
-  daysSince,
-  formatAbsoluteDate,
-  formatClockTime,
-  fromCalendarDate,
-} from "@/utils/format-date";
+  markRoutineDone,
+  ROUTINE_CATEGORY,
+  routineHref,
+} from "@/utils/reminder-actions";
+import { formatAbsoluteDate } from "@/utils/format-date";
 import { panelRowHeight } from "@/utils/panel-row";
-import { useSelector as useValue } from "@legendapp/state/react";
 
 import CALENDAR_ICON from "@/assets/images/icons/calendar-month.xml";
 import NOTIFICATIONS_OFF_ICON from "@/assets/images/icons/notifications-off.xml";
 import RADIO_UNCHECKED_ICON from "@/assets/images/icons/radio-button-unchecked.xml";
+import RESTAURANT_ICON from "@/assets/images/icons/restaurant.xml";
 import SPARKLE_ICON from "@/assets/images/icons/sparkle.xml";
 import WATER_DROP_ICON from "@/assets/images/icons/water-drop.xml";
 
-const ROUTINE_ICONS = {
+const ROUTINE_ICONS: Record<ReminderRoutine, typeof CALENDAR_ICON> = {
+  feed: RESTAURANT_ICON,
   water: WATER_DROP_ICON,
   cleaning: SPARKLE_ICON,
-} as const;
+};
 
 const BADGE_SIZE = 28;
 const BADGE_MAX_SCALE = 2;
@@ -96,28 +92,6 @@ const STACKED_ROW_BLOCKS: Parameters<typeof panelRowHeight>[0] = [
   ["data", 1],
   ["bodyS", 2],
 ];
-
-type DueState = {
-  text: string;
-  color: string;
-};
-
-function markRoutineDone(animalId: string, routine: CareRoutine): void {
-  habitatStore.add(
-    createHabitatActivity({
-      animalId,
-      water: routine === "water",
-      cleaning: routine === "cleaning",
-    }),
-  );
-}
-
-function stopReminding(animal: Animal, routine: CareRoutine): void {
-  addAnimal({
-    ...animal,
-    reminders: { ...animal.reminders, [routine]: false },
-  });
-}
 
 function SwipeAction({
   icon,
@@ -187,10 +161,7 @@ function ReminderRow({
   const routine = t(`reminders.routine.${reminder.routine}`);
   const due = formatAbsoluteDate(reminder.dueOn);
 
-  const openDetail = () =>
-    router.push(
-      `/animal/${reminder.animalId}/habitat?routine=${reminder.routine}`,
-    );
+  const openDetail = () => router.push(routineHref(reminder));
 
   const openEdit = () => {
     swipeableRef.current?.close();
@@ -315,7 +286,9 @@ function ReminderRow({
                 modifiers={[
                   size(badgeSize, badgeSize),
                   clip(Shapes.Circle),
-                  background(CategoryColors.habitat),
+                  background(
+                    CategoryColors[ROUTINE_CATEGORY[reminder.routine]],
+                  ),
                 ]}
               >
                 <Icon
@@ -393,7 +366,7 @@ type ReminderPanelProps = {
   badgeSize: number;
   checkboxSize: number;
   stacked: boolean;
-  onStopReminding: (animalId: string, routine: CareRoutine) => void;
+  onStopReminding: (animalId: string, routine: ReminderRoutine) => void;
 };
 
 function ReminderPanel({
@@ -544,82 +517,13 @@ export default function RemindersScreen() {
   const { t } = useTranslation();
   const { fontScale } = useWindowDimensions();
 
-  const animals = useValue(animals$);
-  const collectionWater = useValue(careSchedules$.water);
-  const collectionCleaning = useValue(careSchedules$.cleaning);
-  const summaries = useValue(summaries$);
-  const reminderTime = useValue(reminders$);
-  const [permission, setPermission] = useState<ReminderPermission>();
+  const [permission, setPermission] = useReminderPermission();
+  const { reminders, dueState, sections, handleStopReminding, clockTime } =
+    useRemindersData();
 
   const [scrollY] = useState(() => new Animated.Value(0));
   const [appBarHeight, setAppBarHeight] = useState(0);
   const [limit, setLimit] = useState(REMINDERS_PAGE);
-
-  useEffect(() => {
-    const read = () => void reminderPermission().then(setPermission);
-    read();
-
-    const subscription = AppState.addEventListener("change", (state) => {
-      if (state === "active") read();
-    });
-
-    return () => subscription.remove();
-  }, []);
-
-  const handleStopReminding = (animalId: string, routine: CareRoutine) => {
-    const animal = animals[animalId];
-    if (animal) stopReminding(animal, routine);
-  };
-
-  const today = useToday();
-  const reminders = useMemo(() => {
-    const { lastWater, lastClean } = summaryLookups(summaries);
-
-    return careReminders(
-      animals,
-      { water: collectionWater, cleaning: collectionCleaning },
-      { water: lastWater, cleaning: lastClean },
-    );
-  }, [animals, collectionCleaning, collectionWater, summaries]);
-
-  const dueState = (reminder: CareReminder): DueState => {
-    if (reminder.dueOn < today) {
-      return {
-        text: t("schedule.overdue", { count: daysSince(reminder.dueOn) ?? 0 }),
-        color: theme.danger,
-      };
-    }
-
-    if (reminder.dueOn === today) {
-      return { text: t("reminders.dueToday"), color: theme.textSecondary };
-    }
-
-    const dueDate = fromCalendarDate(reminder.dueOn);
-    return {
-      text: t("reminders.dueIn", {
-        count: dueDate ? (daysSince(today, dueDate) ?? 0) : 0,
-      }),
-      color: theme.textMuted,
-    };
-  };
-
-  const sections = [
-    {
-      key: "overdue",
-      title: t("reminders.section.overdue"),
-      items: reminders.filter((reminder) => reminder.dueOn < today),
-    },
-    {
-      key: "today",
-      title: t("reminders.section.today"),
-      items: reminders.filter((reminder) => reminder.dueOn === today),
-    },
-    {
-      key: "upcoming",
-      title: t("reminders.section.upcoming"),
-      items: reminders.filter((reminder) => reminder.dueOn > today),
-    },
-  ].filter((section) => section.items.length > 0);
 
   let remainingLimit = limit;
   const visibleSections = sections.map((section) => {
@@ -647,7 +551,6 @@ export default function RemindersScreen() {
     BADGE_SIZE * Math.min(fontScale, BADGE_MAX_SCALE),
   );
   const stacked = fontScale >= StackAboveFontScale;
-  const clockTime = formatClockTime(reminderTime.hour, reminderTime.minute);
 
   return (
     <>

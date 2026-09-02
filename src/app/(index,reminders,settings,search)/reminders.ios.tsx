@@ -39,11 +39,8 @@ import {
   strokeBorder,
   tint,
 } from "@expo/ui/swift-ui/modifiers";
-import { useValue } from "@legendapp/state/react";
 import { router } from "expo-router";
-import { useEffect, useMemo, useState } from "react";
 import {
-  AppState,
   Linking,
   ScrollView,
   StyleSheet,
@@ -56,6 +53,7 @@ import { EmptyState } from "@/components/empty-state";
 import { PageHeader } from "@/components/page-header";
 import { ThemedText } from "@/components/themed-text";
 import {
+  ActivitySymbols,
   CategoryColors,
   Radius,
   Spacing,
@@ -65,28 +63,25 @@ import {
 } from "@/constants/theme";
 import { typeFont } from "@/constants/type-font";
 import { useTheme } from "@/hooks/use-theme";
-import { useToday } from "@/hooks/use-today";
-import { addAnimal, animals$, type Animal } from "@/state/animal";
-import { careSchedules$, type CareRoutine } from "@/state/care-schedule";
-import { createHabitatActivity, habitatStore } from "@/state/habitat";
+import { useReminderPermission } from "@/hooks/use-reminder-permission";
+import { useRemindersData, type DueState } from "@/hooks/use-reminders-data";
+import { type ReminderRoutine } from "@/state/care-schedule";
 import {
-  reminderPermission,
   requestReminderPermission,
   rescheduleSoon,
   type ReminderPermission,
 } from "@/state/notifications";
-import { reminders$ } from "@/state/reminders";
-import { summaries$, summaryLookups } from "@/state/summary";
 import { panelRowHeight } from "@/utils/panel-row";
-import { careReminders, type CareReminder } from "@/utils/care-reminders";
+import { type CareReminder } from "@/utils/care-reminders";
 import {
-  daysSince,
-  formatAbsoluteDate,
-  formatClockTime,
-  fromCalendarDate,
-} from "@/utils/format-date";
+  markRoutineDone,
+  ROUTINE_CATEGORY,
+  routineHref,
+} from "@/utils/reminder-actions";
+import { formatAbsoluteDate } from "@/utils/format-date";
 
-const ROUTINE_SYMBOLS: Record<CareRoutine, SFSymbolName> = {
+const ROUTINE_SYMBOLS: Record<ReminderRoutine, SFSymbolName> = {
+  feed: ActivitySymbols.feed,
   water: "drop.fill",
   cleaning: "sparkles",
 };
@@ -107,11 +102,6 @@ const STACKED_ROW_BLOCKS: Parameters<typeof panelRowHeight>[0] = [
   ["bodyS", 2],
 ];
 
-type DueState = {
-  text: string;
-  color: string;
-};
-
 function panelModifiers(theme: Theme) {
   return [
     frame({ maxWidth: Infinity }),
@@ -124,23 +114,6 @@ function panelModifiers(theme: Theme) {
       cornerRadius: Radius.lg,
     }),
   ];
-}
-
-function markRoutineDone(animalId: string, routine: CareRoutine): void {
-  habitatStore.add(
-    createHabitatActivity({
-      animalId,
-      water: routine === "water",
-      cleaning: routine === "cleaning",
-    }),
-  );
-}
-
-function stopReminding(animal: Animal, routine: CareRoutine): void {
-  addAnimal({
-    ...animal,
-    reminders: { ...animal.reminders, [routine]: false },
-  });
 }
 
 type ReminderRowProps = {
@@ -250,11 +223,7 @@ function ReminderRow({
             modifiers={[
               frame({ maxWidth: Infinity, maxHeight: Infinity }),
               contentShape(shapes.rectangle()),
-              onTapGesture(() =>
-                router.push(
-                  `/animal/${reminder.animalId}/habitat?routine=${reminder.routine}`,
-                ),
-              ),
+              onTapGesture(() => router.push(routineHref(reminder))),
               accessibilityElement("combine"),
               accessibilityAddTraits(["isButton"]),
               accessibilityLabel(
@@ -266,7 +235,13 @@ function ReminderRow({
             <ZStack
               modifiers={[frame({ width: badgeSize, height: badgeSize })]}
             >
-              <Circle modifiers={[foregroundStyle(CategoryColors.habitat)]} />
+              <Circle
+                modifiers={[
+                  foregroundStyle(
+                    CategoryColors[ROUTINE_CATEGORY[reminder.routine]],
+                  ),
+                ]}
+              />
               <Image
                 systemName={ROUTINE_SYMBOLS[reminder.routine]}
                 modifiers={[
@@ -381,7 +356,7 @@ type ReminderPanelProps = {
   checkboxSize: number;
   stacked: boolean;
   textInset: number;
-  onStopReminding: (animalId: string, routine: CareRoutine) => void;
+  onStopReminding: (animalId: string, routine: ReminderRoutine) => void;
 };
 
 function ReminderPanel({
@@ -525,78 +500,9 @@ export default function RemindersScreen() {
   const { t } = useTranslation();
   const { fontScale } = useWindowDimensions();
 
-  const animals = useValue(animals$);
-  const collectionWater = useValue(careSchedules$.water);
-  const collectionCleaning = useValue(careSchedules$.cleaning);
-  const summaries = useValue(summaries$);
-  const reminderTime = useValue(reminders$);
-  const [permission, setPermission] = useState<ReminderPermission>();
-
-  useEffect(() => {
-    const read = () => void reminderPermission().then(setPermission);
-    read();
-
-    const subscription = AppState.addEventListener("change", (state) => {
-      if (state === "active") read();
-    });
-
-    return () => subscription.remove();
-  }, []);
-
-  const handleStopReminding = (animalId: string, routine: CareRoutine) => {
-    const animal = animals[animalId];
-    if (animal) stopReminding(animal, routine);
-  };
-
-  const today = useToday();
-  const reminders = useMemo(() => {
-    const { lastWater, lastClean } = summaryLookups(summaries);
-
-    return careReminders(
-      animals,
-      { water: collectionWater, cleaning: collectionCleaning },
-      { water: lastWater, cleaning: lastClean },
-    );
-  }, [animals, collectionCleaning, collectionWater, summaries]);
-
-  const dueState = (reminder: CareReminder): DueState => {
-    if (reminder.dueOn < today) {
-      return {
-        text: t("schedule.overdue", { count: daysSince(reminder.dueOn) ?? 0 }),
-        color: theme.danger,
-      };
-    }
-
-    if (reminder.dueOn === today) {
-      return { text: t("reminders.dueToday"), color: theme.textSecondary };
-    }
-
-    const dueDate = fromCalendarDate(reminder.dueOn);
-    return {
-      text: t("reminders.dueIn", {
-        count: dueDate ? (daysSince(today, dueDate) ?? 0) : 0,
-      }),
-      color: theme.textMuted,
-    };
-  };
-
-  const sections = [
-    {
-      key: "overdue",
-      title: t("reminders.section.overdue"),
-      items: reminders.filter((reminder) => reminder.dueOn < today),
-    },
-    {
-      key: "today",
-      title: t("reminders.section.today"),
-      items: reminders.filter((reminder) => reminder.dueOn === today),
-    },
-    {
-      key: "upcoming",
-      title: t("reminders.section.upcoming"),
-      items: reminders.filter((reminder) => reminder.dueOn > today),
-    },
-  ].filter((section) => section.items.length > 0);
+  const [permission, setPermission] = useReminderPermission();
+  const { reminders, dueState, sections, handleStopReminding, clockTime } =
+    useRemindersData();
 
   const badgeSize = Math.round(
     BADGE_SIZE * Math.min(fontScale, BADGE_MAX_SCALE),
@@ -606,7 +512,6 @@ export default function RemindersScreen() {
   );
   const stacked = fontScale >= StackAboveFontScale;
   const textInset = Spacing.md + badgeSize + Spacing.sm;
-  const clockTime = formatClockTime(reminderTime.hour, reminderTime.minute);
 
   return (
     <>
