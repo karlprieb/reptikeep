@@ -35,6 +35,60 @@ index d442c5e..674b66a 100644
      }
  
      register("clip") { map, _, _, _ ->
+diff --git a/node_modules/@expo/ui/android/src/main/java/expo/modules/ui/RNHostView.kt b/node_modules/@expo/ui/android/src/main/java/expo/modules/ui/RNHostView.kt
+index 29e36b6..ff13ed3 100644
+--- a/node_modules/@expo/ui/android/src/main/java/expo/modules/ui/RNHostView.kt
++++ b/node_modules/@expo/ui/android/src/main/java/expo/modules/ui/RNHostView.kt
+@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxSize
+ import androidx.compose.foundation.layout.requiredSize
+ import androidx.compose.runtime.Composable
+ import androidx.compose.runtime.MutableState
++import androidx.compose.runtime.key
+ import androidx.compose.runtime.mutableStateOf
+ import androidx.compose.ui.Modifier
+ import androidx.compose.ui.layout.onGloballyPositioned
+@@ -43,7 +44,7 @@ internal data class RNHostViewProps(
+   val matchContents: MutableState<Boolean?> = mutableStateOf(null),
+   //  Adds LeafNode and MeasurableYogaNode trait in Shadow node
+   val expoInternalSizeFromChildren: MutableState<Boolean?> = mutableStateOf(null),
+-  val modifiers: ModifierList = emptyList()
++  val modifiers: MutableState<ModifierList> = mutableStateOf(emptyList())
+ ) : ComposeProps
+ 
+ @SuppressLint("ViewConstructor")
+@@ -159,16 +160,24 @@ internal class RNHostView(context: Context, appContext: AppContext) :
+       // Origin last: a chain applies outside-in, so a caller `padding` or `offset` has to shift the
+       // content before it is read.
+       val modifiers = sizingModifier
+-        .then(ModifierRegistry.applyModifiers(props.modifiers, appContext, scope, globalEventDispatcher))
++        .then(ModifierRegistry.applyModifiers(props.modifiers.value, appContext, scope, globalEventDispatcher))
+         .then(publishContentOriginModifier())
+ 
+-      AndroidView(
+-        factory = {
+-          detachForReuse(wrapper)
+-          wrapper
+-        },
+-        modifier = modifiers
+-      )
++      // `AndroidView`'s `factory` runs once per composition slot and is never re-invoked just
++      // because `wrapper` (the captured variable) points at a different instance on a later
++      // recomposition — there is no `update` callback here to hand it the new instance. Without
++      // this `key`, a `wrapperState` change (this view reused for a different child, e.g. after
++      // Fabric hands this RNHostView instance back out for an unrelated `<Host>`) leaves the old
++      // child's view on screen forever instead of swapping to the new one.
++      key(wrapper) {
++        AndroidView(
++          factory = {
++            detachForReuse(wrapper)
++            wrapper
++          },
++          modifier = modifiers
++        )
++      }
+     }
+   }
+ 
 diff --git a/node_modules/@expo/ui/android/src/main/java/expo/modules/ui/SemanticsModifier.kt b/node_modules/@expo/ui/android/src/main/java/expo/modules/ui/SemanticsModifier.kt
 index fd8cfe5..52e8d27 100644
 --- a/node_modules/@expo/ui/android/src/main/java/expo/modules/ui/SemanticsModifier.kt

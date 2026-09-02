@@ -86,6 +86,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The date-range summary on a reptile's Android history screen no longer
   overlaps the "Clear" button at large text sizes; it drops to its own
   line instead.
+- Tapping certain rows in Android Settings — the Language menu, or the
+  Frozen prey switch — could jump to a reptile's detail page instead, with
+  the menu still open on top of it. Android had confused the two screens'
+  underlying views. Fixed wherever the same mix-up could happen, not just
+  Settings.
 
 ## [0.4.0] - 2026-08-19
 

@@ -1,0 +1,37 @@
+diff --git a/node_modules/expo-modules-core/android/src/compose/expo/modules/kotlin/views/ExpoComposeView.kt b/node_modules/expo-modules-core/android/src/compose/expo/modules/kotlin/views/ExpoComposeView.kt
+index d678c0b..86d9efd 100644
+--- a/node_modules/expo-modules-core/android/src/compose/expo/modules/kotlin/views/ExpoComposeView.kt
++++ b/node_modules/expo-modules-core/android/src/compose/expo/modules/kotlin/views/ExpoComposeView.kt
+@@ -30,8 +30,22 @@ import expo.modules.kotlin.viewevent.EventDispatcher
+ import expo.modules.kotlin.viewevent.ViewEvent
+ import expo.modules.kotlin.viewevent.ViewEventCallback
+ import expo.modules.kotlin.viewevent.ViewEventDelegate
++import java.util.concurrent.atomic.AtomicInteger
+ import kotlin.reflect.KProperty
+ 
++/**
++ * Ids for the hosting [ComposeView]s, counting down from below [View.NO_ID].
++ *
++ * React Native decides whether an Android view is one of its own by testing `id > 0`
++ * (`TouchTargetHelper.findClosestReactAncestor`), and its Fabric view tags are small positive
++ * ints. `View.generateViewId()` hands out small positive ints too, so a hosting view numbered
++ * that way collides with a Fabric tag: a touch anywhere on a `Host` was reported to JavaScript
++ * under the colliding tag and delivered to whatever component owned it — a `Pressable` on
++ * another screen entirely. Negative ids still key Compose's saveable state per host and are
++ * invisible to that walk, so the search continues up to the real React ancestor.
++ */
++private val nextComposeViewId = AtomicInteger(View.NO_ID - 1)
++
+ /**
+  * A scope interface passed through the compose view hierarchy.
+  * Downstream packages (e.g. expo-ui) can implement this interface
+@@ -224,7 +238,8 @@ abstract class ExpoComposeView<T : ComposeProps>(
+       // Give each Host a unique id so its rememberSaveable state gets its own key.
+       // All Hosts share the Activity's SavedStateRegistry (set below), so without an id
+       // they'd collide on one key and only the first could save/restore state.
+-      it.id = generateViewId()
++      // Negative, so React Native's touch target search skips it — see [nextComposeViewId].
++      it.id = nextComposeViewId.getAndDecrement()
+       it.layoutParams = LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT)
+       // Pin the composition to the Activity lifecycle so it survives
+       // react-native-screens detaching inactive screens on every switch.
