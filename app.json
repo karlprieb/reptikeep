@@ -66,7 +66,8 @@
         }
       ],
       "expo-localization",
-      "./plugins/with-no-push-entitlement"
+      "./plugins/with-no-push-entitlement",
+      "expo-sharing"
     ],
     "experiments": {
       "typedRoutes": true,

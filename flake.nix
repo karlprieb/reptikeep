@@ -77,6 +77,7 @@
             androidAvd
             typescript-language-server
             maestro
+            fastlane
           ]
           ++ lib.optionals isDarwin [
             cocoapods
