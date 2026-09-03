@@ -68,6 +68,24 @@
         };
       in
       {
+        devShells.js-ci = pkgs.mkShellNoCC {
+          buildInputs = with pkgs; [
+            nodejs_22
+          ];
+
+          DO_NOT_TRACK = "1";
+        };
+
+        devShells.ios-ci = pkgs.mkShellNoCC {
+          buildInputs = with pkgs; [
+            nodejs_22
+            cocoapods
+            fastlane
+          ];
+
+          DO_NOT_TRACK = "1";
+        };
+
         devShells.default = pkgs.mkShellNoCC {
           buildInputs = with pkgs; [
             nodejs_22

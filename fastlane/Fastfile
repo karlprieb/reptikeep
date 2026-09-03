@@ -1,0 +1,84 @@
+require "json"
+
+platform :android do
+  desc "Build a release APK for sideloading (debug-signed, not for Play Store)"
+  lane :apk do
+    Dir.chdir("..") { sh("npx", "expo", "prebuild", "--platform", "android") }
+
+    gradle(
+      task: "assemble",
+      build_type: "Release",
+      project_dir: File.expand_path("../android", __dir__)
+    )
+
+    UI.success("APK ready: #{lane_context[SharedValues::GRADLE_APK_OUTPUT_PATH]}")
+  end
+end
+
+platform :ios do
+  private_lane :asc_api_key do
+    app_store_connect_api_key(
+      key_id: ENV["ASC_KEY_ID"],
+      issuer_id: ENV["ASC_ISSUER_ID"],
+      key_filepath: ENV["ASC_KEY_PATH"],
+      key_content: ENV["ASC_KEY_CONTENT"],
+      is_key_content_base64: !ENV["ASC_KEY_CONTENT"].nil?
+    )
+  end
+
+  desc "Generate/fetch the Apple Distribution cert and provisioning profile via match"
+  lane :certs do
+    match(
+      type: "appstore",
+      api_key: asc_api_key,
+      readonly: is_ci
+    )
+  end
+
+  desc "Build and upload a release build to TestFlight"
+  lane :beta do
+    app_json_path = File.expand_path("../app.json", __dir__)
+    app_json = JSON.parse(File.read(app_json_path))
+    version = app_json["expo"]["version"]
+
+    changelog_en = File.read(File.expand_path("metadata/en-US/release_notes/#{version}.txt", __dir__)).strip
+    changelog_pt = File.read(File.expand_path("metadata/pt-BR/release_notes/#{version}.txt", __dir__)).strip
+
+    api_key = asc_api_key
+
+    latest_build = latest_testflight_build_number(api_key: api_key, app_identifier: "app.reptikeep", version: version)
+    next_build = (latest_build + 1).to_s
+    File.write(app_json_path, File.read(app_json_path).sub(/"buildNumber":\s*"\d+"/, "\"buildNumber\": \"#{next_build}\""))
+
+    Dir.chdir("..") { sh("npx", "expo", "prebuild", "--platform", "ios") }
+
+    match(
+      type: "appstore",
+      api_key: api_key,
+      readonly: is_ci
+    )
+
+    update_code_signing_settings(
+      use_automatic_signing: false,
+      path: File.expand_path("../ios/ReptiKeep.xcodeproj", __dir__),
+      code_sign_identity: "Apple Distribution",
+      profile_name: lane_context[SharedValues::MATCH_PROVISIONING_PROFILE_MAPPING]["app.reptikeep"]
+    )
+
+    build_app(
+      workspace: File.expand_path("../ios/ReptiKeep.xcworkspace", __dir__),
+      scheme: "ReptiKeep",
+      export_method: "app-store"
+    )
+
+    upload_to_testflight(
+      api_key: api_key,
+      groups: ["Public Beta"],
+      distribute_external: true,
+      localized_build_info: {
+        "en-US" => { whats_new: changelog_en },
+        "pt-BR" => { whats_new: changelog_pt }
+      }
+    )
+  end
+end

@@ -1,0 +1,4 @@
+- Os seletores de data agora seguem o idioma do app em vez de sempre mostrar os meses em inglês.
+- Trocar a foto de um réptil não mostra mais a foto antiga até reiniciar o app.
+- Um cronograma de cuidados personalizado inválido não pode mais ser salvo.
+- Um documento que não existe mais avisa isso em vez de dizer que o réptil inteiro foi removido.

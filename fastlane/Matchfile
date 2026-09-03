@@ -1,0 +1,2 @@
+git_url("https://github.com/karlprieb/reptikeep-certificates.git")
+app_identifier(["app.reptikeep"])

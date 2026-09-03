@@ -7,19 +7,24 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
   cancel-in-progress: true
 
+permissions:
+  contents: read
+
 jobs:
   checks:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
-      - uses: actions/setup-node@v5
+      - uses: DeterminateSystems/nix-installer-action@v22
+      - uses: DeterminateSystems/magic-nix-cache-action@v14
+      - uses: actions/cache@v4
         with:
-          node-version: 22
-          cache: npm
-      - run: npm ci
-      - run: npm run lint
-      - run: npx prettier --check "src/**/*.{ts,tsx,json}" "*.{js,json,md,ts,tsx}"
-      - run: npm test -- --ci
+          path: ~/.npm
+          key: ${{ runner.os }}-npm-${{ hashFiles('package-lock.json') }}
+      - run: nix develop .#js-ci -c npm ci
+      - run: nix develop .#js-ci -c npm run lint
+      - run: nix develop .#js-ci -c npx prettier --check "src/**/*.{ts,tsx,json}" "*.{js,json,md,ts,tsx}"
+      - run: nix develop .#js-ci -c npm test -- --ci
 
   typecheck:
     runs-on: ubuntu-latest
@@ -28,12 +33,14 @@ jobs:
         platform: [ios, android]
     steps:
       - uses: actions/checkout@v5
-      - uses: actions/setup-node@v5
+      - uses: DeterminateSystems/nix-installer-action@v22
+      - uses: DeterminateSystems/magic-nix-cache-action@v14
+      - uses: actions/cache@v4
         with:
-          node-version: 22
-          cache: npm
-      - run: npm ci
-      - run: npm run typecheck:${{ matrix.platform }}
+          path: ~/.npm
+          key: ${{ runner.os }}-npm-${{ hashFiles('package-lock.json') }}
+      - run: nix develop .#js-ci -c npm ci
+      - run: nix develop .#js-ci -c npm run typecheck:${{ matrix.platform }}
 
   export:
     runs-on: ubuntu-latest
@@ -42,9 +49,11 @@ jobs:
         platform: [ios, android]
     steps:
       - uses: actions/checkout@v5
-      - uses: actions/setup-node@v5
+      - uses: DeterminateSystems/nix-installer-action@v22
+      - uses: DeterminateSystems/magic-nix-cache-action@v14
+      - uses: actions/cache@v4
         with:
-          node-version: 22
-          cache: npm
-      - run: npm ci
-      - run: npx expo export --platform ${{ matrix.platform }} --output-dir /tmp/export-${{ matrix.platform }}
+          path: ~/.npm
+          key: ${{ runner.os }}-npm-${{ hashFiles('package-lock.json') }}
+      - run: nix develop .#js-ci -c npm ci
+      - run: nix develop .#js-ci -c npx expo export --platform ${{ matrix.platform }} --output-dir /tmp/export-${{ matrix.platform }}

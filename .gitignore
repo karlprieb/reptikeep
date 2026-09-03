@@ -50,3 +50,7 @@ example
 
 # direnv
 .direnv
+
+# fastlane
+fastlane/report.xml
+fastlane/.env

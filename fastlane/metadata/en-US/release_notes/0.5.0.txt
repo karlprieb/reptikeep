@@ -1,0 +1,4 @@
+- Date pickers now follow the app's language instead of always showing English month names.
+- Replacing a photo no longer shows the old one until you restart the app.
+- A broken custom care schedule can no longer be saved.
+- A missing document now says so instead of claiming the whole reptile was deleted.
