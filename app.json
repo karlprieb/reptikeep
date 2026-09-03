@@ -10,7 +10,7 @@
       "icon": "./assets/ios.icon",
       "bundleIdentifier": "app.reptikeep",
       "appleTeamId": "3K9KUB8992",
-      "buildNumber": "3",
+      "buildNumber": "4",
       "config": {
         "usesNonExemptEncryption": false
       }
