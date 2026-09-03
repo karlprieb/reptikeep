@@ -966,37 +966,47 @@ function DateField({
   const { t } = useTranslation();
   const [showDialog, setShowDialog] = useState(false);
   const value = toCalendarDate(date);
-  const text = useNativeState(formatAbsoluteDate(value));
+  const displayText = formatAbsoluteDate(value);
+  const text = useNativeState(displayText);
 
   useEffect(() => {
-    text.set(formatAbsoluteDate(value));
-  }, [text, value]);
+    text.set(displayText);
+  }, [text, displayText]);
 
   return (
-    <Box modifiers={[fillMaxWidth()]}>
+    <ExposedDropdownMenuBox
+      expanded={showDialog}
+      onExpandedChange={setShowDialog}
+      modifiers={[fillMaxWidth()]}
+    >
       <OutlinedTextField
         value={text}
         readOnly
         singleLine
         colors={fieldColors(theme)}
         textStyle={DATA_STYLE}
-        modifiers={[fillMaxWidth()]}
+        modifiers={[
+          menuAnchor(),
+          fillMaxWidth(),
+          semantics({
+            contentDescription: [
+              label,
+              displayText,
+              t("reptileForm.selectDate"),
+            ].join(", "),
+            mergeDescendants: true,
+          }),
+        ]}
       >
         <OutlinedTextField.Label>
           <Text>{label}</Text>
         </OutlinedTextField.Label>
         <OutlinedTextField.TrailingIcon>
-          <IconButton
-            onClick={() => setShowDialog(true)}
-            colors={{ contentColor: theme.textSecondary }}
-          >
-            <Icon
-              source={CALENDAR_ICON}
-              tint={theme.textSecondary}
-              size={iconSize}
-              contentDescription={`${label}: ${t("reptileForm.selectDate")}`}
-            />
-          </IconButton>
+          <Icon
+            source={CALENDAR_ICON}
+            tint={theme.textSecondary}
+            size={iconSize}
+          />
         </OutlinedTextField.TrailingIcon>
       </OutlinedTextField>
       {showDialog ? (
@@ -1012,7 +1022,7 @@ function DateField({
           dismissButtonLabel={dismissLabel}
         />
       ) : null}
-    </Box>
+    </ExposedDropdownMenuBox>
   );
 }
 

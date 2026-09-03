@@ -4,7 +4,7 @@ import { initReactI18next } from "react-i18next";
 import en from "./locales/en.json";
 import ptBR from "./locales/pt-BR.json";
 
-export { resolveLanguage } from "./resolve-language";
+export { resolveLanguage, swiftUILocaleIdentifier } from "./resolve-language";
 export type { SupportedLanguage } from "./resolve-language";
 
 // eslint-disable-next-line import/no-named-as-default-member
