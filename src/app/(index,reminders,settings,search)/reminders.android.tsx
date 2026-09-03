@@ -525,12 +525,20 @@ export default function RemindersScreen() {
   const [appBarHeight, setAppBarHeight] = useState(0);
   const [limit, setLimit] = useState(REMINDERS_PAGE);
 
-  let remainingLimit = limit;
-  const visibleSections = sections.map((section) => {
-    const visibleItems = section.items.slice(0, Math.max(0, remainingLimit));
-    remainingLimit -= visibleItems.length;
-    return { ...section, visibleItems };
-  });
+  type Section = (typeof sections)[number];
+  const { result: visibleSections } = sections.reduce<{
+    remaining: number;
+    result: (Section & { visibleItems: Section["items"] })[];
+  }>(
+    (acc, section) => {
+      const visibleItems = section.items.slice(0, Math.max(0, acc.remaining));
+      return {
+        remaining: acc.remaining - visibleItems.length,
+        result: [...acc.result, { ...section, visibleItems }],
+      };
+    },
+    { remaining: limit, result: [] },
+  );
 
   const growNearEnd = useCallback(
     ({ nativeEvent }: NativeSyntheticEvent<NativeScrollEvent>) => {
