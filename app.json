@@ -58,6 +58,7 @@
           "cameraPermission": "Take a picture of a document to attach it to a reptile."
         }
       ],
+      "./plugins/with-no-push-entitlement",
       [
         "expo-notifications",
         {
@@ -66,7 +67,6 @@
         }
       ],
       "expo-localization",
-      "./plugins/with-no-push-entitlement",
       "expo-sharing"
     ],
     "experiments": {
