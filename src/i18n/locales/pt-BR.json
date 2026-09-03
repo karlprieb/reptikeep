@@ -114,6 +114,7 @@
     "dueIn_other": "Em {{count}} dias",
     "timeFooter": "Os lembretes chegam às {{time}}.",
     "routine": {
+      "feed": "Alimentação",
       "water": "Troca de água",
       "cleaning": "Limpeza do terrário"
     },
@@ -131,7 +132,7 @@
     },
     "empty": {
       "title": "Nada por vencer",
-      "subtitle": "Defina uma rotina de troca de água ou de limpeza do terrário nos Ajustes, ou no perfil de um réptil, e o que estiver por vir aparece aqui."
+      "subtitle": "Defina uma rotina de alimentação no perfil de um réptil, ou de troca de água ou de limpeza do terrário nos Ajustes, e o que estiver por vir aparece aqui."
     },
     "settings": {
       "section": "Lembretes",
@@ -617,6 +618,9 @@
       }
     },
     "reminders": {
+      "feed": {
+        "hint": "Envia uma notificação quando a alimentação deste réptil vencer"
+      },
       "water": {
         "hint": "Envia uma notificação quando a troca de água deste réptil vencer"
       },
@@ -630,6 +634,10 @@
         "hint": "Abre um registro de cuidado que você pode retroagir ou comentar"
       },
       "done": {
+        "feed": {
+          "label": "{{animalName}} alimentado",
+          "hint": "Registra uma alimentação agora e move isto para o próximo vencimento"
+        },
         "water": {
           "label": "Água trocada de {{animalName}}",
           "hint": "Registra a troca de água agora e move isto para o próximo vencimento"

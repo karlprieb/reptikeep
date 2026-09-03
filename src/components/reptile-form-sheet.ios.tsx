@@ -129,6 +129,8 @@ export function ReptileFormSheet({ animal }: ReptileFormSheetProps) {
     feedingDays,
     setFeedingDays,
     feedingValid,
+    feedingReminder,
+    feedingFooter,
     waterSelection,
     setWaterSelection,
     waterDays,
@@ -152,6 +154,7 @@ export function ReptileFormSheet({ animal }: ReptileFormSheetProps) {
     handlePickPhoto,
     handleRemovePhoto,
     handleSelectSpecies,
+    handleFeedingReminder,
     handleWaterReminder,
     handleCleaningReminder,
   } = form;
@@ -362,9 +365,7 @@ export function ReptileFormSheet({ animal }: ReptileFormSheetProps) {
                 <FormSectionFooter
                   color={feedingValid ? undefined : theme.danger}
                 >
-                  {feedingValid
-                    ? t("feedingSchedule.footer")
-                    : t("schedule.invalidDays")}
+                  {feedingValid ? feedingFooter : t("schedule.invalidDays")}
                 </FormSectionFooter>
               }
               modifiers={modifiers.row}
@@ -378,15 +379,28 @@ export function ReptileFormSheet({ animal }: ReptileFormSheetProps) {
                 ]}
               />
               {usesFeedingSchedule ? (
-                <ScheduleFields
-                  subject={t("feedingSchedule.section")}
-                  hint={t("a11y.feedingSchedule.frequency.hint")}
-                  daysHint={t("a11y.feedingSchedule.customDays.hint")}
-                  selection={feedingSelection}
-                  onSelectionChange={setFeedingSelection}
-                  customDays={feedingDays}
-                  onCustomDaysChange={setFeedingDays}
-                />
+                <>
+                  <ScheduleFields
+                    subject={t("feedingSchedule.section")}
+                    hint={t("a11y.feedingSchedule.frequency.hint")}
+                    daysHint={t("a11y.feedingSchedule.customDays.hint")}
+                    selection={feedingSelection}
+                    onSelectionChange={setFeedingSelection}
+                    customDays={feedingDays}
+                    onCustomDaysChange={setFeedingDays}
+                  />
+                  <Toggle
+                    label={t("reminders.enabled")}
+                    isOn={feedingReminder}
+                    onIsOnChange={handleFeedingReminder}
+                    modifiers={[
+                      accessibilityLabel(
+                        `${t("feedingSchedule.section")}: ${t("reminders.enabled")}`,
+                      ),
+                      accessibilityHint(t("a11y.reminders.feed.hint")),
+                    ]}
+                  />
+                </>
               ) : null}
             </Section>
 

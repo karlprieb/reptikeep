@@ -27,9 +27,9 @@ async function ensureCareChannel(): Promise<void> {
 }
 
 function careLookups() {
-  const { lastWater, lastClean } = summaryLookups(summaries$.peek());
+  const { lastFed, lastWater, lastClean } = summaryLookups(summaries$.peek());
 
-  return { water: lastWater, cleaning: lastClean };
+  return { feed: lastFed, water: lastWater, cleaning: lastClean };
 }
 
 const NAMES_SHOWN = 3;

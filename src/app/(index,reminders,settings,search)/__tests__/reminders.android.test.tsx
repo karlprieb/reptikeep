@@ -5,6 +5,7 @@ import * as Notifications from "expo-notifications";
 import RemindersScreen from "@/app/(index,reminders,settings,search)/reminders.android";
 import { addAnimal, animals$, clearAnimals, type Animal } from "@/state/animal";
 import { careSchedules$ } from "@/state/care-schedule";
+import { feedingStore } from "@/state/feeding";
 import { habitatStore } from "@/state/habitat";
 import * as notificationsState from "@/state/notifications";
 import { clearSummaries } from "@/state/summary";
@@ -32,6 +33,7 @@ beforeEach(() => {
   act(() => {
     clearAnimals();
     habitatStore.clear();
+    feedingStore.clear();
     clearSummaries();
     careSchedules$.water.set(undefined);
     careSchedules$.cleaning.set(undefined);
@@ -75,6 +77,29 @@ describe("RemindersScreen mark done", () => {
     const logged = Object.values(habitatStore.$.peek());
     expect(logged).toHaveLength(1);
     expect(logged[0]).toMatchObject({ animalId: ANIMAL_ID, water: true });
+  });
+
+  it("logs a feeding for the animal", async () => {
+    act(() =>
+      addAnimal(
+        makeAnimal({
+          id: ANIMAL_ID,
+          name: "Buddy",
+          feedingSchedule: { frequency: "weekly" },
+          reminders: { feed: true },
+        }),
+      ),
+    );
+
+    const { getByLabelText } = await renderScreen();
+
+    act(() => {
+      fireEvent.press(getByLabelText(/Fed Buddy/));
+    });
+
+    const logged = Object.values(feedingStore.$.peek());
+    expect(logged).toHaveLength(1);
+    expect(logged[0]).toMatchObject({ animalId: ANIMAL_ID, refused: false });
   });
 });
 

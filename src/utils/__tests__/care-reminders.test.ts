@@ -1,5 +1,5 @@
 import type { Animal } from "@/state/animal";
-import type { CareRoutine, CareSchedule } from "@/state/care-schedule";
+import type { CareSchedule, ReminderRoutine } from "@/state/care-schedule";
 import { careReminders, reminderDigest } from "@/utils/care-reminders";
 
 const TODAY = new Date(2026, 6, 20);
@@ -24,9 +24,9 @@ function byId(...animals: Animal[]): Record<string, Animal> {
 }
 
 function lastDone(
-  overrides: Partial<Record<CareRoutine, Record<string, string>>> = {},
-): Record<CareRoutine, Record<string, string>> {
-  return { water: {}, cleaning: {}, ...overrides };
+  overrides: Partial<Record<ReminderRoutine, Record<string, string>>> = {},
+): Record<ReminderRoutine, Record<string, string>> {
+  return { feed: {}, water: {}, cleaning: {}, ...overrides };
 }
 
 describe("careReminders", () => {
@@ -160,6 +160,59 @@ describe("careReminders", () => {
 
     expect(water?.dueOn).toBe("2026-07-08");
     expect(cleaning?.dueOn).toBe("2026-07-23");
+  });
+
+  it("reminds for feeding from the animal's own schedule, with no collection default", () => {
+    const reminders = careReminders(
+      byId(
+        animal("Rex", {
+          feedingSchedule: weekly,
+          reminders: { feed: true },
+        }),
+      ),
+      {},
+      lastDone({ feed: { Rex: "2026-07-16" } }),
+    );
+
+    expect(reminders).toEqual([
+      {
+        animalId: "Rex",
+        animalName: "Rex",
+        routine: "feed",
+        dueOn: "2026-07-23",
+      },
+    ]);
+  });
+
+  it("leaves feeding out for an animal with no feeding schedule", () => {
+    const reminders = careReminders(byId(animal("Rex")), {}, lastDone());
+
+    expect(reminders).toEqual([]);
+  });
+
+  it("leaves feeding out until explicitly opted in, even with a schedule set", () => {
+    const reminders = careReminders(
+      byId(animal("Rex", { feedingSchedule: weekly })),
+      {},
+      lastDone({ feed: { Rex: "2026-07-16" } }),
+    );
+
+    expect(reminders).toEqual([]);
+  });
+
+  it("honours a muted feeding reminder", () => {
+    const reminders = careReminders(
+      byId(
+        animal("Rex", {
+          feedingSchedule: weekly,
+          reminders: { feed: false },
+        }),
+      ),
+      {},
+      lastDone({ feed: { Rex: "2026-07-16" } }),
+    );
+
+    expect(reminders).toEqual([]);
   });
 });
 

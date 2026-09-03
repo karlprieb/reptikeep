@@ -368,7 +368,9 @@ function validAnimal(
       validSchedule(value.cleaningSchedule, true)) &&
     (value.reminders === undefined ||
       (isPlainObject(value.reminders) &&
-        exactKeys(value.reminders, ["water", "cleaning"]) &&
+        exactKeys(value.reminders, ["feed", "water", "cleaning"]) &&
+        (value.reminders.feed === undefined ||
+          typeof value.reminders.feed === "boolean") &&
         (value.reminders.water === undefined ||
           typeof value.reminders.water === "boolean") &&
         (value.reminders.cleaning === undefined ||
@@ -742,6 +744,8 @@ function remindersForBackup(
   reminders: Animal["reminders"],
 ): Animal["reminders"] {
   const value: NonNullable<Animal["reminders"]> = {};
+
+  if (typeof reminders?.feed === "boolean") value.feed = reminders.feed;
 
   if (typeof reminders?.water === "boolean") value.water = reminders.water;
 

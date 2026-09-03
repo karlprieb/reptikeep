@@ -16,8 +16,8 @@ import { removeDocumentsForAnimal } from "./document";
 import { forgetAnimalSummary } from "./summary";
 import type {
   AnimalSchedule,
-  CareRoutine,
   CareSchedule,
+  ReminderRoutine,
 } from "./care-schedule";
 import type { AnimalLoggingDefaults } from "./logging-defaults";
 
@@ -35,7 +35,7 @@ export interface Animal {
   feedingSchedule?: CareSchedule;
   waterSchedule?: AnimalSchedule;
   cleaningSchedule?: AnimalSchedule;
-  reminders?: Partial<Record<CareRoutine, boolean>>;
+  reminders?: Partial<Record<ReminderRoutine, boolean>>;
 }
 
 export type CreateAnimalInput = Omit<Animal, "id" | "createdAt" | "sex"> & {

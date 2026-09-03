@@ -1,10 +1,10 @@
 import type { Animal } from "@/state/animal";
 import {
-  CARE_ROUTINES,
+  REMINDER_ROUTINES,
   resolveSchedule,
-  type AnimalSchedule,
   type CareRoutine,
   type CareSchedule,
+  type ReminderRoutine,
 } from "@/state/care-schedule";
 import { fromCalendarDate, toCalendarDate } from "@/utils/format-date";
 import { scheduleIntervalDays } from "@/utils/schedule";
@@ -12,13 +12,13 @@ import { scheduleIntervalDays } from "@/utils/schedule";
 export type CareReminder = {
   animalId: string;
   animalName: string;
-  routine: CareRoutine;
+  routine: ReminderRoutine;
   dueOn: string;
 };
 
 export type ReminderDay = {
   date: string;
-  routines: { routine: CareRoutine; names: string[] }[];
+  routines: { routine: ReminderRoutine; names: string[] }[];
 };
 
 function addDays(value: string, days: number): string | null {
@@ -29,26 +29,29 @@ function addDays(value: string, days: number): string | null {
   return toCalendarDate(from);
 }
 
-function animalSchedule(
+function scheduleFor(
   animal: Animal,
-  routine: CareRoutine,
-): AnimalSchedule | undefined {
-  return routine === "water" ? animal.waterSchedule : animal.cleaningSchedule;
+  routine: ReminderRoutine,
+  collection: Partial<Record<CareRoutine, CareSchedule>>,
+): CareSchedule | undefined {
+  if (routine === "feed") return animal.feedingSchedule;
+
+  const animalOverride =
+    routine === "water" ? animal.waterSchedule : animal.cleaningSchedule;
+  return resolveSchedule(collection[routine], animalOverride);
 }
 
 export function careReminders(
   animals: Record<string, Animal>,
   collection: Partial<Record<CareRoutine, CareSchedule>>,
-  lastDone: Record<CareRoutine, Record<string, string>>,
+  lastDone: Record<ReminderRoutine, Record<string, string>>,
 ): CareReminder[] {
-  return CARE_ROUTINES.flatMap((routine) =>
+  return REMINDER_ROUTINES.flatMap((routine) =>
     Object.values(animals).flatMap((animal) => {
-      if (animal.reminders?.[routine] === false) return [];
+      const enabled = animal.reminders?.[routine];
+      if (routine === "feed" ? enabled !== true : enabled === false) return [];
 
-      const schedule = resolveSchedule(
-        collection[routine],
-        animalSchedule(animal, routine),
-      );
+      const schedule = scheduleFor(animal, routine, collection);
       if (!schedule) return [];
 
       const interval = scheduleIntervalDays(schedule);
@@ -84,7 +87,7 @@ export function reminderDigest(
     day.setDate(day.getDate() + offset);
     const date = toCalendarDate(day);
 
-    const routines = CARE_ROUTINES.flatMap((routine) => {
+    const routines = REMINDER_ROUTINES.flatMap((routine) => {
       const names = reminders
         .filter(
           (reminder) => reminder.routine === routine && reminder.dueOn <= date,

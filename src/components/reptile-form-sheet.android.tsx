@@ -299,7 +299,7 @@ export function ReptileFormSheet({ animal }: ReptileFormSheetProps) {
               title={t("feedingSchedule.section")}
               footer={
                 form.feedingValid
-                  ? t("feedingSchedule.footer")
+                  ? form.feedingFooter
                   : t("schedule.invalidDays")
               }
               footerColor={form.feedingValid ? undefined : theme.danger}
@@ -312,18 +312,27 @@ export function ReptileFormSheet({ animal }: ReptileFormSheetProps) {
                 hint={t("a11y.feedingSchedule.enabled.hint")}
               />
               {form.usesFeedingSchedule ? (
-                <ScheduleFields
-                  selection={form.feedingSelection}
-                  onSelectionChange={form.setFeedingSelection}
-                  customDays={form.feedingDays}
-                  onCustomDaysChange={form.setFeedingDays}
-                  valid={form.feedingValid}
-                  theme={theme}
-                  iconSize={iconSize}
-                  showInherit={false}
-                  hint={t("a11y.feedingSchedule.frequency.hint")}
-                  daysHint={t("a11y.feedingSchedule.customDays.hint")}
-                />
+                <>
+                  <ScheduleFields
+                    selection={form.feedingSelection}
+                    onSelectionChange={form.setFeedingSelection}
+                    customDays={form.feedingDays}
+                    onCustomDaysChange={form.setFeedingDays}
+                    valid={form.feedingValid}
+                    theme={theme}
+                    iconSize={iconSize}
+                    showInherit={false}
+                    hint={t("a11y.feedingSchedule.frequency.hint")}
+                    daysHint={t("a11y.feedingSchedule.customDays.hint")}
+                  />
+                  <SwitchRow
+                    label={t("reminders.enabled")}
+                    checked={form.feedingReminder}
+                    onCheckedChange={form.handleFeedingReminder}
+                    theme={theme}
+                    hint={t("a11y.reminders.feed.hint")}
+                  />
+                </>
               ) : null}
             </Section>
 

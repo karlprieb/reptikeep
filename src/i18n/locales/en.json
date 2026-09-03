@@ -114,6 +114,7 @@
     "dueIn_other": "In {{count}} days",
     "timeFooter": "Reminders arrive at {{time}}.",
     "routine": {
+      "feed": "Feeding",
       "water": "Water change",
       "cleaning": "Enclosure cleaning"
     },
@@ -131,7 +132,7 @@
     },
     "empty": {
       "title": "Nothing due",
-      "subtitle": "Set a water change or enclosure cleaning schedule in Settings, or on a reptile's own profile, and what's coming up shows here."
+      "subtitle": "Set a feeding schedule on a reptile's own profile, or a water change or enclosure cleaning schedule in Settings, and what's coming up shows here."
     },
     "settings": {
       "section": "Reminders",
@@ -617,6 +618,9 @@
       }
     },
     "reminders": {
+      "feed": {
+        "hint": "Sends a notification when this reptile's feeding comes due"
+      },
       "water": {
         "hint": "Sends a notification when this reptile's water change comes due"
       },
@@ -630,6 +634,10 @@
         "hint": "Opens a care record you can backdate or annotate"
       },
       "done": {
+        "feed": {
+          "label": "Fed {{animalName}}",
+          "hint": "Logs a feeding now and moves this to its next due date"
+        },
         "water": {
           "label": "Water changed for {{animalName}}",
           "hint": "Logs a water change now and moves this to its next due date"

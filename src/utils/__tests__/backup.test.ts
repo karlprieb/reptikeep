@@ -109,6 +109,17 @@ describe("backup archive validation", () => {
     });
   });
 
+  it("normalizes a muted feeding reminder alongside water and cleaning", () => {
+    expect(
+      animalForBackup({
+        ...animal,
+        reminders: { feed: false, water: true, cleaning: false },
+      } as never),
+    ).toMatchObject({
+      reminders: { feed: false, water: true, cleaning: false },
+    });
+  });
+
   it("normalizes persisted preferences to the current backup schema", () => {
     settings$.set({
       language: "legacy",
@@ -285,6 +296,23 @@ describe("backup archive validation", () => {
     await expect(parseBackup(archive(manifest, withAnimal))).rejects.toThrow(
       "animal",
     );
+  });
+
+  it("accepts an animal with a feed reminders key", async () => {
+    const withAnimal = {
+      ...husbandry,
+      animals: {
+        "willow-1": {
+          ...animal,
+          reminders: { feed: false, water: true, cleaning: false },
+        },
+      },
+    };
+    await expect(
+      parseBackup(archive(manifest, withAnimal)),
+    ).resolves.toMatchObject({
+      data: { animals: withAnimal.animals },
+    });
   });
 
   it("rejects preferences with an unrecognized care schedule key", async () => {
