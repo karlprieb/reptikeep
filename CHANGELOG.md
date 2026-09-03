@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-09-02
+
 ### Added
 
 - **Android, in progress** — ReptiKeep now runs on Android. It is built in
@@ -247,7 +249,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Reset app data** in Settings, which permanently clears every reptile and
   record on the device.
 
-[Unreleased]: https://github.com/karlprieb/reptikeep/compare/0.4.0...HEAD
+[Unreleased]: https://github.com/karlprieb/reptikeep/compare/0.5.0...HEAD
+[0.5.0]: https://github.com/karlprieb/reptikeep/compare/0.4.0...0.5.0
 [0.4.0]: https://github.com/karlprieb/reptikeep/compare/0.3.0...0.4.0
 [0.3.0]: https://github.com/karlprieb/reptikeep/compare/v0.2.0...0.3.0
 [0.2.0]: https://github.com/karlprieb/reptikeep/compare/v0.1.0...v0.2.0
