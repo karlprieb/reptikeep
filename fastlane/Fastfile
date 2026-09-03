@@ -3,7 +3,9 @@ require "json"
 platform :android do
   desc "Build a release APK for sideloading (debug-signed, not for Play Store)"
   lane :apk do
-    Dir.chdir("..") { sh("npx", "expo", "prebuild", "--platform", "android") }
+    Bundler.with_original_env do
+      Dir.chdir("..") { sh("npx", "expo", "prebuild", "--platform", "android") }
+    end
 
     gradle(
       task: "assemble",
@@ -50,7 +52,11 @@ platform :ios do
     next_build = (latest_build + 1).to_s
     File.write(app_json_path, File.read(app_json_path).sub(/"buildNumber":\s*"\d+"/, "\"buildNumber\": \"#{next_build}\""))
 
-    Dir.chdir("..") { sh("npx", "expo", "prebuild", "--platform", "ios") }
+    ios_dir = File.expand_path("../ios", __dir__)
+    Bundler.with_original_env do
+      Dir.chdir("..") { sh("npx", "expo", "prebuild", "--platform", "ios", "--no-install") }
+      sh("pod", "install", "--project-directory=#{ios_dir}")
+    end
 
     match(
       type: "appstore",
