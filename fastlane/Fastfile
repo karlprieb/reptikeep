@@ -1,4 +1,5 @@
 require "json"
+require "securerandom"
 
 platform :android do
   desc "Build a release APK for sideloading (debug-signed, not for Play Store)"
@@ -28,12 +29,27 @@ platform :ios do
     )
   end
 
+  private_lane :ci_keychain_password do
+    password = SecureRandom.uuid
+    create_keychain(
+      name: "fastlane_tmp_keychain",
+      password: password,
+      default_keychain: true,
+      unlock: true,
+      timeout: 3600,
+      lock_when_sleeps: false
+    )
+    password
+  end
+
   desc "Generate/fetch the Apple Distribution cert and provisioning profile via match"
   lane :certs do
     match(
       type: "appstore",
       api_key: asc_api_key,
-      readonly: is_ci
+      readonly: is_ci,
+      keychain_name: is_ci ? "fastlane_tmp_keychain" : nil,
+      keychain_password: is_ci ? ci_keychain_password : nil
     )
   end
 
@@ -61,7 +77,9 @@ platform :ios do
     match(
       type: "appstore",
       api_key: api_key,
-      readonly: is_ci
+      readonly: is_ci,
+      keychain_name: is_ci ? "fastlane_tmp_keychain" : nil,
+      keychain_password: is_ci ? ci_keychain_password : nil
     )
 
     update_code_signing_settings(
