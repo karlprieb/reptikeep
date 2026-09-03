@@ -516,37 +516,47 @@ export function DateField({
   const { t } = useTranslation();
   const [showDialog, setShowDialog] = useState(false);
   const value = toCalendarDate(date);
-  const text = useNativeState(formatAbsoluteDate(value));
+  const displayText = formatAbsoluteDate(value);
+  const text = useNativeState(displayText);
 
   useEffect(() => {
-    text.set(formatAbsoluteDate(value));
-  }, [text, value]);
+    text.set(displayText);
+  }, [text, displayText]);
 
   return (
-    <Box modifiers={[fillMaxWidth()]}>
+    <ExposedDropdownMenuBox
+      expanded={showDialog}
+      onExpandedChange={setShowDialog}
+      modifiers={[fillMaxWidth()]}
+    >
       <OutlinedTextField
         value={text}
         readOnly
         singleLine
         colors={fieldColors(theme)}
         textStyle={DATA_STYLE}
-        modifiers={[fillMaxWidth()]}
+        modifiers={[
+          menuAnchor(),
+          fillMaxWidth(),
+          semantics({
+            contentDescription: [
+              label,
+              displayText,
+              t("reptileForm.selectDate"),
+            ].join(", "),
+            mergeDescendants: true,
+          }),
+        ]}
       >
         <OutlinedTextField.Label>
           <Text>{label}</Text>
         </OutlinedTextField.Label>
         <OutlinedTextField.TrailingIcon>
-          <IconButton
-            onClick={() => setShowDialog(true)}
-            colors={{ contentColor: theme.textSecondary }}
-          >
-            <Icon
-              source={CALENDAR_ICON}
-              tint={theme.textSecondary}
-              size={iconSize}
-              contentDescription={`${label}: ${t("reptileForm.selectDate")}`}
-            />
-          </IconButton>
+          <Icon
+            source={CALENDAR_ICON}
+            tint={theme.textSecondary}
+            size={iconSize}
+          />
         </OutlinedTextField.TrailingIcon>
       </OutlinedTextField>
       {showDialog ? (
@@ -575,7 +585,7 @@ export function DateField({
           dismissButtonLabel={dismissLabel}
         />
       ) : null}
-    </Box>
+    </ExposedDropdownMenuBox>
   );
 }
 
@@ -602,39 +612,47 @@ export function DateTimeField({
   const [stage, setStage] = useState<"none" | "date" | "time">("none");
   const [pendingDay, setPendingDay] = useState<Date>();
   const calendarValue = toCalendarDate(date);
-  const text = useNativeState(
-    `${formatAbsoluteDate(calendarValue)} · ${timeLabel(date)}`,
-  );
+  const displayText = `${formatAbsoluteDate(calendarValue)} · ${timeLabel(date)}`;
+  const text = useNativeState(displayText);
 
   useEffect(() => {
-    text.set(`${formatAbsoluteDate(calendarValue)} · ${timeLabel(date)}`);
-  }, [text, calendarValue, date]);
+    text.set(displayText);
+  }, [text, displayText]);
 
   return (
-    <Box modifiers={[fillMaxWidth()]}>
+    <ExposedDropdownMenuBox
+      expanded={stage !== "none"}
+      onExpandedChange={(expanded) => setStage(expanded ? "date" : "none")}
+      modifiers={[fillMaxWidth()]}
+    >
       <OutlinedTextField
         value={text}
         readOnly
         singleLine
         colors={fieldColors(theme)}
         textStyle={DATA_STYLE}
-        modifiers={[fillMaxWidth()]}
+        modifiers={[
+          menuAnchor(),
+          fillMaxWidth(),
+          semantics({
+            contentDescription: [
+              label,
+              displayText,
+              t("reptileForm.selectDate"),
+            ].join(", "),
+            mergeDescendants: true,
+          }),
+        ]}
       >
         <OutlinedTextField.Label>
           <Text>{label}</Text>
         </OutlinedTextField.Label>
         <OutlinedTextField.TrailingIcon>
-          <IconButton
-            onClick={() => setStage("date")}
-            colors={{ contentColor: theme.textSecondary }}
-          >
-            <Icon
-              source={CALENDAR_ICON}
-              tint={theme.textSecondary}
-              size={iconSize}
-              contentDescription={`${label}: ${t("reptileForm.selectDate")}`}
-            />
-          </IconButton>
+          <Icon
+            source={CALENDAR_ICON}
+            tint={theme.textSecondary}
+            size={iconSize}
+          />
         </OutlinedTextField.TrailingIcon>
       </OutlinedTextField>
       {stage === "date" ? (
@@ -675,7 +693,7 @@ export function DateTimeField({
           onDismissRequest={() => setStage("none")}
         />
       ) : null}
-    </Box>
+    </ExposedDropdownMenuBox>
   );
 }
 

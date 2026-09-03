@@ -91,6 +91,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   the menu still open on top of it. Android had confused the two screens'
   underlying views. Fixed wherever the same mix-up could happen, not just
   Settings.
+- Date pickers on iPhone always showed month and day names in English, even
+  with the app set to Portuguese. They now follow the app's own language.
+- On Android, tapping a date field only opened its calendar picker if you
+  hit the small icon exactly; tapping anywhere else on the field did
+  nothing. The whole field now opens it.
 
 ## [0.4.0] - 2026-08-19
 

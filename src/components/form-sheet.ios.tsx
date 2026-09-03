@@ -3,6 +3,7 @@ import {
   accessibilityHint,
   accessibilityLabel,
   background,
+  environment,
   foregroundStyle,
   listRowBackground,
   pickerStyle,
@@ -17,6 +18,8 @@ import { useTranslation } from "react-i18next";
 import { Typography } from "@/constants/theme";
 import { typeFont } from "@/constants/type-font";
 import { useTheme } from "@/hooks/use-theme";
+import type { SupportedLanguage } from "@/i18n/resolve-language";
+import { swiftUILocaleIdentifier } from "@/i18n/resolve-language";
 import { asEditOf, optionalText, useDraft } from "@/utils/form-sheet-shared";
 
 export { asEditOf, optionalText, useDraft };
@@ -173,12 +176,17 @@ export function DefaultPicker<T extends string>({
 
 export function useFormModifiers() {
   const theme = useTheme();
+  const { i18n } = useTranslation();
 
   return {
     form: [
       tint(theme.primary),
       scrollContentBackground("hidden"),
       background(theme.bg),
+      environment(
+        "locale",
+        swiftUILocaleIdentifier(i18n.language as SupportedLanguage),
+      ),
     ],
     row: [listRowBackground(theme.surface)],
   };
