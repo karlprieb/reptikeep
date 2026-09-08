@@ -294,6 +294,35 @@ img {
   margin-top: 1.15rem;
 }
 
+.legal-title {
+  font-size: clamp(1.9rem, 3.7vw, 2.9rem);
+  max-width: 20ch;
+}
+
+.legal-body {
+  margin-top: 2.5rem;
+  max-width: 62ch;
+  color: var(--ink-2);
+}
+
+.legal-body > * + * {
+  margin-top: 1.1rem;
+}
+
+.legal-body h2 {
+  color: var(--ink);
+  font-size: clamp(1.25rem, 2vw, 1.5rem);
+  margin-top: 2.5rem;
+}
+
+.legal-body ul {
+  padding-left: 1.25rem;
+}
+
+.legal-body li + li {
+  margin-top: 0.4rem;
+}
+
 .cta {
   display: flex;
   flex-wrap: wrap;
