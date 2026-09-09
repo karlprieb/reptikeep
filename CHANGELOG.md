@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Tapping a Reminders row's circle again after already marking it done today
+  logged a second, duplicate record instead of doing nothing. It now tells
+  you the reptile's feeding, water change or cleaning is already logged for
+  today, on both Android and iPhone.
+
 ## [0.5.0] - 2026-09-02
 
 ### Added
