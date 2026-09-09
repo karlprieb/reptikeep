@@ -19,7 +19,7 @@
 
         androidAbi = if pkgs.stdenv.hostPlatform.isAarch64 then "arm64-v8a" else "x86_64";
         androidApiLevel = "35";
-        avdName = "Reptiroutine_API_${androidApiLevel}";
+        avdName = "ReptiKeep_API_${androidApiLevel}";
         avdDevice = "pixel_6";
 
         androidComposition = pkgs.androidenv.composeAndroidPackages {

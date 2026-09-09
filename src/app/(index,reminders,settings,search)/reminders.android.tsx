@@ -1,4 +1,5 @@
 import {
+  AlertDialog,
   Box,
   Button,
   Column,
@@ -7,6 +8,7 @@ import {
   IconButton,
   Row,
   Text,
+  TextButton,
 } from "@expo/ui/jetpack-compose";
 import {
   background,
@@ -43,7 +45,7 @@ import {
   StackAboveFontScale,
   type Theme,
 } from "@/constants/theme";
-import { composeTextStyle } from "@/constants/type-font-compose";
+import { composeTextStyle, SECTION_LABEL } from "@/constants/type-font-compose";
 import { useTheme } from "@/hooks/use-theme";
 import { useReminderPermission } from "@/hooks/use-reminder-permission";
 import { useRemindersData, type DueState } from "@/hooks/use-reminders-data";
@@ -160,6 +162,7 @@ function ReminderRow({
   const swipeableRef = useRef<InstanceType<typeof Swipeable>>(null);
   const routine = t(`reminders.routine.${reminder.routine}`);
   const due = formatAbsoluteDate(reminder.dueOn);
+  const [alreadyDone, setAlreadyDone] = useState(false);
 
   const openDetail = () => router.push(routineHref(reminder));
 
@@ -335,9 +338,11 @@ function ReminderRow({
             </Row>
 
             <IconButton
-              onClick={() =>
-                markRoutineDone(reminder.animalId, reminder.routine)
-              }
+              onClick={() => {
+                if (!markRoutineDone(reminder.animalId, reminder.routine)) {
+                  setAlreadyDone(true);
+                }
+              }}
               colors={{ contentColor: theme.primary }}
             >
               <Icon
@@ -355,6 +360,47 @@ function ReminderRow({
           </Row>
         </Host>
       </Swipeable>
+
+      {alreadyDone ? (
+        <View style={styles.dialogHost} pointerEvents="box-none">
+          <Host matchContents seedColor={theme.primary}>
+            <AlertDialog
+              colors={{
+                containerColor: theme.surface,
+                titleContentColor: theme.text,
+                textContentColor: theme.textSecondary,
+              }}
+              onDismissRequest={() => setAlreadyDone(false)}
+            >
+              <AlertDialog.Title>
+                <Text style={SECTION_LABEL} color={theme.text}>
+                  {t("reminders.alreadyDone.title")}
+                </Text>
+              </AlertDialog.Title>
+              <AlertDialog.Text>
+                <Text
+                  style={composeTextStyle("body")}
+                  color={theme.textSecondary}
+                >
+                  {t(`reminders.alreadyDone.${reminder.routine}`, {
+                    animalName: reminder.animalName,
+                  })}
+                </Text>
+              </AlertDialog.Text>
+              <AlertDialog.ConfirmButton>
+                <TextButton
+                  onClick={() => setAlreadyDone(false)}
+                  colors={{ contentColor: theme.primary }}
+                >
+                  <Text style={composeTextStyle("body")}>
+                    {t("reminders.alreadyDone.dismiss")}
+                  </Text>
+                </TextButton>
+              </AlertDialog.ConfirmButton>
+            </AlertDialog>
+          </Host>
+        </View>
+      ) : null}
     </View>
   );
 }
@@ -660,5 +706,12 @@ const styles = StyleSheet.create({
   divider: {
     height: StyleSheet.hairlineWidth,
     width: "100%",
+  },
+  dialogHost: {
+    position: "absolute",
+    left: 0,
+    top: 0,
+    width: 0,
+    height: 0,
   },
 });

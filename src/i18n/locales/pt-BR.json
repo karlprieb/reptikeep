@@ -150,6 +150,13 @@
       "title": "Cuidados de hoje",
       "line": "{{routine}}: {{names}}",
       "overflow": "{{names}} e mais {{count}}"
+    },
+    "alreadyDone": {
+      "title": "Já feito hoje",
+      "feed": "{{animalName}} já foi alimentado hoje.",
+      "water": "A água de {{animalName}} já foi trocada hoje.",
+      "cleaning": "O terrário de {{animalName}} já foi limpo hoje.",
+      "dismiss": "Entendi"
     }
   },
   "search": {

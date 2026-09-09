@@ -1,4 +1,5 @@
 import {
+  Alert,
   Button,
   Circle,
   Divider,
@@ -40,6 +41,7 @@ import {
   tint,
 } from "@expo/ui/swift-ui/modifiers";
 import { router } from "expo-router";
+import { useState } from "react";
 import {
   Linking,
   ScrollView,
@@ -144,6 +146,7 @@ function ReminderRow({
   const { t } = useTranslation();
   const routine = t(`reminders.routine.${reminder.routine}`);
   const due = formatAbsoluteDate(reminder.dueOn);
+  const [alreadyDone, setAlreadyDone] = useState(false);
 
   const name = (
     <Text
@@ -296,34 +299,59 @@ function ReminderRow({
             </VStack>
           </HStack>
 
-          <Button
-            onPress={() => markRoutineDone(reminder.animalId, reminder.routine)}
-            modifiers={[
-              buttonStyle("borderless"),
-              frame({ width: checkboxSize, height: checkboxSize }),
-              contentShape(shapes.rectangle()),
-              accessibilityLabel(
-                t(`a11y.reminders.done.${reminder.routine}.label`, {
-                  animalName: reminder.animalName,
-                }),
-              ),
-              accessibilityHint(
-                t(`a11y.reminders.done.${reminder.routine}.hint`),
-              ),
-            ]}
+          <Alert
+            title={t("reminders.alreadyDone.title")}
+            isPresented={alreadyDone}
+            onIsPresentedChange={setAlreadyDone}
           >
-            <Image
-              systemName="circle"
-              modifiers={[
-                font({
-                  size: Math.round(
-                    checkboxSize * (CHECKBOX_SYMBOL / CHECKBOX_HIT),
+            <Alert.Trigger>
+              <Button
+                onPress={() => {
+                  if (!markRoutineDone(reminder.animalId, reminder.routine)) {
+                    setAlreadyDone(true);
+                  }
+                }}
+                modifiers={[
+                  buttonStyle("borderless"),
+                  frame({ width: checkboxSize, height: checkboxSize }),
+                  contentShape(shapes.rectangle()),
+                  accessibilityLabel(
+                    t(`a11y.reminders.done.${reminder.routine}.label`, {
+                      animalName: reminder.animalName,
+                    }),
                   ),
-                }),
-                foregroundStyle(theme.primary),
-              ]}
-            />
-          </Button>
+                  accessibilityHint(
+                    t(`a11y.reminders.done.${reminder.routine}.hint`),
+                  ),
+                ]}
+              >
+                <Image
+                  systemName="circle"
+                  modifiers={[
+                    font({
+                      size: Math.round(
+                        checkboxSize * (CHECKBOX_SYMBOL / CHECKBOX_HIT),
+                      ),
+                    }),
+                    foregroundStyle(theme.primary),
+                  ]}
+                />
+              </Button>
+            </Alert.Trigger>
+            <Alert.Actions>
+              <Button
+                label={t("reminders.alreadyDone.dismiss")}
+                role="cancel"
+              />
+            </Alert.Actions>
+            <Alert.Message>
+              <Text>
+                {t(`reminders.alreadyDone.${reminder.routine}`, {
+                  animalName: reminder.animalName,
+                })}
+              </Text>
+            </Alert.Message>
+          </Alert>
         </HStack>
       </VStack>
 

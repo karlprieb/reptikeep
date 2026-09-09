@@ -150,6 +150,13 @@
       "title": "Today's care",
       "line": "{{routine}}: {{names}}",
       "overflow": "{{names}} and {{count}} more"
+    },
+    "alreadyDone": {
+      "title": "Already done today",
+      "feed": "{{animalName}} has already been fed today.",
+      "water": "{{animalName}}'s water has already been changed today.",
+      "cleaning": "{{animalName}}'s enclosure has already been cleaned today.",
+      "dismiss": "Got it"
     }
   },
   "search": {
