@@ -591,6 +591,48 @@ jest.mock("@expo/ui/jetpack-compose", () => {
     }).current;
   }
 
+  function TextButton({
+    onClick,
+    children,
+  }: MockSlotProps & { onClick?: () => void }) {
+    return React.createElement(
+      Pressable,
+      {
+        testID: "expo-ui-text-button",
+        accessibilityRole: "button",
+        onPress: onClick,
+      },
+      children,
+    );
+  }
+
+  function AlertDialog({ children }: MockSlotProps) {
+    return React.createElement(
+      View,
+      { testID: "expo-ui-alert-dialog" },
+      children,
+    );
+  }
+  AlertDialog.Title = function AlertDialogTitle({ children }: MockSlotProps) {
+    return React.createElement(View, null, children);
+  };
+  AlertDialog.Text = function AlertDialogText({ children }: MockSlotProps) {
+    return React.createElement(View, null, children);
+  };
+  AlertDialog.ConfirmButton = function AlertDialogConfirmButton({
+    children,
+  }: MockSlotProps) {
+    return React.createElement(View, null, children);
+  };
+  AlertDialog.DismissButton = function AlertDialogDismissButton({
+    children,
+  }: MockSlotProps) {
+    return React.createElement(View, null, children);
+  };
+  AlertDialog.Icon = function AlertDialogIcon({ children }: MockSlotProps) {
+    return React.createElement(View, null, children);
+  };
+
   return {
     Host,
     Box,
@@ -601,6 +643,8 @@ jest.mock("@expo/ui/jetpack-compose", () => {
     Icon,
     Button: ComposeButton,
     IconButton,
+    TextButton,
+    AlertDialog,
     RNHostView: container("expo-ui-rn-host-view"),
     useNativeState,
   };

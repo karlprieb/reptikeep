@@ -101,6 +101,29 @@ describe("RemindersScreen mark done", () => {
     expect(logged).toHaveLength(1);
     expect(logged[0]).toMatchObject({ animalId: ANIMAL_ID, refused: false });
   });
+
+  it("shows an alert instead of logging again the same day", async () => {
+    act(() => addAnimal(makeAnimal({ id: ANIMAL_ID, name: "Buddy" })));
+
+    const { getByLabelText, getByText } = await renderScreen();
+
+    act(() => {
+      fireEvent.press(getByLabelText(/Water changed for Buddy/));
+    });
+    act(() => {
+      fireEvent.press(getByLabelText(/Water changed for Buddy/));
+    });
+
+    expect(getByText("Already done today")).toBeTruthy();
+    expect(getByText("Buddy's water is already changed today.")).toBeTruthy();
+    expect(Object.values(habitatStore.$.peek())).toHaveLength(1);
+
+    act(() => {
+      fireEvent.press(getByText("Got it"));
+    });
+
+    expect(() => getByText("Already done today")).toThrow();
+  });
 });
 
 describe("RemindersScreen mute", () => {
