@@ -15,7 +15,6 @@ import {
   Row,
   Snackbar,
   SnackbarHost,
-  Switch,
   Text,
   TextButton,
   useNativeState,
@@ -33,7 +32,6 @@ import {
   semantics,
   size,
   Shapes,
-  toggleable,
   weight,
 } from "@expo/ui/jetpack-compose/modifiers";
 import { router } from "expo-router";
@@ -54,6 +52,7 @@ import {
   SCHEDULE_INHERIT,
   type ScheduleSelection,
 } from "@/utils/schedule";
+import { SwitchRow } from "@/components/form-sheet";
 import { FROZEN_TAGS, useReptileForm } from "@/components/use-reptile-form";
 import { Radius, Spacing, StackAboveFontScale } from "@/constants/theme";
 import { composeTextStyle } from "@/constants/type-font-compose";
@@ -893,65 +892,6 @@ function MenuField<T extends string>({
         ))}
       </ExposedDropdownMenu>
     </ExposedDropdownMenuBox>
-  );
-}
-
-function SwitchRow({
-  label,
-  checked,
-  onCheckedChange,
-  theme,
-  hint,
-}: {
-  label: string;
-  checked: boolean;
-  onCheckedChange: (value: boolean) => void;
-  theme: FormTheme;
-  hint?: string;
-}) {
-  return (
-    <Box
-      modifiers={[
-        fillMaxWidth(),
-        clip(Shapes.RoundedCorner(Radius.md)),
-        toggleable(checked, () => onCheckedChange(!checked), {
-          role: "switch",
-        }),
-        semantics({
-          contentDescription: [label, hint].filter(Boolean).join(", "),
-          mergeDescendants: true,
-        }),
-      ]}
-    >
-      <ListItem
-        colors={{ containerColor: theme.bg, contentColor: theme.text }}
-        modifiers={[fillMaxWidth()]}
-      >
-        <ListItem.HeadlineContent>
-          <Text style={composeTextStyle("body")} color={theme.text}>
-            {label}
-          </Text>
-        </ListItem.HeadlineContent>
-        <ListItem.TrailingContent>
-          <Switch
-            value={checked}
-            enabled={false}
-            colors={{
-              checkedThumbColor: theme.onPrimary,
-              checkedTrackColor: theme.primary,
-              uncheckedThumbColor: theme.textMuted,
-              uncheckedTrackColor: theme.surfaceSunken,
-              uncheckedBorderColor: theme.textMuted,
-              disabledCheckedThumbColor: theme.onPrimary,
-              disabledCheckedTrackColor: theme.primary,
-              disabledUncheckedThumbColor: theme.textMuted,
-              disabledUncheckedTrackColor: theme.surfaceSunken,
-              disabledUncheckedBorderColor: theme.textMuted,
-            }}
-          />
-        </ListItem.TrailingContent>
-      </ListItem>
-    </Box>
   );
 }
 

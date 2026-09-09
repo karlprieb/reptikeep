@@ -13,6 +13,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   logged a second, duplicate record instead of doing nothing. It now tells
   you the reptile's feeding, water change or cleaning is already logged for
   today, on both Android and iPhone.
+- On Android, tapping directly on a switch in the reptile edit screen (like
+  "Known birth date") didn't do anything — only tapping its label did.
+  Tapping the switch itself now works too.
 
 ## [0.5.0] - 2026-09-02
 
