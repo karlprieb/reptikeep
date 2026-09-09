@@ -16,6 +16,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - On Android, tapping directly on a switch in the reptile edit screen (like
   "Known birth date") didn't do anything — only tapping its label did.
   Tapping the switch itself now works too.
+- On Android, swiping an activity row to edit or delete it left a sliver of
+  the page background showing at the screen edge and turned the row a stuck
+  gray until you let go. Swiping now fills the screen edge to edge and the
+  row stays its normal color throughout the gesture.
+- On Android, a reptile's birth date and acquired date boxes could end up
+  different heights when one had more to say than the other, leaving one
+  box with an awkward gap. They now always match.
 
 ## [0.5.0] - 2026-09-02
 

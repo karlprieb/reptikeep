@@ -355,25 +355,30 @@ export default function AnimalHistoryScreen() {
           contentContainerStyle={{
             paddingTop: contentPaddingTop,
             paddingBottom: insets.bottom + Spacing.xl,
-            paddingHorizontal: Spacing.md,
           }}
           scrollEventThrottle={16}
           onScroll={onScroll}
         >
-          {filterBar}
-          <FilteredEmptyPanel animalName={animal.name} onClear={clearFilters} />
+          <View style={historyStyles.emptyPanel}>{filterBar}</View>
+          <View style={historyStyles.emptyPanel}>
+            <FilteredEmptyPanel
+              animalName={animal.name}
+              onClear={clearFilters}
+            />
+          </View>
         </Animated.ScrollView>
       ) : (
         <ActivityHistoryList
           entries={shown}
           animalId={id}
           background={theme.bg}
-          header={filterBar}
+          header={
+            <View style={historyStyles.filterBarRowInset}>{filterBar}</View>
+          }
           scrollY={scrollY}
           contentContainerStyle={{
             paddingTop: contentPaddingTop,
             paddingBottom: insets.bottom + Spacing.xl,
-            paddingHorizontal: Spacing.md,
           }}
         />
       )}
@@ -544,6 +549,12 @@ const historyStyles = StyleSheet.create({
   filterBar: {
     paddingBottom: Spacing.sm,
     gap: Spacing.sm,
+  },
+  filterBarRowInset: {
+    paddingHorizontal: Spacing.lg,
+  },
+  emptyPanel: {
+    paddingHorizontal: Spacing.md,
   },
   rangeHost: {
     width: "100%",
