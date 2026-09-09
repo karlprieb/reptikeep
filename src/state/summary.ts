@@ -53,9 +53,9 @@ function latestFor<T extends ActivityRecord>(
 }
 
 const always = () => true;
-const wasAccepted = (feeding: FeedingActivity) => !feeding.refused;
-const changedWater = (habitat: HabitatActivity) => habitat.water;
-const cleanedEnclosure = (habitat: HabitatActivity) =>
+export const wasAccepted = (feeding: FeedingActivity) => !feeding.refused;
+export const changedWater = (habitat: HabitatActivity) => habitat.water;
+export const cleanedEnclosure = (habitat: HabitatActivity) =>
   habitat.cleaning === true;
 
 export function summarize<T extends ActivityRecord>(

@@ -4,6 +4,7 @@ import { markRoutineDone } from "@/utils/reminder-actions";
 
 const ANIMAL = "a1";
 const YESTERDAY = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+const TOMORROW = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
 
 describe("markRoutineDone", () => {
   beforeEach(() => {
@@ -41,6 +42,21 @@ describe("markRoutineDone", () => {
     );
 
     expect(markRoutineDone(ANIMAL, "feed")).toBe(true);
+    expect(Object.keys(feedingStore.$.peek())).toHaveLength(2);
+  });
+
+  it("blocks today's log even when a later, future-dated record exists", () => {
+    feedingStore.add(
+      createFeedingActivity({
+        animalId: ANIMAL,
+        occurredAt: new Date().toISOString(),
+      }),
+    );
+    feedingStore.add(
+      createFeedingActivity({ animalId: ANIMAL, occurredAt: TOMORROW }),
+    );
+
+    expect(markRoutineDone(ANIMAL, "feed")).toBe(false);
     expect(Object.keys(feedingStore.$.peek())).toHaveLength(2);
   });
 });

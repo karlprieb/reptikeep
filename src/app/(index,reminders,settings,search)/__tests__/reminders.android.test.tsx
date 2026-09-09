@@ -115,7 +115,9 @@ describe("RemindersScreen mark done", () => {
     });
 
     expect(getByText("Already done today")).toBeTruthy();
-    expect(getByText("Buddy's water is already changed today.")).toBeTruthy();
+    expect(
+      getByText("Buddy's water has already been changed today."),
+    ).toBeTruthy();
     expect(Object.values(habitatStore.$.peek())).toHaveLength(1);
 
     act(() => {

@@ -153,9 +153,9 @@
     },
     "alreadyDone": {
       "title": "Already done today",
-      "feed": "{{animalName}} is already fed today.",
-      "water": "{{animalName}}'s water is already changed today.",
-      "cleaning": "{{animalName}}'s enclosure is already cleaned today.",
+      "feed": "{{animalName}} has already been fed today.",
+      "water": "{{animalName}}'s water has already been changed today.",
+      "cleaning": "{{animalName}}'s enclosure has already been cleaned today.",
       "dismiss": "Got it"
     }
   },
