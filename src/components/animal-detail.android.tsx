@@ -139,6 +139,8 @@ function StatBox({ stat, theme }: { stat: Stat; theme: Theme }) {
       <ComposeText
         style={{ ...composeTextStyle("label"), letterSpacing: 1.89 }}
         color={theme.textMuted}
+        maxLines={2}
+        overflow="ellipsis"
       >
         {stat.label.toUpperCase()}
       </ComposeText>
@@ -155,11 +157,27 @@ function StatBox({ stat, theme }: { stat: Stat; theme: Theme }) {
           style={composeTextStyle("bodyS")}
           color={stat.secondaryColor ?? theme.textSecondary}
           minLines={2}
+          maxLines={2}
+          overflow="ellipsis"
         >
           {stat.secondary}
         </ComposeText>
       ) : null}
     </Column>
+  );
+}
+
+function StatRow({ row, theme }: { row: Stat[]; theme: Theme }) {
+  return (
+    <Row
+      verticalAlignment="top"
+      horizontalArrangement={{ spacedBy: Spacing.md }}
+      modifiers={[fillMaxWidth()]}
+    >
+      {row.map((stat) => (
+        <StatBox key={stat.key} stat={stat} theme={theme} />
+      ))}
+    </Row>
   );
 }
 
@@ -494,16 +512,7 @@ export function AnimalDetail({ animal, onAddActivity }: AnimalDetailProps) {
             modifiers={[fillMaxWidth()]}
           >
             {[...pairs(dateStats), ...pairs(currentStats)].map((row) => (
-              <Row
-                key={row[0].key}
-                verticalAlignment="top"
-                horizontalArrangement={{ spacedBy: Spacing.md }}
-                modifiers={[fillMaxWidth()]}
-              >
-                {row.map((stat) => (
-                  <StatBox key={stat.key} stat={stat} theme={theme} />
-                ))}
-              </Row>
+              <StatRow key={row[0].key} row={row} theme={theme} />
             ))}
           </Column>
         </Host>

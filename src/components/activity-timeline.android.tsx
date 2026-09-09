@@ -127,6 +127,7 @@ type ActivityRowProps = {
   divided: boolean;
   rowHeight: number;
   rowBackground: string;
+  edgeToEdge?: boolean;
 };
 
 function ActivityRow({
@@ -139,6 +140,7 @@ function ActivityRow({
   divided,
   rowHeight,
   rowBackground,
+  edgeToEdge = false,
 }: ActivityRowProps) {
   const { t } = useTranslation();
   const swipeableRef = useRef<InstanceType<typeof Swipeable>>(null);
@@ -267,8 +269,13 @@ function ActivityRow({
             contentAlignment="centerStart"
             modifiers={[
               fillMaxSize(),
-              padding(Spacing.md, 0, Spacing.md, 0),
-              clickable(openDetail),
+              clickable(openDetail, { indication: false }),
+              padding(
+                edgeToEdge ? Spacing.lg : Spacing.md,
+                0,
+                edgeToEdge ? Spacing.lg : Spacing.md,
+                0,
+              ),
               semantics({
                 contentDescription: [
                   typeName,
@@ -377,8 +384,8 @@ function SeeAllRow({
           contentAlignment="centerStart"
           modifiers={[
             fillMaxSize(),
-            padding(Spacing.md, 0, Spacing.md, 0),
             clickable(onPress),
+            padding(Spacing.md, 0, Spacing.md, 0),
             semantics({
               contentDescription: [label, t("timeline.showAllHint")].join(", "),
               role: "button",
@@ -486,6 +493,7 @@ export function ActivityHistoryList({
             divided={index > 0}
             rowHeight={rowHeight}
             rowBackground={rowBackground}
+            edgeToEdge
           />
         ))}
       </View>
