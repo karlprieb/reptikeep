@@ -2,7 +2,7 @@ require "json"
 require "securerandom"
 
 platform :android do
-  desc "Build a release APK for sideloading (debug-signed, not for Play Store)"
+  desc "Build a release APK"
   lane :apk do
     Bundler.with_original_env do
       Dir.chdir("..") { sh("npx", "expo", "prebuild", "--platform", "android") }
@@ -15,6 +15,23 @@ platform :android do
     )
 
     UI.success("APK ready: #{lane_context[SharedValues::GRADLE_APK_OUTPUT_PATH]}")
+  end
+
+  desc "Build a release AAB"
+  lane :aab do
+    UI.user_error!("Set ANDROID_RELEASE_STORE_FILE and friends in fastlane/.env first") unless ENV["ANDROID_RELEASE_STORE_FILE"]
+
+    Bundler.with_original_env do
+      Dir.chdir("..") { sh("npx", "expo", "prebuild", "--platform", "android") }
+    end
+
+    gradle(
+      task: "bundle",
+      build_type: "Release",
+      project_dir: File.expand_path("../android", __dir__)
+    )
+
+    UI.success("AAB ready: #{lane_context[SharedValues::GRADLE_AAB_OUTPUT_PATH]}")
   end
 end
 

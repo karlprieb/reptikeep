@@ -1,0 +1,21 @@
+ReptiKeep is a husbandry log for reptile keepers. Feed. Shed. Repeat.
+
+Log feedings, weigh-ins, sheds, waste, water changes and enclosure cleaning for every animal in your collection, and let the app tell you who needs attention today.
+
+WHAT YOU CAN DO
+• Give each reptile its own profile: species, sex, photo, birth date and the day you got them
+• Log six kinds of activity: feeding, shed, waste, weight, habitat upkeep and medical care
+• Backdate records, because nobody logs things in real time while holding a snake
+• See a per-animal timeline with feeding status and a weight trend chart
+• Set feeding, water-change and enclosure-cleaning schedules that fit your routine
+• Check one Reminders screen for everything overdue or due today across your whole collection
+• Get an optional daily notification instead of hunting for what's due
+• Attach documents like vet records or certificates of authenticity to an animal
+• Back up your whole collection to a file and restore it on the same or a new device
+• Use it in English or Brazilian Portuguese, in light or dark mode
+
+BUILT AROUND YOUR PRIVACY
+ReptiKeep works fully offline. No account, no sign-up, no data leaving your device unless you choose to export it yourself. It's also open source, so you, or anyone, can read exactly how it works.
+
+WHO IT'S FOR
+Built for keepers with a real collection, whether that's three geckos or thirty snakes across a rack. Once memory alone can't keep track of who ate when, ReptiKeep can.

@@ -33,10 +33,6 @@ Right now the app is fully local. Eventually I plan to offer an optional, paid s
 - A reminders screen that collects everything due or overdue, with optional daily notifications
 - English and Brazilian Portuguese, light or dark mode
 
-## Project status
-
-ReptiKeep is under active development and focused on iOS for now. Android is next! I'll start on it once the iOS public beta is out.
-
 ## Running it locally
 
 ReptiKeep uses Expo SDK 57 and needs Node.js 22. Since it uses native SwiftUI components and MMKV storage, you'll need a local development build. No Expo Go here :)

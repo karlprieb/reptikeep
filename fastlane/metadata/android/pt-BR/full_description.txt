@@ -1,0 +1,21 @@
+ReptiKeep é um diário de cuidados para quem cria répteis. Alimentou. Mudou de pele. Repita.
+
+Registre alimentações, pesagens, mudas, fezes, trocas de água e limpeza do terrário de cada animal da sua coleção, e deixe o app dizer quem precisa de atenção hoje.
+
+O QUE VOCÊ PODE FAZER
+• Crie um perfil para cada réptil: espécie, sexo, foto, data de nascimento e o dia em que ele chegou até você
+• Registre seis tipos de atividade: alimentação, muda, fezes, peso, cuidados do terrário e atendimento veterinário
+• Registre com data retroativa, porque ninguém anota nada em tempo real segurando uma cobra
+• Veja a linha do tempo de cada animal, com status de alimentação e gráfico de evolução de peso
+• Configure horários de alimentação, troca de água e limpeza do terrário do seu jeito
+• Confira em uma única tela tudo o que está atrasado ou vence hoje, para toda a coleção
+• Receba uma notificação diária opcional em vez de sair caçando o que falta fazer
+• Anexe documentos como laudos veterinários ou certificados de origem a um animal
+• Faça backup de toda a coleção em um arquivo e restaure no mesmo aparelho ou em outro
+• Use em português do Brasil ou inglês, no modo claro ou escuro
+
+FEITO PENSANDO NA SUA PRIVACIDADE
+O ReptiKeep funciona totalmente offline. Sem conta, sem cadastro, sem dado saindo do seu aparelho a não ser que você mesmo exporte. É também open source, então qualquer pessoa pode conferir exatamente como ele funciona.
+
+PARA QUEM É
+Feito para quem tem uma coleção de verdade, sejam três lagartixas ou trinta cobras num rack. Quando a memória sozinha já não dá conta de saber quem comeu quando, o ReptiKeep dá conta.

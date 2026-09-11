@@ -1,0 +1,1 @@
+First release of ReptiKeep for Android. Track feedings, sheds, weight and habitat care for every reptile in your collection, get reminders for what's due, and keep it all fully offline. Thanks for testing!
