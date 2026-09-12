@@ -1,6 +1,7 @@
 import {
   AlertDialog,
   Button,
+  CircularProgressIndicator,
   Column,
   DropdownMenu,
   DropdownMenuItem,
@@ -34,6 +35,7 @@ import { useTheme } from "@/hooks/use-theme";
 import { animals$ } from "@/state/animal";
 import { resetAppData } from "@/state/reset";
 import {
+  createBackup,
   parseBackup,
   restoreBackup,
   shareBackup,
@@ -70,6 +72,7 @@ export default function BackupRestoreScreen() {
   const [animalIds, setAnimalIds] = useState<string[]>([]);
   const [includePreferences, setIncludePreferences] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [progress, setProgress] = useState<"export" | "restore">();
   const [success, setSuccess] = useState<RestoredBackup>();
   const [error, setError] = useState<string>();
   const [isAdvancedPresented, setIsAdvancedPresented] = useState(false);
@@ -108,16 +111,21 @@ export default function BackupRestoreScreen() {
     setBusy(true);
     setError(undefined);
     setSuccess(undefined);
+    setProgress("export");
+    AccessibilityInfo.announceForAccessibility(t("backup.exportingTitle"));
     try {
-      await shareBackup(
+      const archive = await createBackup(
         exportAll
           ? undefined
           : { animalIds: selectedAnimalIds, includePreferences },
       );
+      setProgress(undefined);
+      await shareBackup(archive);
     } catch (error) {
       logBackupError("export", error);
       setError(t("backup.error"));
     } finally {
+      setProgress(undefined);
       setBusy(false);
     }
   };
@@ -125,6 +133,8 @@ export default function BackupRestoreScreen() {
   const confirmRestore = async (candidate: File) => {
     setBusy(true);
     setError(undefined);
+    setProgress("restore");
+    AccessibilityInfo.announceForAccessibility(t("backup.restoringTitle"));
     try {
       const restored = await restoreBackup(candidate);
       setSuccess(restored);
@@ -133,6 +143,7 @@ export default function BackupRestoreScreen() {
       logBackupError("restore", error);
       setError(t("backup.restoreError"));
     } finally {
+      setProgress(undefined);
       setBusy(false);
     }
   };
@@ -149,7 +160,10 @@ export default function BackupRestoreScreen() {
       });
       if (result.canceled) return;
       const file = new File(result.assets[0].uri);
+      setProgress("restore");
+      AccessibilityInfo.announceForAccessibility(t("backup.restoringTitle"));
       const parsed = await parseBackup(file);
+      setProgress(undefined);
       const summary = {
         scopes: parsed.manifest.scopes,
         animals: Object.keys(parsed.data.animals ?? {}).length,
@@ -172,6 +186,7 @@ export default function BackupRestoreScreen() {
     } catch {
       setError(t("backup.error"));
     } finally {
+      setProgress(undefined);
       setBusy(false);
     }
   };
@@ -179,6 +194,8 @@ export default function BackupRestoreScreen() {
   const askReset = () => setShowReset(true);
 
   const exportDisabled = busy || (!exportAll && !customSelection);
+
+  const copy = progress === "export" ? "exporting" : "restoring";
 
   return (
     <>
@@ -313,6 +330,45 @@ export default function BackupRestoreScreen() {
           </Column>
         </Host>
       </ScrollView>
+
+      {progress ? (
+        <View style={styles.dialogHost} pointerEvents="box-none">
+          <Host matchContents seedColor={theme.primary}>
+            <AlertDialog
+              colors={{
+                containerColor: theme.surface,
+                iconContentColor: theme.primary,
+                titleContentColor: theme.text,
+                textContentColor: theme.textSecondary,
+              }}
+              properties={{
+                dismissOnBackPress: false,
+                dismissOnClickOutside: false,
+              }}
+            >
+              <AlertDialog.Icon>
+                <CircularProgressIndicator
+                  color={theme.primary}
+                  trackColor={theme.surfaceSunken}
+                />
+              </AlertDialog.Icon>
+              <AlertDialog.Title>
+                <Text style={SECTION_LABEL} color={theme.text}>
+                  {t(`backup.${copy}Title`)}
+                </Text>
+              </AlertDialog.Title>
+              <AlertDialog.Text>
+                <Text
+                  style={composeTextStyle("body")}
+                  color={theme.textSecondary}
+                >
+                  {t(`backup.${copy}Message`)}
+                </Text>
+              </AlertDialog.Text>
+            </AlertDialog>
+          </Host>
+        </View>
+      ) : null}
 
       {pendingRestore ? (
         <View style={styles.dialogHost} pointerEvents="box-none">

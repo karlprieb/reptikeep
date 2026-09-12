@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Exporting or restoring a backup no longer leaves the app looking frozen.
+  A message now explains that your reptiles, records and photos are being
+  packed or replaced, and the screen waits until it finishes, on both
+  Android and iPhone.
+
 ## [0.5.1] - 2026-09-11
 
 ### Fixed
