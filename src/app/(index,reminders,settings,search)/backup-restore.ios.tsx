@@ -19,7 +19,8 @@ import {
 import { useValue } from "@legendapp/state/react";
 import * as DocumentPicker from "expo-document-picker";
 import { File } from "expo-file-system";
-import { useState } from "react";
+import { useNavigation } from "expo-router";
+import { useEffect, useState } from "react";
 import {
   AccessibilityInfo,
   ActivityIndicator,
@@ -37,6 +38,7 @@ import { useTheme } from "@/hooks/use-theme";
 import { animals$ } from "@/state/animal";
 import { resetAppData } from "@/state/reset";
 import {
+  cleanupBackupArchive,
   createBackup,
   parseBackup,
   restoreBackup,
@@ -54,7 +56,6 @@ const activityTables = [
 ] as const;
 
 const SCRIM_COLOR = "rgba(26, 20, 14, 0.4)";
-const ProgressTextScale = 1.5;
 
 function withDocuments(
   sentence: string,
@@ -67,6 +68,7 @@ function withDocuments(
 export default function BackupRestoreScreen() {
   const { t } = useTranslation();
   const theme = useTheme();
+  const navigation = useNavigation();
   const formModifiers = useFormModifiers();
   const animals = Object.values(useValue(animals$));
   const [exportAll, setExportAll] = useState(true);
@@ -108,8 +110,9 @@ export default function BackupRestoreScreen() {
     setSuccess(undefined);
     setProgress("export");
     AccessibilityInfo.announceForAccessibility(t("backup.exportingTitle"));
+    let archive: File | undefined;
     try {
-      const archive = await createBackup(
+      archive = await createBackup(
         exportAll
           ? undefined
           : { animalIds: selectedAnimalIds, includePreferences },
@@ -122,6 +125,7 @@ export default function BackupRestoreScreen() {
     } finally {
       setProgress(undefined);
       setBusy(false);
+      if (archive) cleanupBackupArchive(archive);
     }
   };
   const chooseBackup = async () => {
@@ -196,6 +200,13 @@ export default function BackupRestoreScreen() {
     resetAppData();
     setIsResetPresented(false);
   };
+
+  useEffect(() => {
+    navigation.setOptions({
+      gestureEnabled: !progress,
+      headerLeft: progress ? () => null : undefined,
+    });
+  }, [navigation, progress]);
 
   const copy = progress === "export" ? "exporting" : "restoring";
 
@@ -397,17 +408,12 @@ export default function BackupRestoreScreen() {
             style={[styles.progressCard, { backgroundColor: theme.surface }]}
           >
             <ActivityIndicator size="large" color={theme.primary} />
-            <ThemedText
-              type="heading"
-              maxFontSizeMultiplier={ProgressTextScale}
-              style={styles.progressText}
-            >
+            <ThemedText type="heading" style={styles.progressText}>
               {t(`backup.${copy}Title`)}
             </ThemedText>
             <ThemedText
               type="body"
               themeColor="textSecondary"
-              maxFontSizeMultiplier={ProgressTextScale}
               style={styles.progressText}
             >
               {t(`backup.${copy}Message`)}

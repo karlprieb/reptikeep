@@ -35,6 +35,7 @@ import { useTheme } from "@/hooks/use-theme";
 import { animals$ } from "@/state/animal";
 import { resetAppData } from "@/state/reset";
 import {
+  cleanupBackupArchive,
   createBackup,
   parseBackup,
   restoreBackup,
@@ -113,8 +114,9 @@ export default function BackupRestoreScreen() {
     setSuccess(undefined);
     setProgress("export");
     AccessibilityInfo.announceForAccessibility(t("backup.exportingTitle"));
+    let archive: File | undefined;
     try {
-      const archive = await createBackup(
+      archive = await createBackup(
         exportAll
           ? undefined
           : { animalIds: selectedAnimalIds, includePreferences },
@@ -127,6 +129,7 @@ export default function BackupRestoreScreen() {
     } finally {
       setProgress(undefined);
       setBusy(false);
+      if (archive) cleanupBackupArchive(archive);
     }
   };
 
