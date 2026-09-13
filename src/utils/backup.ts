@@ -686,6 +686,11 @@ function validate(parsed: ParsedBackup): void {
   }
 }
 
+async function waitForUiPaint(): Promise<void> {
+  await new Promise((resolve) => requestAnimationFrame(resolve));
+  await new Promise((resolve) => requestAnimationFrame(resolve));
+}
+
 async function waitForHydration(): Promise<void> {
   const stores = [
     animals$,
@@ -938,6 +943,7 @@ export function preferencesForBackup() {
 
 export async function createBackup(selection?: BackupSelection): Promise<File> {
   await waitForHydration();
+  await waitForUiPaint();
   const all = !selection;
   const selected = new Set(selection?.animalIds ?? []);
   const sourceAnimals = animals$.peek();
@@ -1046,9 +1052,7 @@ export async function createBackup(selection?: BackupSelection): Promise<File> {
   }
 }
 
-export async function shareBackup(selection?: BackupSelection): Promise<void> {
-  const archive = await createBackup(selection);
-
+export async function shareBackup(archive: File): Promise<void> {
   try {
     if (!(await Sharing.isAvailableAsync()))
       throw new Error("Sharing is unavailable.");
@@ -1066,6 +1070,7 @@ export async function parseBackup(file: File): Promise<ParsedBackup> {
     throw new Error("Backup is unreadable or too large.");
 
   const bytes = await file.bytes();
+  await waitForUiPaint();
 
   inspectZip(bytes);
 
@@ -1105,6 +1110,7 @@ export async function parseBackup(file: File): Promise<ParsedBackup> {
 
 export async function restoreBackup(file: File): Promise<RestoredBackup> {
   await waitForHydration();
+  await waitForUiPaint();
 
   const parsed = await parseBackup(file);
   const { data, manifest, photos, documents } = parsed;

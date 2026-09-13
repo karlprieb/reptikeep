@@ -1,0 +1,4 @@
+- Tapping a Reminders row's circle again after it was already marked done today logged a duplicate record. It now tells you the task is already logged for today.
+- Tapping a switch itself (like "Known birth date"), not just its label, now works.
+- Swiping an activity row to edit or delete it no longer leaves a gray sliver at the screen edge.
+- A reptile's birth date and acquired date boxes now always match height.
