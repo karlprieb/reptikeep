@@ -36,6 +36,14 @@
 
         androidSdk = androidComposition.androidsdk;
 
+        androidSdkCi = (pkgs.androidenv.composeAndroidPackages {
+          platformVersions = [ "35" "36" ];
+          buildToolsVersions = [ "35.0.0" "36.0.0" ];
+          includeNDK = true;
+          ndkVersions = [ "27.1.12297006" ];
+          cmakeVersions = [ "3.22.1" ];
+        }).androidsdk;
+
         androidAvd = pkgs.writeShellApplication {
           name = "android-avd";
           text = ''
@@ -84,6 +92,21 @@
           ];
 
           DO_NOT_TRACK = "1";
+        };
+
+        devShells.android-ci = pkgs.mkShellNoCC {
+          buildInputs = with pkgs; [
+            nodejs_22
+            jdk17
+            androidSdkCi
+            fastlane
+          ];
+
+          DO_NOT_TRACK = "1";
+
+          ANDROID_HOME = "${androidSdkCi}/libexec/android-sdk";
+          ANDROID_SDK_ROOT = "${androidSdkCi}/libexec/android-sdk";
+          JAVA_HOME = pkgs.jdk17.home;
         };
 
         devShells.default = pkgs.mkShellNoCC {

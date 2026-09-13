@@ -1,0 +1,4 @@
+- Tocar de novo no círculo de um lembrete já marcado como feito hoje registrava um lançamento duplicado. Agora avisa que a tarefa já foi registrada hoje.
+- Tocar no próprio switch (como "Data de nascimento conhecida"), não só no texto, agora funciona.
+- Deslizar uma linha de atividade para editar ou excluir não deixa mais uma sobra cinza na borda da tela.
+- As caixas de data de nascimento e de aquisição do réptil agora sempre têm a mesma altura.
