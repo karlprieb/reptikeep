@@ -578,6 +578,11 @@
         "hint": "Preenche o nome comum e o nome científico desta espécie"
       }
     },
+    "feedingForm": {
+      "foodTypeSuggestion": {
+        "hint": "Preenche este tipo de alimento"
+      }
+    },
     "feedingSchedule": {
       "enabled": {
         "hint": "Mostra quando a alimentação deste réptil está atrasada"

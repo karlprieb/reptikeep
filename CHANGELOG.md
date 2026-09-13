@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Logging a feeding now suggests food types you've used before for that
+  reptile, ranked by how often you've picked them. Tap one to fill it in,
+  or keep typing to narrow the list down, on both Android and iPhone.
+
 ### Fixed
 
 - Exporting or restoring a backup no longer leaves the app looking frozen.

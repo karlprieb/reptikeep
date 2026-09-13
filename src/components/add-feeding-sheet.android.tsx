@@ -1,11 +1,18 @@
 import {
   Column,
+  DropdownMenuItem,
+  ExposedDropdownMenu,
+  ExposedDropdownMenuBox,
   Host,
   OutlinedTextField,
   Text,
   useNativeState,
 } from "@expo/ui/jetpack-compose";
-import { fillMaxWidth } from "@expo/ui/jetpack-compose/modifiers";
+import {
+  fillMaxWidth,
+  menuAnchor,
+  semantics,
+} from "@expo/ui/jetpack-compose/modifiers";
 import { router } from "expo-router";
 import { Animated, useWindowDimensions, View } from "react-native";
 import { useTranslation } from "react-i18next";
@@ -28,6 +35,8 @@ import {
   useScrollLift,
 } from "@/components/form-sheet";
 import { Spacing, StackAboveFontScale } from "@/constants/theme";
+import { composeTextStyle } from "@/constants/type-font-compose";
+import { useFoodTypeSuggestions } from "@/hooks/use-food-type-suggestions";
 import { useTheme } from "@/hooks/use-theme";
 import {
   feedingStore,
@@ -106,7 +115,18 @@ export function AddFeedingSheet({
     weight: useNativeState(gramsToField(activity?.weight, defaults.weightUnit)),
     notes: useNativeState(activity?.notes ?? ""),
   };
+  const foodTypeSelection = useNativeState({
+    start: (activity?.foodType ?? "").length,
+    end: (activity?.foodType ?? "").length,
+  });
   const { lifted, onScroll } = useScrollLift();
+  const foodSuggestions = useFoodTypeSuggestions({
+    animalId,
+    text: fields.foodType,
+    selection: foodTypeSelection,
+    query: draft.foodType,
+    onSelect: (value) => updateDraft({ foodType: value }),
+  });
 
   const parsedWeight = weightFieldToGrams(
     draft.weight,
@@ -193,18 +213,55 @@ export function AddFeedingSheet({
               }
               footerColor={invalidWeight ? theme.danger : undefined}
             >
-              <OutlinedTextField
-                value={fields.foodType}
-                onValueChange={(value) => updateDraft({ foodType: value })}
-                colors={fieldColors(theme)}
-                keyboardOptions={{ capitalization: "sentences" }}
-                singleLine
+              <ExposedDropdownMenuBox
+                expanded={foodSuggestions.visible}
                 modifiers={[fillMaxWidth()]}
               >
-                <OutlinedTextField.Label>
-                  <Text>{t("feedingForm.foodType")}</Text>
-                </OutlinedTextField.Label>
-              </OutlinedTextField>
+                <OutlinedTextField
+                  value={fields.foodType}
+                  selection={foodTypeSelection}
+                  onValueChange={(value) => updateDraft({ foodType: value })}
+                  onFocusChanged={foodSuggestions.handleFocusChange}
+                  colors={fieldColors(theme)}
+                  keyboardOptions={{ capitalization: "sentences" }}
+                  singleLine
+                  modifiers={[menuAnchor(), fillMaxWidth()]}
+                >
+                  <OutlinedTextField.Label>
+                    <Text>{t("feedingForm.foodType")}</Text>
+                  </OutlinedTextField.Label>
+                </OutlinedTextField>
+                <ExposedDropdownMenu
+                  expanded={foodSuggestions.visible}
+                  onDismissRequest={foodSuggestions.dismiss}
+                  containerColor={theme.surface}
+                >
+                  {foodSuggestions.suggestions.map((option) => (
+                    <DropdownMenuItem
+                      key={option}
+                      onClick={() => foodSuggestions.select(option)}
+                      modifiers={[
+                        semantics({
+                          contentDescription: [
+                            option,
+                            t("a11y.feedingForm.foodTypeSuggestion.hint"),
+                          ].join(", "),
+                          mergeDescendants: true,
+                        }),
+                      ]}
+                    >
+                      <DropdownMenuItem.Text>
+                        <Text
+                          style={composeTextStyle("body")}
+                          color={theme.text}
+                        >
+                          {option}
+                        </Text>
+                      </DropdownMenuItem.Text>
+                    </DropdownMenuItem>
+                  ))}
+                </ExposedDropdownMenu>
+              </ExposedDropdownMenuBox>
 
               <SegmentedField
                 value={draft.measure}
