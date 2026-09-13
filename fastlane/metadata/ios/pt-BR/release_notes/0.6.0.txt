@@ -1,0 +1,2 @@
+- Registrar uma alimentação agora sugere os tipos de comida que você já usou para aquele réptil, ordenados por frequência de uso. Toque em um para preencher, ou continue digitando para filtrar a lista.
+- Exportar ou restaurar um backup não deixa mais o app parecendo travado. Uma mensagem explica o que está acontecendo e a tela espera até terminar.

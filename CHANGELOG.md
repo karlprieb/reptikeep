@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.6.0] - 2026-09-13
+
 ### Added
 
 - Logging a feeding now suggests food types you've used before for that
@@ -281,7 +283,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Reset app data** in Settings, which permanently clears every reptile and
   record on the device.
 
-[Unreleased]: https://github.com/karlprieb/reptikeep/compare/0.5.1...HEAD
+[Unreleased]: https://github.com/karlprieb/reptikeep/compare/0.6.0...HEAD
+[0.6.0]: https://github.com/karlprieb/reptikeep/compare/0.5.1...0.6.0
 [0.5.1]: https://github.com/karlprieb/reptikeep/compare/0.5.0...0.5.1
 [0.5.0]: https://github.com/karlprieb/reptikeep/compare/0.4.0...0.5.0
 [0.4.0]: https://github.com/karlprieb/reptikeep/compare/0.3.0...0.4.0

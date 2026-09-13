@@ -1,0 +1,2 @@
+- Logging a feeding now suggests food types you've used before for that reptile, ranked by how often you've picked them. Tap one to fill it in, or keep typing to narrow the list down.
+- Exporting or restoring a backup no longer leaves the app looking frozen. A message explains what's happening and the screen waits until it's done.
