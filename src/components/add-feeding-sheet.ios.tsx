@@ -1,5 +1,6 @@
 import { Host } from "@expo/ui";
 import {
+  Button,
   DatePicker,
   Form,
   Picker,
@@ -10,6 +11,7 @@ import {
   useNativeState,
 } from "@expo/ui/swift-ui";
 import {
+  accessibilityHint,
   accessibilityLabel,
   datePickerStyle,
   keyboardType,
@@ -32,6 +34,7 @@ import {
   useDraft,
   useFormModifiers,
 } from "@/components/form-sheet";
+import { useFoodTypeSuggestions } from "@/hooks/use-food-type-suggestions";
 import { useTheme } from "@/hooks/use-theme";
 import {
   feedingStore,
@@ -109,6 +112,17 @@ export function AddFeedingSheet({
     weight: useNativeState(gramsToField(activity?.weight, defaults.weightUnit)),
     notes: useNativeState(activity?.notes ?? ""),
   };
+  const foodTypeSelection = useNativeState({
+    start: (activity?.foodType ?? "").length,
+    end: (activity?.foodType ?? "").length,
+  });
+  const foodSuggestions = useFoodTypeSuggestions({
+    animalId,
+    text: fields.foodType,
+    selection: foodTypeSelection,
+    query: draft.foodType,
+    onSelect: (value) => updateDraft({ foodType: value }),
+  });
 
   const parsedWeight = weightFieldToGrams(
     draft.weight,
@@ -201,13 +215,29 @@ export function AddFeedingSheet({
             >
               <TextField
                 text={fields.foodType}
+                selection={foodTypeSelection}
                 placeholder={t("feedingForm.foodType")}
                 onTextChange={(value) => updateDraft({ foodType: value })}
+                onFocusChange={foodSuggestions.handleFocusChange}
                 modifiers={[
                   accessibilityLabel(t("feedingForm.foodType")),
                   textInputAutocapitalization("sentences"),
                 ]}
               />
+              {foodSuggestions.visible
+                ? foodSuggestions.suggestions.map((option) => (
+                    <Button
+                      key={option}
+                      label={option}
+                      onPress={() => foodSuggestions.select(option)}
+                      modifiers={[
+                        accessibilityHint(
+                          t("a11y.feedingForm.foodTypeSuggestion.hint"),
+                        ),
+                      ]}
+                    />
+                  ))
+                : null}
               <Picker
                 label={t("feedingForm.measureBy")}
                 selection={draft.measure}

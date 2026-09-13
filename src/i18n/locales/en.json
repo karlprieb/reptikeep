@@ -578,6 +578,11 @@
         "hint": "Fills in the common and scientific name for this species"
       }
     },
+    "feedingForm": {
+      "foodTypeSuggestion": {
+        "hint": "Fills in this food type"
+      }
+    },
     "feedingSchedule": {
       "enabled": {
         "hint": "Shows when this reptile is overdue for feeding"
