@@ -11,7 +11,10 @@ function rankFoodTypes(
   animalId: string,
   records: Record<string, FeedingActivity>,
 ): string[] {
-  const counts = new Map<string, { display: string; count: number }>();
+  const counts = new Map<
+    string,
+    { display: string; count: number; latestOccurredAt: number }
+  >();
 
   for (const record of Object.values(records)) {
     if (record.animalId !== animalId) continue;
@@ -19,12 +22,20 @@ function rankFoodTypes(
     if (!foodType) continue;
 
     const key = foodType.toLowerCase();
+    const occurredAt = Date.parse(record.occurredAt);
     const existing = counts.get(key);
     if (existing) {
       existing.count += 1;
-      existing.display = foodType;
+      if (occurredAt > existing.latestOccurredAt) {
+        existing.display = foodType;
+        existing.latestOccurredAt = occurredAt;
+      }
     } else {
-      counts.set(key, { display: foodType, count: 1 });
+      counts.set(key, {
+        display: foodType,
+        count: 1,
+        latestOccurredAt: occurredAt,
+      });
     }
   }
 
