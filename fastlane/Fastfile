@@ -33,6 +33,54 @@ platform :android do
 
     UI.success("AAB ready: #{lane_context[SharedValues::GRADLE_AAB_OUTPUT_PATH]}")
   end
+
+  desc "Build and upload a release build to the Play Store closed testing track"
+  lane :beta do
+    UI.user_error!("Set ANDROID_RELEASE_STORE_FILE and friends in fastlane/.env first") unless ENV["ANDROID_RELEASE_STORE_FILE"]
+
+    package_name = "app.reptikeep"
+    track = "alpha"
+    json_key_data = ENV["PLAY_JSON_KEY_CONTENT"]
+
+    app_json_path = File.expand_path("../app.json", __dir__)
+    app_json = JSON.parse(File.read(app_json_path))
+    version = app_json["expo"]["version"]
+
+    changelog_en = File.read(File.expand_path("metadata/android/en-US/release_notes/#{version}.txt", __dir__)).strip
+    changelog_pt = File.read(File.expand_path("metadata/android/pt-BR/release_notes/#{version}.txt", __dir__)).strip
+    [changelog_en, changelog_pt].each do |changelog|
+      UI.user_error!("Android changelog for #{version} is #{changelog.length} chars, Play caps it at 500") if changelog.length > 500
+    end
+
+    latest_version_code = google_play_track_version_codes(
+      package_name: package_name,
+      track: track,
+      json_key_data: json_key_data
+    ).max
+    next_version_code = latest_version_code + 1
+    File.write(app_json_path, File.read(app_json_path).sub(/"versionCode":\s*\d+/, "\"versionCode\": #{next_version_code}"))
+
+    File.write(File.expand_path("metadata/android/en-US/changelogs/#{next_version_code}.txt", __dir__), changelog_en)
+    File.write(File.expand_path("metadata/android/pt-BR/changelogs/#{next_version_code}.txt", __dir__), changelog_pt)
+
+    Bundler.with_original_env do
+      Dir.chdir("..") { sh("npx", "expo", "prebuild", "--platform", "android") }
+    end
+
+    gradle(
+      task: "bundle",
+      build_type: "Release",
+      project_dir: File.expand_path("../android", __dir__)
+    )
+
+    upload_to_play_store(
+      package_name: package_name,
+      track: track,
+      aab: lane_context[SharedValues::GRADLE_AAB_OUTPUT_PATH],
+      json_key_data: json_key_data,
+      release_status: "completed"
+    )
+  end
 end
 
 platform :ios do
@@ -76,8 +124,8 @@ platform :ios do
     app_json = JSON.parse(File.read(app_json_path))
     version = app_json["expo"]["version"]
 
-    changelog_en = File.read(File.expand_path("metadata/en-US/release_notes/#{version}.txt", __dir__)).strip
-    changelog_pt = File.read(File.expand_path("metadata/pt-BR/release_notes/#{version}.txt", __dir__)).strip
+    changelog_en = File.read(File.expand_path("metadata/ios/en-US/release_notes/#{version}.txt", __dir__)).strip
+    changelog_pt = File.read(File.expand_path("metadata/ios/pt-BR/release_notes/#{version}.txt", __dir__)).strip
 
     api_key = asc_api_key
 
