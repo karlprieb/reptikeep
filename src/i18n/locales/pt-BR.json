@@ -45,6 +45,8 @@
     "restoreFooter": "A restauração substitui os dados incluídos no backup. Um backup de répteis e registros substitui os répteis e registros atuais; um backup somente de preferências os mantém.",
     "restore": "Restaurar de backup",
     "restoring": "Restaurando…",
+    "inspectingTitle": "Verificando seu backup",
+    "inspectingMessage": "Conferindo o que há no arquivo antes de você confirmar. Isso pode levar um momento, então mantenha o ReptiKeep aberto.",
     "restoringTitle": "Restaurando seu backup",
     "restoringMessage": "Substituindo seus dados, fotos e documentos pelos deste backup. Isso pode levar um momento, então mantenha o ReptiKeep aberto.",
     "restoreTitle": "Substituir dados deste backup?",

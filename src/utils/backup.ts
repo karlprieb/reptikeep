@@ -1062,7 +1062,9 @@ export async function shareBackup(archive: File): Promise<void> {
 }
 
 export function cleanupBackupArchive(archive: File): void {
-  if (archive.parentDirectory.exists) archive.parentDirectory.delete();
+  try {
+    if (archive.parentDirectory.exists) archive.parentDirectory.delete();
+  } catch {}
 }
 
 export async function parseBackup(file: File): Promise<ParsedBackup> {
