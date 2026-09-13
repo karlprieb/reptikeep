@@ -35,6 +35,7 @@ import { useTheme } from "@/hooks/use-theme";
 import { animals$ } from "@/state/animal";
 import { resetAppData } from "@/state/reset";
 import {
+  cleanupBackupArchive,
   createBackup,
   parseBackup,
   restoreBackup,
@@ -72,7 +73,7 @@ export default function BackupRestoreScreen() {
   const [animalIds, setAnimalIds] = useState<string[]>([]);
   const [includePreferences, setIncludePreferences] = useState(false);
   const [busy, setBusy] = useState(false);
-  const [progress, setProgress] = useState<"export" | "restore">();
+  const [progress, setProgress] = useState<"export" | "inspect" | "restore">();
   const [success, setSuccess] = useState<RestoredBackup>();
   const [error, setError] = useState<string>();
   const [isAdvancedPresented, setIsAdvancedPresented] = useState(false);
@@ -113,8 +114,9 @@ export default function BackupRestoreScreen() {
     setSuccess(undefined);
     setProgress("export");
     AccessibilityInfo.announceForAccessibility(t("backup.exportingTitle"));
+    let archive: File | undefined;
     try {
-      const archive = await createBackup(
+      archive = await createBackup(
         exportAll
           ? undefined
           : { animalIds: selectedAnimalIds, includePreferences },
@@ -127,6 +129,7 @@ export default function BackupRestoreScreen() {
     } finally {
       setProgress(undefined);
       setBusy(false);
+      if (archive) cleanupBackupArchive(archive);
     }
   };
 
@@ -160,8 +163,8 @@ export default function BackupRestoreScreen() {
       });
       if (result.canceled) return;
       const file = new File(result.assets[0].uri);
-      setProgress("restore");
-      AccessibilityInfo.announceForAccessibility(t("backup.restoringTitle"));
+      setProgress("inspect");
+      AccessibilityInfo.announceForAccessibility(t("backup.inspectingTitle"));
       const parsed = await parseBackup(file);
       setProgress(undefined);
       const summary = {
@@ -195,7 +198,12 @@ export default function BackupRestoreScreen() {
 
   const exportDisabled = busy || (!exportAll && !customSelection);
 
-  const copy = progress === "export" ? "exporting" : "restoring";
+  const copy =
+    progress === "export"
+      ? "exporting"
+      : progress === "inspect"
+        ? "inspecting"
+        : "restoring";
 
   return (
     <>

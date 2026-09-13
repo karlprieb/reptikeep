@@ -1053,16 +1053,18 @@ export async function createBackup(selection?: BackupSelection): Promise<File> {
 }
 
 export async function shareBackup(archive: File): Promise<void> {
+  if (!(await Sharing.isAvailableAsync()))
+    throw new Error("Sharing is unavailable.");
+  await Sharing.shareAsync(archive.uri, {
+    mimeType: "application/zip",
+    UTI: "com.pkware.zip-archive",
+  });
+}
+
+export function cleanupBackupArchive(archive: File): void {
   try {
-    if (!(await Sharing.isAvailableAsync()))
-      throw new Error("Sharing is unavailable.");
-    await Sharing.shareAsync(archive.uri, {
-      mimeType: "application/zip",
-      UTI: "com.pkware.zip-archive",
-    });
-  } finally {
     if (archive.parentDirectory.exists) archive.parentDirectory.delete();
-  }
+  } catch {}
 }
 
 export async function parseBackup(file: File): Promise<ParsedBackup> {
