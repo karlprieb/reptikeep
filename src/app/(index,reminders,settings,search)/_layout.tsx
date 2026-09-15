@@ -75,6 +75,7 @@ export default function TabStackLayout({ segment }: { segment: string }) {
     <Stack
       screenOptions={{
         headerTransparent: Platform.OS === "ios",
+        headerTintColor: theme.text,
         headerStyle:
           Platform.OS === "android" ? { backgroundColor: theme.bg } : undefined,
         headerShadowVisible: false,
