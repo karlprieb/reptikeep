@@ -1,6 +1,9 @@
 import { useSelector as useValue } from "@legendapp/state/react";
 import { router, Stack } from "expo-router";
+import { useHeaderHeight } from "expo-router/react-navigation";
 import { useMemo } from "react";
+import { useWindowDimensions } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { useTranslation } from "react-i18next";
 
@@ -43,6 +46,10 @@ export default function ReptilesScreen() {
   const summaries = useValue(summaries$);
   const sort = useValue(settings$.reptileSort);
   const view = useValue(settings$.reptileView);
+  const windowHeight = useWindowDimensions().height;
+  const headerHeight = useHeaderHeight();
+  const safeAreaBottom = useSafeAreaInsets().bottom;
+  const emptyMinHeight = windowHeight - headerHeight - safeAreaBottom;
 
   const { lastFed, lastWater, lastClean, lastActivity } = useMemo(
     () => summaryLookups(summaries),
@@ -68,6 +75,7 @@ export default function ReptilesScreen() {
         lastClean={lastClean}
         viewMode={view}
         onAddPress={handleAdd}
+        emptyMinHeight={emptyMinHeight}
       />
 
       <PageHeader

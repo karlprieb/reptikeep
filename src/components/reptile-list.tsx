@@ -66,6 +66,7 @@ export type ReptileListProps = {
   scrollY?: Animated.Value;
   contentInsetTop?: number;
   contentInsetBottom?: number;
+  emptyMinHeight?: number;
 };
 
 const CARD_GAP = Spacing.md;
@@ -128,6 +129,7 @@ export function ReptileList({
   scrollY,
   contentInsetTop,
   contentInsetBottom,
+  emptyMinHeight,
 }: ReptileListProps) {
   const { width, fontScale } = useWindowDimensions();
   const theme = useTheme();
@@ -191,6 +193,7 @@ export function ReptileList({
         contentContainerStyle={[
           styles.content,
           styles.emptyContent,
+          emptyMinHeight ? { minHeight: emptyMinHeight } : { flexGrow: 1 },
           insetStyle,
         ]}
       >
@@ -346,7 +349,6 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.md,
   },
   emptyContent: {
-    flexGrow: 1,
     justifyContent: "center",
   },
   grid: {
