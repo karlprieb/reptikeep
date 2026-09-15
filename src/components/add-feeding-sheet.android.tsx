@@ -14,7 +14,7 @@ import {
   defaultMinSize,
   dropShadow,
   fillMaxWidth,
-  matchParentSize,
+  height,
   offset,
   onGloballyPositioned,
   padding,
@@ -129,26 +129,31 @@ export function AddFeedingSheet({
     start: (activity?.foodType ?? "").length,
     end: (activity?.foodType ?? "").length,
   });
-  const formOriginRef = useRef({ x: 0, y: 0 });
+  const formOriginRef = useRef({ x: 0, y: 0, width: 0, height: 0 });
   const foodFieldLayoutRef = useRef({ x: 0, y: 0, width: 0, height: 0 });
   const [overlayGeometry, setOverlayGeometry] = useState({
     offsetX: 0,
     offsetY: 0,
     width: 0,
+    aboveHeight: 0,
+    belowHeight: 0,
   });
   const syncOverlayGeometry = () => {
+    const fieldTop = foodFieldLayoutRef.current.y - formOriginRef.current.y;
+    const fieldBottom = fieldTop + foodFieldLayoutRef.current.height;
     const next = {
       offsetX: foodFieldLayoutRef.current.x - formOriginRef.current.x,
-      offsetY:
-        foodFieldLayoutRef.current.y -
-        formOriginRef.current.y +
-        foodFieldLayoutRef.current.height,
+      offsetY: fieldBottom,
       width: foodFieldLayoutRef.current.width,
+      aboveHeight: fieldTop,
+      belowHeight: Math.max(0, formOriginRef.current.height - fieldBottom),
     };
     setOverlayGeometry((prev) =>
       prev.offsetX === next.offsetX &&
       prev.offsetY === next.offsetY &&
-      prev.width === next.width
+      prev.width === next.width &&
+      prev.aboveHeight === next.aboveHeight &&
+      prev.belowHeight === next.belowHeight
         ? prev
         : next,
     );
@@ -400,12 +405,37 @@ export function AddFeedingSheet({
             </Column>
 
             {foodSuggestions.visible ? (
-              <Box
-                modifiers={[
-                  matchParentSize(),
-                  clickable(foodSuggestions.dismiss, { indication: false }),
-                ]}
-              />
+              <>
+                <Box
+                  modifiers={[
+                    fillMaxWidth(),
+                    height(overlayGeometry.aboveHeight),
+                    clickable(foodSuggestions.dismiss, {
+                      indication: false,
+                    }),
+                    semantics({
+                      contentDescription: t(
+                        "a11y.feedingForm.dismissSuggestions",
+                      ),
+                    }),
+                  ]}
+                />
+                <Box
+                  modifiers={[
+                    offset(0, overlayGeometry.offsetY),
+                    fillMaxWidth(),
+                    height(overlayGeometry.belowHeight),
+                    clickable(foodSuggestions.dismiss, {
+                      indication: false,
+                    }),
+                    semantics({
+                      contentDescription: t(
+                        "a11y.feedingForm.dismissSuggestions",
+                      ),
+                    }),
+                  ]}
+                />
+              </>
             ) : null}
             {foodSuggestions.visible ? (
               <Column
