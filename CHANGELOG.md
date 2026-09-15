@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Editing a food type after picking a suggestion (say, fixing a typo)
+  wouldn't bring the suggestion list back — you had to tap away and back in
+  first. It now updates live as you keep typing, on both Android and
+  iPhone.
+
 ## [0.6.0] - 2026-09-13
 
 ### Added

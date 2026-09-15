@@ -150,6 +150,25 @@ describe("useFoodTypeSuggestions", () => {
     expect(result.current.visible).toBe(false);
   });
 
+  it("reopens filtered as soon as the selected text is edited again", () => {
+    seed("animal-1", "Ratos", "2024-01-01T00:00:00.000Z");
+    seed("animal-1", "Codorna", "2024-01-02T00:00:00.000Z");
+    seed("animal-1", "Ratos grandes", "2024-01-03T00:00:00.000Z");
+
+    const { result, rerender } = renderSuggestions("animal-1", "Rat");
+    act(() => result.current.handleFocusChange(true));
+
+    act(() => result.current.select("Ratos"));
+    rerender({ query: "Ratos" });
+    expect(result.current.suggestions).toEqual(["Ratos", "Ratos grandes"]);
+    expect(result.current.visible).toBe(false);
+
+    rerender({ query: "Rato" });
+
+    expect(result.current.suggestions).toEqual(["Ratos", "Ratos grandes"]);
+    expect(result.current.visible).toBe(true);
+  });
+
   it("clears the pending blur timer on unmount", () => {
     seed("animal-1", "Rato", "2024-01-01T00:00:00.000Z");
     jest.useFakeTimers();
