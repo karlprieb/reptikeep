@@ -2,7 +2,7 @@ import { useSelector as useValue } from "@legendapp/state/react";
 import { router, Stack, useFocusEffect } from "expo-router";
 import type { SearchBarCommands } from "react-native-screens";
 import { useCallback, useMemo, useRef, useState } from "react";
-import { ScrollView, StyleSheet } from "react-native";
+import { Platform, ScrollView, StyleSheet } from "react-native";
 import { useTranslation } from "react-i18next";
 
 import { EmptyState } from "@/components/empty-state";
@@ -15,6 +15,9 @@ import { animals$ } from "@/state/animal";
 import { activityStores } from "@/state/activity-stores";
 import { lastFedByAnimal } from "@/utils/animal-activity";
 import { searchAnimals } from "@/utils/animal-search";
+
+const INTEGRATED_SEARCH_BAR =
+  Platform.OS === "ios" && parseInt(String(Platform.Version), 10) >= 26;
 
 export default function SearchScreen() {
   const theme = useTheme();
@@ -67,13 +70,15 @@ export default function SearchScreen() {
           <ReptileRows animals={results} lastFed={lastFed} />
         )}
       </ScrollView>
-      <PageHeader large={false} title={t("search.title")} />
+      <PageHeader large={!INTEGRATED_SEARCH_BAR} title={t("search.title")} />
       <Stack.SearchBar
         ref={searchBarRef}
         autoCapitalize="none"
         placeholder={t("search.placeholder")}
         placement="integrated"
-        barTintColor={theme.surface}
+        barTintColor={
+          INTEGRATED_SEARCH_BAR ? theme.surface : theme.searchFieldTint
+        }
         textColor={theme.text}
         hintTextColor={theme.textMuted}
         headerIconColor={theme.textSecondary}
