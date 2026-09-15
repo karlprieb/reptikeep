@@ -23,7 +23,7 @@ import {
   width,
 } from "@expo/ui/jetpack-compose/modifiers";
 import { router } from "expo-router";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useEffectEvent, useRef, useState } from "react";
 import { Animated, BackHandler, useWindowDimensions, View } from "react-native";
 import { useTranslation } from "react-i18next";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -153,6 +153,24 @@ export function AddFeedingSheet({
         : next,
     );
   };
+  const handleFormLayout = (layout: {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+  }) => {
+    formOriginRef.current = layout;
+    syncOverlayGeometry();
+  };
+  const handleFoodFieldLayout = (layout: {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+  }) => {
+    foodFieldLayoutRef.current = layout;
+    syncOverlayGeometry();
+  };
   const { lifted, onScroll } = useScrollLift();
   const foodSuggestions = useFoodTypeSuggestions({
     animalId,
@@ -162,14 +180,16 @@ export function AddFeedingSheet({
     onSelect: (value) => updateDraft({ foodType: value }),
   });
 
+  const handleBackPress = useEffectEvent(() => {
+    foodSuggestions.dismiss();
+    return true;
+  });
+
   useEffect(() => {
     if (!foodSuggestions.visible) return;
     const subscription = BackHandler.addEventListener(
       "hardwareBackPress",
-      () => {
-        foodSuggestions.dismiss();
-        return true;
-      },
+      handleBackPress,
     );
     return () => subscription.remove();
   }, [foodSuggestions.visible]);
@@ -228,10 +248,8 @@ export function AddFeedingSheet({
           <Box
             modifiers={[
               fillMaxWidth(),
-              onGloballyPositioned((layout) => {
-                formOriginRef.current = layout;
-                syncOverlayGeometry();
-              }),
+              // eslint-disable-next-line react-hooks/refs -- runs from a native layout callback, never during render
+              onGloballyPositioned(handleFormLayout),
             ]}
           >
             <Column
@@ -278,10 +296,8 @@ export function AddFeedingSheet({
                   singleLine
                   modifiers={[
                     fillMaxWidth(),
-                    onGloballyPositioned((layout) => {
-                      foodFieldLayoutRef.current = layout;
-                      syncOverlayGeometry();
-                    }),
+                    // eslint-disable-next-line react-hooks/refs -- runs from a native layout callback, never during render
+                    onGloballyPositioned(handleFoodFieldLayout),
                     semantics({ role: "dropdownList" }),
                   ]}
                 >
