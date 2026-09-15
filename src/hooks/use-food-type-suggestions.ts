@@ -116,6 +116,7 @@ export function useFoodTypeSuggestions({
 
   const dismiss = () => {
     clearTimeout(blurTimer.current);
+    selectedValueRef.current = null;
     setDismissed(true);
   };
 

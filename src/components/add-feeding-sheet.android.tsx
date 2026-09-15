@@ -14,7 +14,7 @@ import {
   defaultMinSize,
   dropShadow,
   fillMaxWidth,
-  height,
+  matchParentSize,
   offset,
   onGloballyPositioned,
   padding,
@@ -402,55 +402,51 @@ export function AddFeedingSheet({
             {foodSuggestions.visible ? (
               <Box
                 modifiers={[
+                  matchParentSize(),
+                  clickable(foodSuggestions.dismiss, { indication: false }),
+                ]}
+              />
+            ) : null}
+            {foodSuggestions.visible ? (
+              <Column
+                modifiers={[
                   offset(overlayGeometry.offsetX, overlayGeometry.offsetY),
                   width(overlayGeometry.width),
+                  dropShadow(Shapes.RoundedCorner(Radius.xs), {
+                    radius: 10,
+                    offsetY: 3,
+                    alpha: 0.3,
+                  }),
+                  clip(Shapes.RoundedCorner(Radius.xs)),
+                  background(theme.surface),
+                  border(1, theme.border),
                 ]}
               >
-                <Box
-                  modifiers={[
-                    fillMaxWidth(),
-                    height(
-                      foodSuggestions.suggestions.length * 48 + Spacing.md * 2,
-                    ),
-                    clickable(foodSuggestions.dismiss, { indication: false }),
-                  ]}
-                />
-                <Column
-                  modifiers={[
-                    fillMaxWidth(),
-                    dropShadow(Shapes.RoundedCorner(Radius.xs), {
-                      radius: 10,
-                      offsetY: 3,
-                      alpha: 0.3,
-                    }),
-                    clip(Shapes.RoundedCorner(Radius.xs)),
-                    background(theme.surface),
-                    border(1, theme.border),
-                  ]}
-                >
-                  {foodSuggestions.suggestions.map((option) => (
-                    <Box
-                      key={option}
-                      contentAlignment="centerStart"
-                      modifiers={[
-                        fillMaxWidth(),
-                        defaultMinSize({ minHeight: 48 }),
-                        clickable(() => foodSuggestions.select(option)),
-                        padding(Spacing.md, 0, Spacing.md, 0),
-                        semantics({
-                          contentDescription: option,
-                          role: "button",
-                          mergeDescendants: true,
-                        }),
-                      ]}
-                    >
-                      <Text style={composeTextStyle("body")} color={theme.text}>
-                        {option}
-                      </Text>
-                    </Box>
-                  ))}
-                </Column>
-              </Box>
+                {foodSuggestions.suggestions.map((option) => (
+                  <Box
+                    key={option}
+                    contentAlignment="centerStart"
+                    modifiers={[
+                      fillMaxWidth(),
+                      defaultMinSize({ minHeight: 48 }),
+                      clickable(() => foodSuggestions.select(option)),
+                      padding(Spacing.md, 0, Spacing.md, 0),
+                      semantics({
+                        contentDescription: [
+                          option,
+                          t("a11y.feedingForm.foodTypeSuggestion.hint"),
+                        ].join(", "),
+                        role: "button",
+                        mergeDescendants: true,
+                      }),
+                    ]}
+                  >
+                    <Text style={composeTextStyle("body")} color={theme.text}>
+                      {option}
+                    </Text>
+                  </Box>
+                ))}
+              </Column>
             ) : null}
           </Box>
         </Host>
