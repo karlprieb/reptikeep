@@ -581,7 +581,8 @@
     "feedingForm": {
       "foodTypeSuggestion": {
         "hint": "Fills in this food type"
-      }
+      },
+      "dismissSuggestions": "Close food type suggestions"
     },
     "feedingSchedule": {
       "enabled": {
