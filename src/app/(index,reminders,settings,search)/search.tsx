@@ -67,7 +67,7 @@ export default function SearchScreen() {
           <ReptileRows animals={results} lastFed={lastFed} />
         )}
       </ScrollView>
-      <PageHeader title={t("search.title")} />
+      <PageHeader large={false} title={t("search.title")} />
       <Stack.SearchBar
         ref={searchBarRef}
         autoCapitalize="none"

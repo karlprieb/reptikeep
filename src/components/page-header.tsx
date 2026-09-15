@@ -17,16 +17,22 @@ export type PageHeaderProps = {
   title: string;
   actions?: readonly PageHeaderAction[];
   menu?: ReactNode;
+  large?: boolean;
 };
 
-export function PageHeader({ title, actions, menu }: PageHeaderProps) {
+export function PageHeader({
+  title,
+  actions,
+  menu,
+  large = true,
+}: PageHeaderProps) {
   const theme = useTheme();
   const hasActions = actions && actions.length > 0;
 
   return (
     <>
       <Stack.Title
-        large
+        large={large}
         largeStyle={{
           fontFamily: Typography.displayXl.fontFamily,
           color: theme.text,
