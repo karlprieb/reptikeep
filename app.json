@@ -2,7 +2,7 @@
   "expo": {
     "name": "ReptiKeep",
     "slug": "ReptiKeep",
-    "version": "0.6.0",
+    "version": "0.6.1",
     "orientation": "portrait",
     "scheme": "reptikeep",
     "userInterfaceStyle": "automatic",

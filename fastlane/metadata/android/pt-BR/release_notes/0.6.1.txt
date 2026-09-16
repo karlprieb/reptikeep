@@ -1,0 +1,3 @@
+- Agora dá para saber quando os registros estão filtrados por data.
+- Os textos de destaque do app estavam apagados demais para ler com conforto e ficaram mais escuros.
+- Editar um tipo de comida depois de escolher uma sugestão traz a lista de sugestões de volta conforme você digita.

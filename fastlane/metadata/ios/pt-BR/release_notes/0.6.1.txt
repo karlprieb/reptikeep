@@ -1,0 +1,4 @@
+- O app agora abre normalmente na versão mais recente do iPhone.
+- Links para o ReptiKeep agora levam você à tela certa, mesmo com o app completamente fechado.
+- Textos e botões difíceis de ler ficaram mais nítidos: o botão Salvar no modo escuro e os textos de destaque apagados pelo app.
+- Editar um tipo de comida depois de escolher uma sugestão traz a lista de sugestões de volta conforme você digita.

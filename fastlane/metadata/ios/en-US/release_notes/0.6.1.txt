@@ -1,0 +1,4 @@
+- The app now opens correctly on the newest iPhone software.
+- Links to ReptiKeep now take you to the right screen, even when the app was fully closed.
+- Text and buttons that were hard to read are clearer now: the Save button in dark mode, and faint accent text around the app.
+- Editing a food type after picking a suggestion brings the suggestion list back as you keep typing.

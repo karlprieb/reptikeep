@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.6.1] - 2026-09-16
+
 ### Fixed
 
 - The app wouldn't open at all on the newest iPhone software, closing
@@ -304,7 +306,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Reset app data** in Settings, which permanently clears every reptile and
   record on the device.
 
-[Unreleased]: https://github.com/karlprieb/reptikeep/compare/0.6.0...HEAD
+[Unreleased]: https://github.com/karlprieb/reptikeep/compare/0.6.1...HEAD
+[0.6.1]: https://github.com/karlprieb/reptikeep/compare/0.6.0...0.6.1
 [0.6.0]: https://github.com/karlprieb/reptikeep/compare/0.5.1...0.6.0
 [0.5.1]: https://github.com/karlprieb/reptikeep/compare/0.5.0...0.5.1
 [0.5.0]: https://github.com/karlprieb/reptikeep/compare/0.4.0...0.5.0
