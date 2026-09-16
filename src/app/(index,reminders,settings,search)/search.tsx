@@ -76,7 +76,13 @@ export default function SearchScreen() {
         autoCapitalize="none"
         placeholder={t("search.placeholder")}
         placement="integrated"
-        barTintColor={GLASS_SEARCH_BAR ? theme.surface : theme.searchFieldTint}
+        barTintColor={
+          GLASS_SEARCH_BAR
+            ? theme.surface
+            : Platform.OS === "ios"
+              ? theme.searchFieldTint
+              : theme.surface
+        }
         textColor={theme.text}
         hintTextColor={theme.textMuted}
         headerIconColor={theme.textSecondary}
