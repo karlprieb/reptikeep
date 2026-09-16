@@ -141,11 +141,11 @@ function AppBarMenu({ icon, accessibilityLabel, items }: AppBarMenuProps) {
           <DropdownMenu.Trigger>
             <IconButton
               onClick={() => setExpanded(true)}
-              colors={{ contentColor: theme.textSecondary }}
+              colors={{ contentColor: theme.text }}
             >
               <Icon
                 source={icon}
-                tint={theme.textSecondary}
+                tint={theme.text}
                 size={ACTION_ICON_SIZE}
                 contentDescription={accessibilityLabel}
               />
@@ -172,7 +172,7 @@ function AppBarMenu({ icon, accessibilityLabel, items }: AppBarMenuProps) {
                     <DropdownMenuItem.TrailingIcon>
                       <Icon
                         source={CHECK_ICON}
-                        tint={theme.primary}
+                        tint={theme.accentInk}
                         size={ACTION_ICON_SIZE}
                         contentDescription={t("a11y.selected")}
                       />

@@ -83,7 +83,7 @@ export default function DocumentPreviewScreen() {
       <Stack.Toolbar placement="right">
         <Stack.Toolbar.Button
           icon="square.and.arrow.up"
-          tintColor={theme.primary}
+          tintColor={theme.text}
           accessibilityLabel={t("documents.preview.share")}
           accessibilityHint={t("a11y.documents.share.hint")}
           onPress={handleShare}

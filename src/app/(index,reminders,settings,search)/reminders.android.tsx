@@ -343,11 +343,11 @@ function ReminderRow({
                   setAlreadyDone(true);
                 }
               }}
-              colors={{ contentColor: theme.primary }}
+              colors={{ contentColor: theme.accentInk }}
             >
               <Icon
                 source={RADIO_UNCHECKED_ICON}
-                tint={theme.primary}
+                tint={theme.accentInk}
                 size={CHECKBOX_SYMBOL}
                 contentDescription={[
                   t(`a11y.reminders.done.${reminder.routine}.label`, {
@@ -390,7 +390,7 @@ function ReminderRow({
               <AlertDialog.ConfirmButton>
                 <TextButton
                   onClick={() => setAlreadyDone(false)}
-                  colors={{ contentColor: theme.primary }}
+                  colors={{ contentColor: theme.accentInk }}
                 >
                   <Text style={composeTextStyle("body")}>
                     {t("reminders.alreadyDone.dismiss")}

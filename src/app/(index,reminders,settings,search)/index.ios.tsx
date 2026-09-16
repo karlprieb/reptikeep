@@ -1,6 +1,9 @@
 import { useSelector as useValue } from "@legendapp/state/react";
 import { router, Stack } from "expo-router";
+import { useHeaderHeight } from "expo-router/react-navigation";
 import { useMemo } from "react";
+import { Platform, useWindowDimensions } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { useTranslation } from "react-i18next";
 
@@ -19,6 +22,9 @@ import type { AnimalSortField, SortDirection } from "@/utils/animal-sort";
 import { sortAnimals } from "@/utils/animal-sort";
 
 const handleAdd = () => router.push("/add-reptile");
+
+const GLASS_TAB_BAR = parseInt(String(Platform.Version), 10) >= 26;
+const CLASSIC_TAB_BAR_HEIGHT = 49;
 
 const SORT_FIELDS: AnimalSortField[] = [
   "name",
@@ -43,6 +49,12 @@ export default function ReptilesScreen() {
   const summaries = useValue(summaries$);
   const sort = useValue(settings$.reptileSort);
   const view = useValue(settings$.reptileView);
+  const windowHeight = useWindowDimensions().height;
+  const headerHeight = useHeaderHeight();
+  const safeAreaBottom = useSafeAreaInsets().bottom;
+  const tabBarHeight =
+    safeAreaBottom + (GLASS_TAB_BAR ? 0 : CLASSIC_TAB_BAR_HEIGHT);
+  const emptyMinHeight = windowHeight - headerHeight - tabBarHeight;
 
   const { lastFed, lastWater, lastClean, lastActivity } = useMemo(
     () => summaryLookups(summaries),
@@ -68,6 +80,7 @@ export default function ReptilesScreen() {
         lastClean={lastClean}
         viewMode={view}
         onAddPress={handleAdd}
+        emptyMinHeight={emptyMinHeight}
       />
 
       <PageHeader
@@ -78,14 +91,14 @@ export default function ReptilesScreen() {
             icon: "plus",
             accessibilityLabel: t("a11y.addReptile.label"),
             accessibilityHint: t("a11y.addReptile.hint"),
-            tintColor: theme.primary,
+            tintColor: theme.text,
             onPress: handleAdd,
           },
         ]}
         menu={
           <Stack.Toolbar.Menu
-            icon="ellipsis.circle"
-            tintColor={theme.textSecondary}
+            icon="ellipsis"
+            tintColor={theme.text}
             accessibilityLabel={t("reptiles.options")}
             accessibilityHint={t("reptiles.optionsHint")}
           >

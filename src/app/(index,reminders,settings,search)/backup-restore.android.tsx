@@ -345,7 +345,7 @@ export default function BackupRestoreScreen() {
             <AlertDialog
               colors={{
                 containerColor: theme.surface,
-                iconContentColor: theme.primary,
+                iconContentColor: theme.accentInk,
                 titleContentColor: theme.text,
                 textContentColor: theme.textSecondary,
               }}
@@ -356,7 +356,7 @@ export default function BackupRestoreScreen() {
             >
               <AlertDialog.Icon>
                 <CircularProgressIndicator
-                  color={theme.primary}
+                  color={theme.accentInk}
                   trackColor={theme.surfaceSunken}
                 />
               </AlertDialog.Icon>
@@ -662,7 +662,7 @@ function AnimalMenu({
                 <DropdownMenuItem.TrailingIcon>
                   <Icon
                     source={CHECK_ICON}
-                    tint={theme.primary}
+                    tint={theme.accentInk}
                     size={ACTION_ICON_SIZE}
                     contentDescription={t("a11y.selected")}
                   />

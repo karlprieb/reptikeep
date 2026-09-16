@@ -329,11 +329,11 @@ export default function AnimalDocumentsScreen() {
           >
             <IconButton
               onClick={() => router.back()}
-              colors={{ contentColor: theme.textSecondary }}
+              colors={{ contentColor: theme.text }}
             >
               <Icon
                 source={ARROW_BACK_ICON}
-                tint={theme.textSecondary}
+                tint={theme.text}
                 size={iconSize}
                 contentDescription={t("activityDetail.done")}
               />
@@ -349,13 +349,10 @@ export default function AnimalDocumentsScreen() {
               {t("documents.title")}
             </Text>
 
-            <IconButton
-              onClick={openAdd}
-              colors={{ contentColor: theme.primary }}
-            >
+            <IconButton onClick={openAdd} colors={{ contentColor: theme.text }}>
               <Icon
                 source={ADD_ICON}
-                tint={theme.primary}
+                tint={theme.text}
                 size={iconSize}
                 contentDescription={t("documents.add")}
               />

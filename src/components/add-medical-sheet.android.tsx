@@ -313,7 +313,7 @@ export function AddMedicalSheet({
               ) : null}
               <TextButton
                 onClick={handlePickFiles}
-                colors={{ contentColor: theme.primary }}
+                colors={{ contentColor: theme.accentInk }}
               >
                 <Row
                   verticalAlignment="center"
@@ -321,7 +321,7 @@ export function AddMedicalSheet({
                 >
                   <Icon
                     source={ATTACH_FILE_ICON}
-                    tint={theme.primary}
+                    tint={theme.accentInk}
                     size={iconSize}
                   />
                   <Text style={LABEL_LARGE}>

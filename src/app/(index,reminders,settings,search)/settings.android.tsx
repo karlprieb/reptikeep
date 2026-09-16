@@ -535,7 +535,7 @@ function MenuRow<T extends string>({
               <DropdownMenuItem.TrailingIcon>
                 <Icon
                   source={CHECK_ICON}
-                  tint={theme.primary}
+                  tint={theme.accentInk}
                   size={ACTION_ICON_SIZE}
                   contentDescription={t("a11y.selected")}
                 />

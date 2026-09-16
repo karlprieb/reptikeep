@@ -19,10 +19,16 @@ export default function AppTabs() {
       hidden={Platform.OS === "android" && FULL_SCREEN_ROUTES.test(pathname)}
       backgroundColor={colors.bg}
       indicatorColor={colors.primarySurface}
-      iconColor={{ default: colors.textSecondary, selected: colors.primary }}
+      iconColor={{
+        default: colors.textSecondary,
+        selected:
+          Platform.OS === "android"
+            ? colors.onPrimarySurface
+            : colors.accentInk,
+      }}
       labelStyle={{
         default: { color: colors.textSecondary },
-        selected: { color: colors.primary },
+        selected: { color: colors.accentInk },
       }}
       minimizeBehavior="onScrollDown"
       blurEffect="systemChromeMaterial"

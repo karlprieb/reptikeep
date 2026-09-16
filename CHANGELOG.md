@@ -9,6 +9,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- The app wouldn't open at all on the newest iPhone software, closing
+  immediately on launch. It now starts normally.
+- Opening a link to ReptiKeep while the app was fully closed dropped you on
+  the reptile list instead of the screen the link pointed at. Links now take
+  you where they should, whether the app was open or not.
+- The Save button in the add and edit sheets was almost unreadable in dark
+  mode on iPhone, both while it was waiting for a name and once it was ready
+  to tap. Its label is now legible in both states.
+- Accent-coloured text and icons — the selected tab, "See all" rows, the
+  range filter's Clear button — were too faint against the page to read
+  comfortably. They're darker now, on both Android and iPhone.
+- On Android, you couldn't tell whether a date range filter was switched on,
+  because the icon looked the same either way. An active filter now sits in
+  a filled badge.
 - Editing a food type after picking a suggestion (say, fixing a typo)
   wouldn't bring the suggestion list back — you had to tap away and back in
   first. It now updates live as you keep typing, on both Android and
