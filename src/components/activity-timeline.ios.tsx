@@ -353,7 +353,9 @@ function SeeAllRow({
           alignment="leading"
           modifiers={[frame({ maxWidth: Infinity, alignment: "leading" })]}
         >
-          <Text modifiers={[typeFont("body"), foregroundStyle(theme.primary)]}>
+          <Text
+            modifiers={[typeFont("body"), foregroundStyle(theme.accentInk)]}
+          >
             {label}
           </Text>
         </VStack>

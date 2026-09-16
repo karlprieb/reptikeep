@@ -126,7 +126,7 @@ function RangeSummaryRow({
   const clearButton = (
     <TextButton
       onClick={onClear}
-      colors={{ contentColor: theme.primary }}
+      colors={{ contentColor: theme.accentInk }}
       modifiers={[
         semantics({
           contentDescription: [
@@ -137,7 +137,7 @@ function RangeSummaryRow({
         }),
       ]}
     >
-      <Text style={composeTextStyle("body")} color={theme.primary}>
+      <Text style={composeTextStyle("body")} color={theme.accentInk}>
         {t("timeline.range.clear")}
       </Text>
     </TextButton>
@@ -418,11 +418,11 @@ export default function AnimalHistoryScreen() {
           >
             <IconButton
               onClick={() => router.back()}
-              colors={{ contentColor: theme.textSecondary }}
+              colors={{ contentColor: theme.text }}
             >
               <Icon
                 source={ARROW_BACK_ICON}
-                tint={theme.textSecondary}
+                tint={theme.text}
                 size={iconSize}
                 contentDescription={t("activityDetail.done")}
               />
@@ -444,11 +444,11 @@ export default function AnimalHistoryScreen() {
 
             <IconButton
               onClick={addActivity.open}
-              colors={{ contentColor: theme.primary }}
+              colors={{ contentColor: theme.text }}
             >
               <Icon
                 source={ADD_ICON}
-                tint={theme.primary}
+                tint={theme.text}
                 size={iconSize}
                 contentDescription={t("animal.addActivity")}
               />
@@ -464,13 +464,13 @@ export default function AnimalHistoryScreen() {
                   onClick={() => setMenuOpen(true)}
                   colors={{
                     contentColor: activeRange
-                      ? theme.primary
+                      ? theme.text
                       : theme.textSecondary,
                   }}
                 >
                   <Icon
                     source={FILTER_LIST_ICON}
-                    tint={activeRange ? theme.primary : theme.textSecondary}
+                    tint={activeRange ? theme.text : theme.textSecondary}
                     size={iconSize}
                     contentDescription={t("timeline.range.label")}
                   />

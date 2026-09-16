@@ -110,8 +110,8 @@ function RangeSummaryRow({
         modifiers={[
           buttonStyle("plain"),
           typeFont("body"),
-          foregroundStyle(theme.primary),
-          tint(theme.primary),
+          foregroundStyle(theme.accentInk),
+          tint(theme.accentInk),
           accessibilityLabel(t("timeline.range.clear")),
           accessibilityHint(t("timeline.range.clearHint")),
         ]}
@@ -345,7 +345,7 @@ export default function AnimalHistoryScreen() {
           {
             key: "add",
             icon: "plus",
-            tintColor: theme.primary,
+            tintColor: theme.text,
             accessibilityLabel: t("animal.addActivity"),
             onPress: addActivity.open,
           },
@@ -357,7 +357,7 @@ export default function AnimalHistoryScreen() {
                 ? "line.3.horizontal.decrease.circle.fill"
                 : "line.3.horizontal.decrease.circle"
             }
-            tintColor={activeRange ? theme.primary : theme.textSecondary}
+            tintColor={activeRange ? theme.text : theme.textSecondary}
             accessibilityLabel={t("timeline.range.label")}
             accessibilityHint={t("timeline.range.hint")}
           >

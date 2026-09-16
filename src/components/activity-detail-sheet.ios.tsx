@@ -354,7 +354,7 @@ export function ActivityDetailSheet({
       <Stack.Toolbar placement="right">
         <Stack.Toolbar.Menu
           icon="ellipsis"
-          tintColor={theme.primary}
+          tintColor={theme.text}
           accessibilityLabel={t("activityDetail.actions")}
           accessibilityHint={t("activityDetail.actionsHint")}
         >

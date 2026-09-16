@@ -86,14 +86,14 @@ export default function ReptilesScreen() {
             icon: "plus",
             accessibilityLabel: t("a11y.addReptile.label"),
             accessibilityHint: t("a11y.addReptile.hint"),
-            tintColor: theme.primary,
+            tintColor: theme.text,
             onPress: handleAdd,
           },
         ]}
         menu={
           <Stack.Toolbar.Menu
-            icon="ellipsis.circle"
-            tintColor={theme.primary}
+            icon="ellipsis"
+            tintColor={theme.text}
             accessibilityLabel={t("reptiles.options")}
             accessibilityHint={t("reptiles.optionsHint")}
           >

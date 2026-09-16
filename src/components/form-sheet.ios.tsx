@@ -180,7 +180,7 @@ export function useFormModifiers() {
 
   return {
     form: [
-      tint(theme.primary),
+      tint(theme.accentInk),
       scrollContentBackground("hidden"),
       background(theme.bg),
       environment(

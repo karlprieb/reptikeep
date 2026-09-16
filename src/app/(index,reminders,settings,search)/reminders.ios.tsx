@@ -333,7 +333,7 @@ function ReminderRow({
                         checkboxSize * (CHECKBOX_SYMBOL / CHECKBOX_HIT),
                       ),
                     }),
-                    foregroundStyle(theme.primary),
+                    foregroundStyle(theme.accentInk),
                   ]}
                 />
               </Button>

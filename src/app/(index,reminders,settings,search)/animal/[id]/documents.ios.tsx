@@ -180,7 +180,7 @@ export default function AnimalDocumentsScreen() {
       <Stack.Toolbar placement="right">
         <Stack.Toolbar.Button
           icon="plus"
-          tintColor={theme.primary}
+          tintColor={theme.text}
           accessibilityLabel={t("documents.add")}
           accessibilityHint={t("a11y.documents.add.hint")}
           onPress={openAdd}

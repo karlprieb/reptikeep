@@ -82,7 +82,7 @@ export default function SearchScreen() {
         textColor={theme.text}
         hintTextColor={theme.textMuted}
         headerIconColor={theme.textSecondary}
-        tintColor={theme.primary}
+        tintColor={theme.accentInk}
         onChangeText={(event) => setQuery(event.nativeEvent.text)}
         onCancelButtonPress={handleCancel}
       />

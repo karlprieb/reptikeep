@@ -398,7 +398,7 @@ function SeeAllRow({
             horizontalArrangement="spaceBetween"
             modifiers={[fillMaxWidth()]}
           >
-            <Text style={composeTextStyle("body")} color={theme.primary}>
+            <Text style={composeTextStyle("body")} color={theme.accentInk}>
               {label}
             </Text>
             <Icon

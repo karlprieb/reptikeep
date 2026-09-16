@@ -412,7 +412,7 @@ export default function BackupRestoreScreen() {
           <View
             style={[styles.progressCard, { backgroundColor: theme.surface }]}
           >
-            <ActivityIndicator size="large" color={theme.primary} />
+            <ActivityIndicator size="large" color={theme.accentInk} />
             <ThemedText type="heading" style={styles.progressText}>
               {t(`backup.${copy}Title`)}
             </ThemedText>

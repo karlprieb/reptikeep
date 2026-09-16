@@ -51,13 +51,13 @@ export default function AnimalDetailScreen() {
       <Stack.Toolbar placement="right">
         <Stack.Toolbar.Button
           icon="plus"
-          tintColor={theme.primary}
+          tintColor={theme.text}
           accessibilityLabel={t("animal.addActivity")}
           onPress={addActivity.open}
         />
         <Stack.Toolbar.Menu
           icon="ellipsis"
-          tintColor={theme.primary}
+          tintColor={theme.text}
           accessibilityLabel={t("animal.actions")}
           accessibilityHint={t("animal.actionsHint")}
         >

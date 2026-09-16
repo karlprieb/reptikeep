@@ -148,13 +148,13 @@ function RepositoryRow({
         colors={{
           containerColor: theme.surface,
           contentColor: theme.text,
-          leadingContentColor: theme.primary,
+          leadingContentColor: theme.accentInk,
         }}
       >
         <ListItem.LeadingContent>
           <Icon
             source={CODE_ICON}
-            tint={theme.primary}
+            tint={theme.accentInk}
             size={ACTION_ICON_SIZE}
           />
         </ListItem.LeadingContent>
