@@ -57,7 +57,7 @@ export default function AnimalDetailScreen() {
         />
         <Stack.Toolbar.Menu
           icon="ellipsis"
-          tintColor={theme.textSecondary}
+          tintColor={theme.primary}
           accessibilityLabel={t("animal.actions")}
           accessibilityHint={t("animal.actionsHint")}
         >

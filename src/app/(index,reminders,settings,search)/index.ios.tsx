@@ -93,7 +93,7 @@ export default function ReptilesScreen() {
         menu={
           <Stack.Toolbar.Menu
             icon="ellipsis.circle"
-            tintColor={theme.textSecondary}
+            tintColor={theme.primary}
             accessibilityLabel={t("reptiles.options")}
             accessibilityHint={t("reptiles.optionsHint")}
           >
