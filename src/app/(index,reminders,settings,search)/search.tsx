@@ -16,7 +16,7 @@ import { activityStores } from "@/state/activity-stores";
 import { lastFedByAnimal } from "@/utils/animal-activity";
 import { searchAnimals } from "@/utils/animal-search";
 
-const INTEGRATED_SEARCH_BAR =
+const GLASS_SEARCH_BAR =
   Platform.OS === "ios" && parseInt(String(Platform.Version), 10) >= 26;
 
 export default function SearchScreen() {
@@ -70,15 +70,13 @@ export default function SearchScreen() {
           <ReptileRows animals={results} lastFed={lastFed} />
         )}
       </ScrollView>
-      <PageHeader large={!INTEGRATED_SEARCH_BAR} title={t("search.title")} />
+      <PageHeader large={!GLASS_SEARCH_BAR} title={t("search.title")} />
       <Stack.SearchBar
         ref={searchBarRef}
         autoCapitalize="none"
         placeholder={t("search.placeholder")}
         placement="integrated"
-        barTintColor={
-          INTEGRATED_SEARCH_BAR ? theme.surface : theme.searchFieldTint
-        }
+        barTintColor={GLASS_SEARCH_BAR ? theme.surface : theme.searchFieldTint}
         textColor={theme.text}
         hintTextColor={theme.textMuted}
         headerIconColor={theme.textSecondary}

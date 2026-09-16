@@ -193,7 +193,9 @@ export function ReptileList({
         contentContainerStyle={[
           styles.content,
           styles.emptyContent,
-          emptyMinHeight ? { minHeight: emptyMinHeight } : { flexGrow: 1 },
+          emptyMinHeight && emptyMinHeight > 0
+            ? { minHeight: emptyMinHeight }
+            : { flexGrow: 1 },
           insetStyle,
         ]}
       >

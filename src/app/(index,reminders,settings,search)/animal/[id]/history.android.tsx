@@ -462,15 +462,20 @@ export default function AnimalHistoryScreen() {
               <DropdownMenu.Trigger>
                 <IconButton
                   onClick={() => setMenuOpen(true)}
-                  colors={{
-                    contentColor: activeRange
-                      ? theme.text
-                      : theme.textSecondary,
-                  }}
+                  colors={
+                    activeRange
+                      ? {
+                          containerColor: theme.primarySurface,
+                          contentColor: theme.onPrimarySurface,
+                        }
+                      : { contentColor: theme.textSecondary }
+                  }
                 >
                   <Icon
                     source={FILTER_LIST_ICON}
-                    tint={activeRange ? theme.text : theme.textSecondary}
+                    tint={
+                      activeRange ? theme.onPrimarySurface : theme.textSecondary
+                    }
                     size={iconSize}
                     contentDescription={t("timeline.range.label")}
                   />
