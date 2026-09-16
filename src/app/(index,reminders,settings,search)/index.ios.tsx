@@ -2,7 +2,7 @@ import { useSelector as useValue } from "@legendapp/state/react";
 import { router, Stack } from "expo-router";
 import { useHeaderHeight } from "expo-router/react-navigation";
 import { useMemo } from "react";
-import { useWindowDimensions } from "react-native";
+import { Platform, useWindowDimensions } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { useTranslation } from "react-i18next";
@@ -22,6 +22,9 @@ import type { AnimalSortField, SortDirection } from "@/utils/animal-sort";
 import { sortAnimals } from "@/utils/animal-sort";
 
 const handleAdd = () => router.push("/add-reptile");
+
+const GLASS_TAB_BAR = parseInt(String(Platform.Version), 10) >= 26;
+const CLASSIC_TAB_BAR_HEIGHT = 49;
 
 const SORT_FIELDS: AnimalSortField[] = [
   "name",
@@ -49,7 +52,9 @@ export default function ReptilesScreen() {
   const windowHeight = useWindowDimensions().height;
   const headerHeight = useHeaderHeight();
   const safeAreaBottom = useSafeAreaInsets().bottom;
-  const emptyMinHeight = windowHeight - headerHeight - safeAreaBottom;
+  const tabBarHeight =
+    safeAreaBottom + (GLASS_TAB_BAR ? 0 : CLASSIC_TAB_BAR_HEIGHT);
+  const emptyMinHeight = windowHeight - headerHeight - tabBarHeight;
 
   const { lastFed, lastWater, lastClean, lastActivity } = useMemo(
     () => summaryLookups(summaries),
