@@ -17,7 +17,7 @@ import { useTranslation } from "react-i18next";
 
 import { Typography } from "@/constants/theme";
 import { typeFont } from "@/constants/type-font";
-import { useTheme } from "@/hooks/use-theme";
+import { useColorScheme, useTheme } from "@/hooks/use-theme";
 import type { SupportedLanguage } from "@/i18n/resolve-language";
 import { swiftUILocaleIdentifier } from "@/i18n/resolve-language";
 import { asEditOf, optionalText, useDraft } from "@/utils/form-sheet-shared";
@@ -42,6 +42,7 @@ export function FormSheetChrome({
   onSave,
 }: FormSheetChromeProps) {
   const theme = useTheme();
+  const colorScheme = useColorScheme();
   const { t } = useTranslation();
 
   return (
@@ -65,7 +66,13 @@ export function FormSheetChrome({
       <Stack.Toolbar placement="right">
         <Stack.Toolbar.Button
           tintColor={theme.primary}
-          style={{ color: theme.onPrimary }}
+          style={{
+            color: saveDisabled
+              ? theme.textSecondary
+              : colorScheme === "dark"
+                ? theme.text
+                : theme.onPrimary,
+          }}
           accessibilityLabel={t(`${namespace}.save`)}
           accessibilityHint={t(
             `${namespace}.${editing ? "editSaveHint" : "saveHint"}`,
