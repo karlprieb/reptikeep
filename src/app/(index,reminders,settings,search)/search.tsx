@@ -77,11 +77,11 @@ export default function SearchScreen() {
         placeholder={t("search.placeholder")}
         placement="integrated"
         barTintColor={
-          GLASS_SEARCH_BAR
+          Platform.OS !== "ios"
             ? theme.surface
-            : Platform.OS === "ios"
-              ? theme.searchFieldTint
-              : theme.surface
+            : GLASS_SEARCH_BAR
+              ? undefined
+              : theme.searchFieldTint
         }
         textColor={theme.text}
         hintTextColor={theme.textMuted}
