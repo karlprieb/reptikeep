@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- On iPhone, the search field was a solid panel that clashed with the
+  translucent close button sitting right beside it. Both now use the same
+  material.
+
 ## [0.6.1] - 2026-09-16
 
 ### Fixed
