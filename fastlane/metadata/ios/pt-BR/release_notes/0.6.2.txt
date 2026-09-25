@@ -1,0 +1,2 @@
+- O campo de busca agora tem o mesmo visual translúcido do botão de fechar ao lado.
+- Ao alterar a foto de um réptil, a nova aparece na hora, inclusive depois de restaurar um backup, sem precisar reabrir o app.

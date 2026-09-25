@@ -1,0 +1,2 @@
+- The search field now matches the translucent style of the close button beside it.
+- Changing a reptile's picture now shows the new one right away, including after restoring a backup, with no need to reopen the app.
