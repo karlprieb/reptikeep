@@ -4,6 +4,10 @@ import { zipSync } from "fflate";
 import { animals$, type Animal } from "@/state/animal";
 import { activityStores } from "@/state/activity-stores";
 import { addDocument, documents$, type AnimalDocument } from "@/state/document";
+import {
+  animalPhotoRevisions$,
+  managedAnimalPhotoUri,
+} from "@/utils/animal-photo-storage";
 import { createBackup, parseBackup, restoreBackup } from "@/utils/backup";
 import { TEXT_LIMITS } from "@/utils/text-limits";
 
@@ -234,6 +238,7 @@ beforeEach(() => {
   mockFailCopyDestination = undefined;
   animals$.set({});
   documents$.set({});
+  animalPhotoRevisions$.set({});
   for (const store of Object.values(activityStores)) store.clear();
 });
 
@@ -460,6 +465,52 @@ describe("backup restore", () => {
     expect(mockFiles.has(`${DOCUMENTS_DIRECTORY}/${invoice.id}.jpg`)).toBe(
       false,
     );
+  });
+
+  it("bumps a photo's revision after a successful restore writes it", async () => {
+    const managedUri = managedAnimalPhotoUri(animal.id);
+    const archive = writeArchive({
+      "manifest.json": json(
+        manifest(4, { animals: 1, records: 0, photos: 1, documents: 0 }),
+      ),
+      "data.json": json({
+        ...husbandryOnly({}, {}),
+        animals: {
+          [animal.id]: { ...animal, photo: `photos/${animal.id}.webp` },
+        },
+      }),
+      [`photos/${animal.id}.webp`]: WEBP_BYTES,
+    });
+
+    await restoreBackup(archive);
+
+    expect(mockFiles.get(managedUri)).toEqual(WEBP_BYTES);
+    expect(animalPhotoRevisions$[managedUri].peek()).toBe(1);
+  });
+
+  it("bumps the old photo's revision again when a later step fails and rollback restores it", async () => {
+    const managedUri = managedAnimalPhotoUri(animal.id);
+    animals$.set({ [animal.id]: { ...animal, photo: managedUri } });
+    mockFiles.set(managedUri, WEBP_BYTES);
+
+    const archive = writeArchive({
+      "manifest.json": json(
+        manifest(4, { animals: 1, records: 0, photos: 1, documents: 0 }),
+      ),
+      "data.json": json({
+        ...husbandryOnly({}, {}),
+        animals: {
+          [animal.id]: { ...animal, photo: `photos/${animal.id}.webp` },
+        },
+      }),
+      [`photos/${animal.id}.webp`]: WEBP_BYTES,
+    });
+    mockFailCopyDestination = managedUri;
+
+    await expect(restoreBackup(archive)).rejects.toThrow("copy failed");
+
+    expect(mockFiles.get(managedUri)).toEqual(WEBP_BYTES);
+    expect(animalPhotoRevisions$[managedUri].peek()).toBe(1);
   });
 });
 

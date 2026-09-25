@@ -38,8 +38,7 @@ function deleteCacheFile(uri: string): void {
 export const animalPhotoRevisions$ = observable<Record<string, number>>({});
 
 export function bumpAnimalPhotoRevision(uri: string): void {
-  const current = animalPhotoRevisions$.peek();
-  animalPhotoRevisions$.set({ ...current, [uri]: (current[uri] ?? 0) + 1 });
+  animalPhotoRevisions$[uri].set((n) => (n ?? 0) + 1);
 }
 
 export async function importAnimalPhoto(
@@ -74,7 +73,7 @@ export function getAnimalPhotoUri(photo: string): string {
 
 export function useAnimalPhotoUri(photo: string): string {
   const uri = getAnimalPhotoUri(photo);
-  const revision = useValue(animalPhotoRevisions$)[uri];
+  const revision = useValue(animalPhotoRevisions$[uri]);
   return revision ? `${uri}?v=${revision}` : uri;
 }
 
