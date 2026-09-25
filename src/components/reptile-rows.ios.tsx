@@ -36,7 +36,7 @@ import { typeFont } from "@/constants/type-font";
 import type { Animal } from "@/state/animal";
 import { useTheme } from "@/hooks/use-theme";
 import { SEX_SYMBOLS } from "@/utils/animal-card-status";
-import { getAnimalPhotoUri } from "@/utils/animal-photo-storage";
+import { useAnimalPhotoUri } from "@/utils/animal-photo-storage";
 import { feedingStatus } from "@/utils/feeding-status";
 
 const THUMBNAIL_SIZE = 44;
@@ -57,6 +57,7 @@ function ReptileRow({
   textInset,
 }: ReptileRowProps) {
   const { t } = useTranslation();
+  const photoUri = useAnimalPhotoUri(animal.photo ?? "");
   const feeding = feedingStatus(t, lastFedAt, animal.feedingSchedule);
   const feedingColor = feeding.overdue ? theme.danger : theme.textSecondary;
   const symbol = SEX_SYMBOLS[animal.sex];
@@ -101,7 +102,7 @@ function ReptileRow({
         >
           {animal.photo ? (
             <Image
-              uiImage={getAnimalPhotoUri(animal.photo)}
+              uiImage={photoUri}
               modifiers={[
                 resizable(),
                 aspectRatio({ contentMode: "fill" }),

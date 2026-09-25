@@ -12,6 +12,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - On iPhone, the search field was a solid panel that clashed with the
   translucent close button sitting right beside it. Both now use the same
   material.
+- On iPhone, changing a reptile's picture left the old one on screen
+  everywhere until you closed and reopened the app. The new picture now shows
+  up as soon as you save, and after restoring a backup too.
 
 ## [0.6.1] - 2026-09-16
 

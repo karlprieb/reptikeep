@@ -59,7 +59,7 @@ import {
   latestEnclosureClean,
   latestWaterChange,
 } from "@/utils/animal-activity";
-import { getAnimalPhotoUri } from "@/utils/animal-photo-storage";
+import { useAnimalPhotoUri } from "@/utils/animal-photo-storage";
 import { formatAbsoluteDate } from "@/utils/format-date";
 import { scheduleDaysOverdue } from "@/utils/schedule";
 import { formatWeight, formatWeightDelta } from "@/utils/format-number";
@@ -167,6 +167,7 @@ export function AnimalDetail({ animal, onAddActivity }: AnimalDetailProps) {
   const theme = useTheme();
   const { t } = useTranslation();
   const { width } = useWindowDimensions();
+  const photoUri = useAnimalPhotoUri(animal.photo ?? "");
   const sex = animal.sex === "unknown" ? null : t(`sex.${animal.sex}`);
 
   const feedings = useValue(activityStores.feed.$);
@@ -387,7 +388,7 @@ export function AnimalDetail({ animal, onAddActivity }: AnimalDetailProps) {
             ]}
           >
             <Image
-              uiImage={getAnimalPhotoUri(animal.photo)}
+              uiImage={photoUri}
               modifiers={[
                 resizable(),
                 aspectRatio({ contentMode: "fill" }),

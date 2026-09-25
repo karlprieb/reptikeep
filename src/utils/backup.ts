@@ -27,6 +27,7 @@ import {
   type DocumentExtension,
 } from "@/utils/animal-document-storage";
 import {
+  bumpAnimalPhotoRevision,
   deleteManagedAnimalPhoto,
   getAnimalPhotoUri,
   managedAnimalPhotoUri,
@@ -1166,6 +1167,7 @@ export async function restoreBackup(file: File): Promise<RestoredBackup> {
         intermediates: true,
       });
       await staged.copy(destination, { overwrite: true });
+      bumpAnimalPhotoRevision(destination.uri);
     }
 
     batch(() => {
@@ -1280,6 +1282,7 @@ export async function restoreBackup(file: File): Promise<RestoredBackup> {
         intermediates: true,
       });
       destination.write(photo.bytes);
+      bumpAnimalPhotoRevision(destination.uri);
     }
 
     for (const { document, bytes } of oldDocuments)

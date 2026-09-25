@@ -1,9 +1,13 @@
+import { act, renderHook } from "@testing-library/react-native";
+
 import {
+  animalPhotoRevisions$,
   clearManagedAnimalPhotos,
   deleteManagedAnimalPhoto,
   getAnimalPhotoUri,
   importAnimalPhoto,
   isManagedAnimalPhoto,
+  useAnimalPhotoUri,
 } from "@/utils/animal-photo-storage";
 
 let mockProcessedUri = "file:///cache/processed-animal-photo.webp";
@@ -251,6 +255,64 @@ describe("importAnimalPhoto", () => {
     ).rejects.toThrow("copy failed");
 
     expect(mockFiles).toContain(existingPhoto);
+  });
+});
+
+describe("useAnimalPhotoUri", () => {
+  const first = `${MANAGED_DIRECTORY}/animal-first.webp`;
+  const second = `${MANAGED_DIRECTORY}/animal-second.webp`;
+
+  beforeEach(() => {
+    animalPhotoRevisions$.set({});
+    mockFiles.add(first);
+    mockFiles.add(second);
+  });
+
+  afterEach(() => {
+    animalPhotoRevisions$.set({});
+  });
+
+  it("only re-renders consumers of the photo that was bumped", async () => {
+    let secondRenderCount = 0;
+    const firstHook = renderHook(() => useAnimalPhotoUri(first));
+    const secondHook = renderHook(() => {
+      secondRenderCount += 1;
+      return useAnimalPhotoUri(second);
+    });
+
+    expect(firstHook.result.current).toBe(first);
+    expect(secondHook.result.current).toBe(second);
+    expect(secondRenderCount).toBe(1);
+
+    mockProcessedUri = `${CACHE_DIR}/processed.webp`;
+    mockFiles.add(mockProcessedUri);
+    await act(async () => {
+      const uri = await importAnimalPhoto(
+        { uri: "file:///picker/first.jpg" },
+        "animal-first",
+      );
+      expect(uri).toBe(first);
+    });
+
+    expect(firstHook.result.current).toBe(`${first}?v=1`);
+    expect(secondHook.result.current).toBe(second);
+    expect(secondRenderCount).toBe(1);
+
+    mockFiles.add(mockProcessedUri);
+    await act(async () => {
+      const uri = await importAnimalPhoto(
+        { uri: "file:///picker/first-again.jpg" },
+        "animal-first",
+      );
+      expect(uri).toBe(first);
+    });
+
+    expect(firstHook.result.current).toBe(`${first}?v=2`);
+    expect(secondHook.result.current).toBe(second);
+    expect(secondRenderCount).toBe(1);
+
+    firstHook.unmount();
+    secondHook.unmount();
   });
 });
 

@@ -1,3 +1,5 @@
+import { observable } from "@legendapp/state";
+import { useSelector as useValue } from "@legendapp/state/react";
 import { Directory, File, Paths } from "expo-file-system";
 
 import { processAnimalPhoto } from "@/utils/image-processing";
@@ -33,6 +35,12 @@ function deleteCacheFile(uri: string): void {
   } catch {}
 }
 
+export const animalPhotoRevisions$ = observable<Record<string, number>>({});
+
+export function bumpAnimalPhotoRevision(uri: string): void {
+  animalPhotoRevisions$[uri].set((n) => (n ?? 0) + 1);
+}
+
 export async function importAnimalPhoto(
   source: AnimalPhotoSource,
   animalId: string,
@@ -48,6 +56,7 @@ export async function importAnimalPhoto(
   try {
     await new File(processedUri).copy(stagingFile, { overwrite: true });
     await stagingFile.move(destination, { overwrite: true });
+    bumpAnimalPhotoRevision(destination.uri);
     return destination.uri;
   } catch (error) {
     if (stagingFile.exists) stagingFile.delete();
@@ -60,6 +69,12 @@ export async function importAnimalPhoto(
 export function getAnimalPhotoUri(photo: string): string {
   const fileName = photo.split("/").pop();
   return fileName ? new File(getManagedDirectory(), fileName).uri : photo;
+}
+
+export function useAnimalPhotoUri(photo: string): string {
+  const uri = getAnimalPhotoUri(photo);
+  const revision = useValue(animalPhotoRevisions$[uri]);
+  return revision ? `${uri}?v=${revision}` : uri;
 }
 
 export function isManagedAnimalPhoto(uri: string): boolean {
