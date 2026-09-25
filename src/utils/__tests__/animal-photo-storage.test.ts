@@ -1,9 +1,13 @@
+import { act, renderHook } from "@testing-library/react-native";
+
 import {
+  animalPhotoRevisions$,
   clearManagedAnimalPhotos,
   deleteManagedAnimalPhoto,
   getAnimalPhotoUri,
   importAnimalPhoto,
   isManagedAnimalPhoto,
+  useAnimalPhotoUri,
 } from "@/utils/animal-photo-storage";
 
 let mockProcessedUri = "file:///cache/processed-animal-photo.webp";
@@ -251,6 +255,36 @@ describe("importAnimalPhoto", () => {
     ).rejects.toThrow("copy failed");
 
     expect(mockFiles).toContain(existingPhoto);
+  });
+});
+
+describe("useAnimalPhotoUri", () => {
+  it("carries a revision query string that changes when the same photo is re-imported", async () => {
+    animalPhotoRevisions$.set({});
+    mockProcessedUri = `${CACHE_DIR}/processed.webp`;
+    mockFiles.add(mockProcessedUri);
+
+    let uri = "";
+    await act(async () => {
+      uri = await importAnimalPhoto(
+        { uri: "file:///picker/first.jpg" },
+        "animal-rev",
+      );
+    });
+
+    const { result } = renderHook(() => useAnimalPhotoUri(uri));
+    expect(result.current).toBe(`${uri}?v=1`);
+
+    mockFiles.add(mockProcessedUri);
+    await act(async () => {
+      const second = await importAnimalPhoto(
+        { uri: "file:///picker/second.jpg" },
+        "animal-rev",
+      );
+      expect(second).toBe(uri);
+    });
+
+    expect(result.current).toBe(`${uri}?v=2`);
   });
 });
 

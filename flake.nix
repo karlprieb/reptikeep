@@ -71,7 +71,7 @@
             "$ANDROID_HOME/platform-tools/adb" start-server
 
             echo "Starting emulator '${avdName}'..."
-            exec "$emulator" -avd "${avdName}" "$@"
+            exec "$emulator" -avd "${avdName}" -no-snapshot-load "$@"
           '';
         };
       in

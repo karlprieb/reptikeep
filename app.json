@@ -60,6 +60,7 @@
       ],
       "./plugins/with-ios-scene-delegate",
       "./plugins/with-no-push-entitlement",
+      "./plugins/with-dev-launcher-script-always-run",
       "./plugins/with-android-release-signing",
       [
         "expo-notifications",

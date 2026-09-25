@@ -39,7 +39,7 @@ import { typeFont } from "@/constants/type-font";
 import type { Animal } from "@/state/animal";
 import type { CareSchedule } from "@/state/care-schedule";
 import { overdueRoutines, SEX_SYMBOLS } from "@/utils/animal-card-status";
-import { getAnimalPhotoUri } from "@/utils/animal-photo-storage";
+import { useAnimalPhotoUri } from "@/utils/animal-photo-storage";
 import { feedingStatus } from "@/utils/feeding-status";
 
 const SCRIM_GRADIENT_COLORS = ["rgba(14, 9, 4, 1)", "rgba(14, 9, 4, 0)"];
@@ -82,6 +82,7 @@ function AnimalCardBase({
 }: AnimalCardProps) {
   const { t } = useTranslation();
   const { fontScale } = useWindowDimensions();
+  const photoUri = useAnimalPhotoUri(animal.photo ?? "");
   const iconWidth = Spacing.md * Math.min(fontScale, ICON_MAX_SCALE);
   const isPlaceholder = !animal.photo;
   const monogram = animal.name.trim().slice(0, 1).toLocaleUpperCase();
@@ -166,7 +167,7 @@ function AnimalCardBase({
           {animal.photo ? (
             <>
               <Image
-                uiImage={getAnimalPhotoUri(animal.photo)}
+                uiImage={photoUri}
                 modifiers={[
                   resizable(),
                   aspectRatio({ contentMode: "fill" }),
