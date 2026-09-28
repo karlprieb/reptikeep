@@ -1,4 +1,4 @@
-import { File, Paths } from "expo-file-system";
+import { Directory, File, Paths } from "expo-file-system";
 import { ImageManipulator, SaveFormat } from "expo-image-manipulator";
 import * as Print from "expo-print";
 import * as Sharing from "expo-sharing";
@@ -12,7 +12,7 @@ import { getAnimalPhotoUri } from "@/utils/animal-photo-storage";
 
 import { formatAbsoluteDate } from "./format-date";
 
-export type LabelSize = "tag" | "card" | "large";
+export type LabelSize = "tag" | "card" | "large" | "custom";
 export type LabelTarget = "profile" | "log";
 export type PaperSize = "a4" | "letter";
 
@@ -29,6 +29,7 @@ export interface LabelFields {
 
 export interface LabelOptions {
   size: LabelSize;
+  customWidthMm?: number;
   target: LabelTarget;
   paper: PaperSize | "label";
   fields: LabelFields;
@@ -56,7 +57,14 @@ export const LABEL_FIELD_KEYS: readonly (keyof LabelFields)[] = [
   "photo",
 ];
 
-export const LABEL_SIZES: readonly LabelSize[] = ["tag", "card", "large"];
+export const LABEL_SIZES: readonly LabelSize[] = [
+  "tag",
+  "card",
+  "large",
+  "custom",
+];
+
+export const CUSTOM_LABEL_WIDTH = { min: 61, max: 200 };
 export const LABEL_TARGETS: readonly LabelTarget[] = ["profile", "log"];
 export const PAPER_SIZES: readonly PaperSize[] = ["a4", "letter"];
 
@@ -69,7 +77,7 @@ const BASE_GEOMETRY = {
   typeMm: 3.6,
 };
 
-const SIZE_SCALE: Record<LabelSize, number> = {
+const SIZE_SCALE: Record<Exclude<LabelSize, "custom">, number> = {
   tag: 1,
   card: 1.25,
   large: 1.6,
@@ -95,13 +103,36 @@ const PAGE_GEOMETRY: Record<
   letter: { cssSize: "letter", widthPt: 612, heightPt: 792 },
 };
 
-export function labelGeometry(size: LabelSize) {
-  const scale = SIZE_SCALE[size];
+export function labelGeometry(
+  size: LabelSize,
+  customWidthMm: number = BASE_GEOMETRY.widthMm,
+) {
+  const scale =
+    size === "custom"
+      ? customWidthMm / BASE_GEOMETRY.widthMm
+      : SIZE_SCALE[size];
   return {
     widthMm: Math.round(BASE_GEOMETRY.widthMm * scale),
     heightMm: Math.round(BASE_GEOMETRY.heightMm * scale),
     scale,
   };
+}
+
+export function customLabelSize(
+  dimension: "width" | "height",
+  text: string,
+): { widthMm: number; heightMm: number } | undefined {
+  const value = Number(text.replace(",", "."));
+  if (!Number.isFinite(value) || value <= 0) return undefined;
+  const widthMm = Math.round(
+    dimension === "width"
+      ? value
+      : (value * BASE_GEOMETRY.widthMm) / BASE_GEOMETRY.heightMm,
+  );
+  if (widthMm < CUSTOM_LABEL_WIDTH.min || widthMm > CUSTOM_LABEL_WIDTH.max) {
+    return undefined;
+  }
+  return { widthMm, heightMm: labelGeometry("custom", widthMm).heightMm };
 }
 
 export function pageGeometry(paper: PaperSize) {
@@ -112,12 +143,12 @@ const LABEL_PAGE_MARGIN_MM = 4;
 
 function pageFor(options: LabelOptions) {
   return options.paper === "label"
-    ? labelPageGeometry(options.size)
+    ? labelPageGeometry(options.size, options.customWidthMm)
     : pageGeometry(options.paper);
 }
 
-export function labelPageGeometry(size: LabelSize) {
-  const { widthMm, heightMm } = labelGeometry(size);
+export function labelPageGeometry(size: LabelSize, customWidthMm?: number) {
+  const { widthMm, heightMm } = labelGeometry(size, customWidthMm);
   const widthPt = Math.ceil(((widthMm + LABEL_PAGE_MARGIN_MM) * 72) / 25.4);
   const heightPt = Math.ceil(((heightMm + LABEL_PAGE_MARGIN_MM) * 72) / 25.4);
   return { cssSize: `${widthPt}pt ${heightPt}pt`, widthPt, heightPt };
@@ -263,7 +294,10 @@ export function buildLabelHtml(
   options: LabelOptions,
   deps: LabelHtmlDeps,
 ): string {
-  const { widthMm, heightMm, scale } = labelGeometry(options.size);
+  const { widthMm, heightMm, scale } = labelGeometry(
+    options.size,
+    options.customWidthMm,
+  );
   const mm = (value: number) => `${+(value * scale).toFixed(2)}mm`;
   const base = BASE_GEOMETRY;
   const page = pageFor(options);
@@ -481,6 +515,30 @@ export async function shareLabelPdf(uri: string): Promise<void> {
     mimeType: "application/pdf",
     UTI: "com.adobe.pdf",
   });
+}
+
+export function labelFileName(
+  animal: Animal,
+  options: Pick<LabelOptions, "size" | "customWidthMm">,
+  t: TFunction,
+): string {
+  const { widthMm, heightMm } = labelGeometry(
+    options.size,
+    options.customWidthMm,
+  );
+  const name = animal.name.replace(/[\\/:*?"<>|\u0000-\u001f]/g, "").trim();
+  return `${t("label.fileName", { name, size: `${widthMm}x${heightMm}` })}.pdf`;
+}
+
+export async function nameLabelPdf(
+  uri: string,
+  fileName: string,
+): Promise<string> {
+  const folder = new Directory(Paths.cache, "labels");
+  folder.create({ intermediates: true, idempotent: true });
+  const file = new File(uri);
+  await file.move(new File(folder, fileName), { overwrite: true });
+  return file.uri;
 }
 
 export function deleteLabelPdf(uri: string): void {

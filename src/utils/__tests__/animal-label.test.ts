@@ -4,8 +4,10 @@ import {
   availableLabelFields,
   buildLabelHtml,
   buildLabelUrl,
+  customLabelSize,
   escapeHtml,
   hasLabelContent,
+  labelFileName,
   LABEL_SIZES,
   PAPER_SIZES,
   labelGeometry,
@@ -113,6 +115,46 @@ describe("availableLabelFields", () => {
         }),
       ),
     ).toEqual(["qr", "name", "commonName", "sex", "birthDate", "photo"]);
+  });
+});
+
+describe("customLabelSize", () => {
+  it("keeps width and height in proportion", () => {
+    expect(customLabelSize("width", "100")).toEqual({
+      widthMm: 100,
+      heightMm: 33,
+    });
+    expect(customLabelSize("height", "33")).toEqual({
+      widthMm: 101,
+      heightMm: 33,
+    });
+    expect(customLabelSize("width", "90,5")).toEqual({
+      widthMm: 91,
+      heightMm: 30,
+    });
+  });
+
+  it("rejects sizes outside the allowed range or non-numbers", () => {
+    expect(customLabelSize("width", "50")).toBeUndefined();
+    expect(customLabelSize("width", "250")).toBeUndefined();
+    expect(customLabelSize("height", "abc")).toBeUndefined();
+    expect(customLabelSize("width", "")).toBeUndefined();
+  });
+});
+
+describe("labelFileName", () => {
+  it("names the file after the animal and label size", () => {
+    const name = (key: string, options: Record<string, string>) =>
+      key === "label.fileName"
+        ? `Label ${options.name} - ${options.size}`
+        : key;
+    expect(
+      labelFileName(
+        makeAnimal({ name: "Shen/long:?" }),
+        { size: "tag" },
+        name as unknown as import("i18next").TFunction,
+      ),
+    ).toBe("Label Shenlong - 122x40.pdf");
   });
 });
 

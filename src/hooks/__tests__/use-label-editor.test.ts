@@ -11,8 +11,18 @@ jest.mock("expo-image-manipulator", () => ({
 describe("readLabelDefaults", () => {
   it("keeps valid saved choices", () => {
     expect(
-      readLabelDefaults({ size: "large", target: "log", paper: "letter" }),
-    ).toEqual({ size: "large", target: "log", paper: "letter" });
+      readLabelDefaults({
+        size: "custom",
+        target: "log",
+        paper: "letter",
+        customWidthMm: 90,
+      }),
+    ).toEqual({
+      size: "custom",
+      target: "log",
+      paper: "letter",
+      customWidthMm: 90,
+    });
   });
 
   it("falls back per field when a saved value is unknown or missing", () => {
@@ -21,12 +31,19 @@ describe("readLabelDefaults", () => {
         size: "poster" as never,
         target: undefined,
         paper: "a4",
+        customWidthMm: 999,
       }),
-    ).toEqual({ size: "card", target: "profile", paper: "a4" });
+    ).toEqual({
+      size: "card",
+      target: "profile",
+      paper: "a4",
+      customWidthMm: 122,
+    });
     expect(readLabelDefaults(undefined)).toEqual({
       size: "card",
       target: "profile",
       paper: "a4",
+      customWidthMm: 122,
     });
   });
 });

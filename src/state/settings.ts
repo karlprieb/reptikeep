@@ -15,6 +15,7 @@ export interface LabelDefaults {
   size: LabelSize;
   target: LabelTarget;
   paper: PaperSize;
+  customWidthMm: number;
 }
 
 const DEFAULT_REPTILE_SORT: AnimalSort = { field: "name", direction: "asc" };
@@ -23,6 +24,7 @@ export const DEFAULT_LABEL_DEFAULTS: LabelDefaults = {
   size: "card",
   target: "profile",
   paper: "a4",
+  customWidthMm: 122,
 };
 
 export const settings$ = observable({

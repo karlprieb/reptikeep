@@ -4,13 +4,16 @@ import {
   Host,
   Icon,
   IconButton,
+  OutlinedTextField,
   Row,
   Text as ComposeText,
+  useNativeState,
 } from "@expo/ui/jetpack-compose";
 import {
   defaultMinSize,
   fillMaxWidth,
   padding,
+  semantics,
   weight,
 } from "@expo/ui/jetpack-compose/modifiers";
 import { router } from "expo-router";
@@ -23,10 +26,11 @@ import { useTranslation } from "react-i18next";
 import { AnimalNotFound, useAnimalRoute } from "@/components/animal-route";
 import {
   ACTION_ICON_SIZE,
+  DATA_STYLE,
+  fieldColors,
   FormSheetSnackbar,
   MenuField,
   Section,
-  SegmentedField,
   SwitchRow,
   TITLE_LARGE,
   TOP_BAR_HEIGHT,
@@ -40,7 +44,7 @@ import { useColorScheme, useTheme } from "@/hooks/use-theme";
 import {
   LABEL_SIZES,
   LABEL_TARGETS,
-  labelGeometry,
+  CUSTOM_LABEL_WIDTH,
   labelPageGeometry,
   PAPER_SIZES,
 } from "@/utils/animal-label";
@@ -67,9 +71,37 @@ export default function AnimalLabelScreen() {
   };
   const label = useLabelEditor(animal, () => showMessage(t("label.error")));
 
+  const widthText = useNativeState(String(label.customWidthMm));
+  const heightText = useNativeState(String(label.customHeightMm));
+
   if (!animal) return <AnimalNotFound />;
 
   const iconSize = ACTION_ICON_SIZE;
+  const customField = (dimension: "width" | "height") => (
+    <OutlinedTextField
+      value={dimension === "width" ? widthText : heightText}
+      onValueChange={(value) => {
+        const other = label.changeCustomDimension(dimension, value);
+        if (other === undefined) return;
+        (dimension === "width" ? heightText : widthText).set(other);
+      }}
+      colors={fieldColors(theme)}
+      keyboardOptions={{ keyboardType: "number" }}
+      textStyle={DATA_STYLE}
+      singleLine
+      modifiers={[
+        fillMaxWidth(),
+        semantics({
+          contentDescription: `${t(`label.size.${dimension}`)}, ${t("a11y.label.customSize.hint")}`,
+          mergeDescendants: true,
+        }),
+      ]}
+    >
+      <OutlinedTextField.Label>
+        <ComposeText>{t(`label.size.${dimension}`)}</ComposeText>
+      </OutlinedTextField.Label>
+    </OutlinedTextField>
+  );
   const handlePrint = () =>
     label.hasContent ? void label.print() : showMessage(t("label.empty"));
   const handleShare = () =>
@@ -132,19 +164,27 @@ export default function AnimalLabelScreen() {
             horizontalAlignment="start"
             modifiers={[fillMaxWidth()]}
           >
-            <Section title={t("label.size.label")}>
-              <SegmentedField
-                value={label.size}
-                options={LABEL_SIZES}
-                labelFor={(value) =>
-                  t("label.size.dimensions", {
-                    width: labelGeometry(value).widthMm,
-                    height: labelGeometry(value).heightMm,
-                  })
-                }
-                onChange={label.changeSize}
+            <Section
+              footer={
+                label.size === "custom"
+                  ? t("label.size.customRange", CUSTOM_LABEL_WIDTH)
+                  : undefined
+              }
+            >
+              <MenuField
+                label={t("label.size.label")}
+                value={label.describeSize(label.size)}
                 theme={theme}
+                iconSize={iconSize}
+                items={LABEL_SIZES.map((value) => ({
+                  value,
+                  label: label.describeSize(value),
+                  selected: value === label.size,
+                }))}
+                onSelect={label.changeSize}
               />
+              {label.size === "custom" ? customField("width") : null}
+              {label.size === "custom" ? customField("height") : null}
             </Section>
 
             <Section>

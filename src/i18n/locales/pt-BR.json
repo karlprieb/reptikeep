@@ -249,7 +249,11 @@
     "share": "Compartilhar",
     "size": {
       "label": "Formato",
-      "dimensions": "{{width}} × {{height}} mm"
+      "dimensions": "{{width}} × {{height}} mm",
+      "custom": "Personalizado",
+      "width": "Largura (mm)",
+      "height": "Altura (mm)",
+      "customRange": "Entre {{min}} e {{max}} mm de largura. A altura acompanha a largura para manter a proporção da etiqueta."
     },
     "target": {
       "label": "Abrir",
@@ -281,7 +285,8 @@
       "log": "O escaneamento abre o seletor de atividade de {{animalName}}."
     },
     "error": "Não foi possível gerar esta etiqueta. Tente mudar uma opção ou tente de novo.",
-    "empty": "Ative pelo menos uma opção."
+    "empty": "Ative pelo menos uma opção.",
+    "fileName": "Etiqueta {{name}} - {{size}}"
   },
   "addRecord": {
     "title": "Adicionar registro",
@@ -761,6 +766,9 @@
       },
       "paper": {
         "hint": "Escolhe o tamanho do papel para impressão"
+      },
+      "customSize": {
+        "hint": "Largura e altura mantêm a proporção"
       }
     }
   },

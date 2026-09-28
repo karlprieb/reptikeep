@@ -1,7 +1,21 @@
-import { Form, Host, Section, Text, Toggle } from "@expo/ui/swift-ui";
 import {
+  Form,
+  Host,
+  LabeledContent,
+  Section,
+  Text,
+  TextField,
+  Toggle,
+  useNativeState,
+} from "@expo/ui/swift-ui";
+import {
+  accessibilityHint,
+  accessibilityLabel,
   foregroundStyle,
+  keyboardType,
   listRowBackground,
+  multilineTextAlignment,
+  scrollDismissesKeyboard,
 } from "@expo/ui/swift-ui/modifiers";
 import { Stack } from "expo-router";
 import { useHeaderHeight } from "expo-router/react-navigation";
@@ -18,7 +32,7 @@ import { useTheme } from "@/hooks/use-theme";
 import {
   LABEL_SIZES,
   LABEL_TARGETS,
-  labelGeometry,
+  CUSTOM_LABEL_WIDTH,
   labelPageGeometry,
   PAPER_SIZES,
 } from "@/utils/animal-label";
@@ -33,7 +47,32 @@ export default function AnimalLabelScreen() {
   const formModifiers = useFormModifiers();
   const label = useLabelEditor(animal, () => Alert.alert(t("label.error")));
 
+  const widthText = useNativeState(String(label.customWidthMm));
+  const heightText = useNativeState(String(label.customHeightMm));
+
   if (!animal) return <AnimalNotFound />;
+
+  const customField = (dimension: "width" | "height") => (
+    <LabeledContent
+      label={t(`label.size.${dimension}`)}
+      modifiers={[listRowBackground(theme.surface)]}
+    >
+      <TextField
+        text={dimension === "width" ? widthText : heightText}
+        onTextChange={(value) => {
+          const other = label.changeCustomDimension(dimension, value);
+          if (other === undefined) return;
+          (dimension === "width" ? heightText : widthText).set(other);
+        }}
+        modifiers={[
+          accessibilityLabel(t(`label.size.${dimension}`)),
+          accessibilityHint(t("a11y.label.customSize.hint")),
+          keyboardType("numeric"),
+          multilineTextAlignment("trailing"),
+        ]}
+      />
+    </LabeledContent>
+  );
 
   return (
     <>
@@ -103,21 +142,31 @@ export default function AnimalLabelScreen() {
         </View>
 
         <Host style={styles.host} useViewportSizeMeasurement>
-          <Form modifiers={formModifiers.form}>
-            <Section>
+          <Form
+            modifiers={[
+              ...formModifiers.form,
+              scrollDismissesKeyboard("immediately"),
+            ]}
+          >
+            <Section
+              footer={
+                label.size === "custom" ? (
+                  <Text modifiers={[foregroundStyle(theme.textSecondary)]}>
+                    {t("label.size.customRange", CUSTOM_LABEL_WIDTH)}
+                  </Text>
+                ) : undefined
+              }
+            >
               <DefaultPicker
                 label={t("label.size.label")}
                 hint={t("a11y.label.size.hint")}
                 options={LABEL_SIZES}
-                describe={(value) =>
-                  t("label.size.dimensions", {
-                    width: labelGeometry(value).widthMm,
-                    height: labelGeometry(value).heightMm,
-                  })
-                }
+                describe={label.describeSize}
                 value={label.size}
                 onChange={(value) => value && label.changeSize(value)}
               />
+              {label.size === "custom" ? customField("width") : null}
+              {label.size === "custom" ? customField("height") : null}
               <DefaultPicker
                 label={t("label.target.label")}
                 hint={t("a11y.label.target.hint")}

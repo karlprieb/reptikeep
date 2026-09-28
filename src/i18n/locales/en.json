@@ -249,7 +249,11 @@
     "share": "Share",
     "size": {
       "label": "Format",
-      "dimensions": "{{width}} × {{height}} mm"
+      "dimensions": "{{width}} × {{height}} mm",
+      "custom": "Custom",
+      "width": "Width (mm)",
+      "height": "Height (mm)",
+      "customRange": "Between {{min}} and {{max}} mm wide. Height follows width to keep the label's shape."
     },
     "target": {
       "label": "Scan opens",
@@ -281,7 +285,8 @@
       "log": "Scanning opens the activity picker for {{animalName}}."
     },
     "error": "We couldn't build this label. Try changing an option or try again.",
-    "empty": "Turn on at least one option."
+    "empty": "Turn on at least one option.",
+    "fileName": "Label {{name}} - {{size}}"
   },
   "addRecord": {
     "title": "Add a record",
@@ -761,6 +766,9 @@
       },
       "paper": {
         "hint": "Chooses the paper size for printing"
+      },
+      "customSize": {
+        "hint": "Width and height stay in proportion"
       }
     }
   },
