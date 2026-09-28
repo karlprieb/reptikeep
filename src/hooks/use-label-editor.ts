@@ -87,7 +87,12 @@ export function useLabelEditor(
           if (stale) deleteLabelPdf(stale);
         },
         () => {
-          if (id === generation.current) reportError.current();
+          if (id !== generation.current) return;
+          const stale = shownPreview.current;
+          shownPreview.current = undefined;
+          setPreviewUri(undefined);
+          if (stale) deleteLabelPdf(stale);
+          reportError.current();
         },
       );
     }, REGENERATE_DEBOUNCE_MS);
@@ -130,7 +135,11 @@ export function useLabelEditor(
     fields,
     previewUri,
     hasContent,
-    fieldKeys: animal ? availableLabelFields(animal) : [],
+    fieldKeys: animal
+      ? availableLabelFields(animal).filter(
+          (key) => key !== "sex" || fields.name,
+        )
+      : [],
     changeSize: (value: LabelSize) => {
       setSize(value);
       setLabelDefaults({ size: value });

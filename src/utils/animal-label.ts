@@ -332,7 +332,6 @@ export function buildLabelHtml(
       }
       .qr svg { width: 100%; height: 100%; display: block; }
       .qr path { fill: #3B2A1D; }
-      .qr rect { fill: none; }
       .info {
         flex: 1 1 auto;
         min-width: 0;
