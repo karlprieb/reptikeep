@@ -184,7 +184,8 @@
     "deleteTitle": "Excluir {{animalName}}?",
     "deleteMessage": "Isto também exclui todos os registros de alimentação, crescimento, muda, fezes e documentos de {{animalName}}. Não há como desfazer.",
     "deleteConfirm": "Excluir",
-    "cancel": "Cancelar"
+    "cancel": "Cancelar",
+    "back": "Voltar"
   },
   "documents": {
     "title": "Documentos",
@@ -240,6 +241,47 @@
       "missingTitle": "Documento indisponível",
       "missingDescription": "Este arquivo não foi encontrado. Ele pode ter sido removido deste dispositivo."
     }
+  },
+  "label": {
+    "title": "Etiqueta do terrário",
+    "menuItem": "Imprimir etiqueta",
+    "print": "Imprimir",
+    "share": "Compartilhar",
+    "size": {
+      "label": "Formato",
+      "dimensions": "{{width}} × {{height}} mm"
+    },
+    "target": {
+      "label": "Abrir",
+      "profile": "Perfil do animal",
+      "log": "Seletor de atividade"
+    },
+    "paper": {
+      "label": "Papel",
+      "a4": "A4",
+      "letter": "Carta"
+    },
+    "fields": {
+      "section": "Na etiqueta",
+      "qr": "Código QR",
+      "name": "Nome",
+      "scientificName": "Nome científico",
+      "commonName": "Nome popular",
+      "sex": "Sexo",
+      "birthDate": "Data de nascimento",
+      "acquiredDate": "Data de aquisição",
+      "photo": "Foto"
+    },
+    "field": {
+      "birthDate": "Nascido em {{date}}",
+      "acquiredDate": "Adquirido em {{date}}"
+    },
+    "footer": {
+      "profile": "O escaneamento abre o perfil de {{animalName}}.",
+      "log": "O escaneamento abre o seletor de atividade de {{animalName}}."
+    },
+    "error": "Não foi possível gerar esta etiqueta. Tente mudar uma opção ou tente de novo.",
+    "empty": "Ative pelo menos uma opção."
   },
   "addRecord": {
     "title": "Adicionar registro",
@@ -702,6 +744,23 @@
       },
       "share": {
         "hint": "Compartilha este documento"
+      }
+    },
+    "label": {
+      "print": {
+        "hint": "Cria um PDF da etiqueta e abre a caixa de diálogo de impressão"
+      },
+      "share": {
+        "hint": "Compartilha esta etiqueta como PDF"
+      },
+      "size": {
+        "hint": "Escolhe o tamanho da etiqueta impressa"
+      },
+      "target": {
+        "hint": "Escolhe o que abre ao escanear o código QR"
+      },
+      "paper": {
+        "hint": "Escolhe o tamanho do papel para impressão"
       }
     }
   },

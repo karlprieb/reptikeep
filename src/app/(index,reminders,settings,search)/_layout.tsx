@@ -146,6 +146,17 @@ export default function TabStackLayout({ segment }: { segment: string }) {
         options={{ headerBackButtonDisplayMode: "minimal" }}
       />
       <Stack.Screen
+        name="animal/[id]/label"
+        options={
+          Platform.OS === "android"
+            ? { headerShown: false }
+            : {
+                title: t("label.title"),
+                headerBackButtonDisplayMode: "minimal",
+              }
+        }
+      />
+      <Stack.Screen
         name="animal/[id]/edit"
         options={{ ...REPTILE_FORM_OPTIONS, title: t("editReptile.title") }}
       />

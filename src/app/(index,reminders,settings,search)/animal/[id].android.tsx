@@ -38,6 +38,7 @@ import DELETE_ICON from "@/assets/images/icons/delete.xml";
 import DESCRIPTION_ICON from "@/assets/images/icons/description.xml";
 import MODE_EDIT_ICON from "@/assets/images/icons/mode-edit.xml";
 import MORE_VERT_ICON from "@/assets/images/icons/more-vert.xml";
+import QR_CODE_ICON from "@/assets/images/icons/qr-code.xml";
 
 const PHOTO_SCRIM_COLOR = "rgba(20, 14, 8, 0.4)";
 const PHOTO_SCRIM_SOLID = "rgba(20, 14, 8, 0.92)";
@@ -49,7 +50,7 @@ export default function AnimalDetailScreen() {
   const insets = useSafeAreaInsets();
   const { t } = useTranslation();
   const { id, animal } = useAnimalRoute();
-  const addActivity = useAddActivity(id);
+  const addActivity = useAddActivity(animal?.id);
   const pendingDelete = useRef(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const { lifted, onScroll } = useScrollLift();
@@ -187,6 +188,23 @@ export default function AnimalDetailScreen() {
                 </IconButton>
               </DropdownMenu.Trigger>
               <DropdownMenu.Items>
+                <DropdownMenuItem
+                  onClick={() => {
+                    setMenuOpen(false);
+                    router.push(`/animal/${id}/label`);
+                  }}
+                >
+                  <DropdownMenuItem.Text>
+                    <Text color={theme.text}>{t("label.menuItem")}</Text>
+                  </DropdownMenuItem.Text>
+                  <DropdownMenuItem.LeadingIcon>
+                    <Icon
+                      source={QR_CODE_ICON}
+                      tint={theme.text}
+                      size={iconSize}
+                    />
+                  </DropdownMenuItem.LeadingIcon>
+                </DropdownMenuItem>
                 <DropdownMenuItem
                   onClick={() => {
                     setMenuOpen(false);

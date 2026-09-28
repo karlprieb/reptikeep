@@ -1,0 +1,16 @@
+[
+  {
+    "relation": [
+      "delegate_permission/common.handle_all_urls"
+    ],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "app.reptikeep",
+      "sha256_cert_fingerprints": [
+        "17:F5:20:75:39:12:C9:AF:A1:D2:51:4D:2B:92:81:64:34:EE:0E:C6:4F:18:C9:34:8C:6F:FE:B1:79:38:55:2A",
+        "FA:C6:17:45:DC:09:03:78:6F:B9:ED:E6:2A:96:2B:39:9F:73:48:F0:BB:6F:89:9B:83:32:66:75:91:03:3B:9C",
+        "33:AF:F9:F5:2F:D1:45:68:90:69:39:90:F3:42:FE:7D:29:43:74:AA:D3:8D:7C:2D:E2:EB:F1:EC:6A:BA:2E:D7"
+      ]
+    }
+  }
+]

@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- You can now print an enclosure label for any reptile, with a QR code and
+  its name, species and dates. Scanning the code with your phone opens that
+  reptile in the app, or straight to logging a new activity for it.
+
 ## [0.6.2] - 2026-09-25
 
 ### Fixed

@@ -184,7 +184,8 @@
     "deleteTitle": "Delete {{animalName}}?",
     "deleteMessage": "This also deletes every feeding, growth, shed, poop record, and document logged for {{animalName}}. There is no way to undo it.",
     "deleteConfirm": "Delete",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "back": "Back"
   },
   "documents": {
     "title": "Documents",
@@ -240,6 +241,47 @@
       "missingTitle": "Document unavailable",
       "missingDescription": "This file could not be found. It may have been removed from this device."
     }
+  },
+  "label": {
+    "title": "Enclosure label",
+    "menuItem": "Print label",
+    "print": "Print",
+    "share": "Share",
+    "size": {
+      "label": "Format",
+      "dimensions": "{{width}} × {{height}} mm"
+    },
+    "target": {
+      "label": "Scan opens",
+      "profile": "Animal profile",
+      "log": "Activity picker"
+    },
+    "paper": {
+      "label": "Paper",
+      "a4": "A4",
+      "letter": "Letter"
+    },
+    "fields": {
+      "section": "On the label",
+      "qr": "QR code",
+      "name": "Name",
+      "scientificName": "Scientific name",
+      "commonName": "Common name",
+      "sex": "Sex",
+      "birthDate": "Birth date",
+      "acquiredDate": "Acquired date",
+      "photo": "Photo"
+    },
+    "field": {
+      "birthDate": "Born {{date}}",
+      "acquiredDate": "Acquired {{date}}"
+    },
+    "footer": {
+      "profile": "Scanning opens {{animalName}}'s profile.",
+      "log": "Scanning opens the activity picker for {{animalName}}."
+    },
+    "error": "We couldn't build this label. Try changing an option or try again.",
+    "empty": "Turn on at least one option."
   },
   "addRecord": {
     "title": "Add a record",
@@ -702,6 +744,23 @@
       },
       "share": {
         "hint": "Shares this document"
+      }
+    },
+    "label": {
+      "print": {
+        "hint": "Creates a PDF label and opens the print dialog"
+      },
+      "share": {
+        "hint": "Shares this label as a PDF"
+      },
+      "size": {
+        "hint": "Chooses how big the printed label is"
+      },
+      "target": {
+        "hint": "Chooses what scanning the QR code opens"
+      },
+      "paper": {
+        "hint": "Chooses the paper size for printing"
       }
     }
   },

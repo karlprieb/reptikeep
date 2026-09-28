@@ -52,6 +52,9 @@ jobs:
 
           npx --yes clean-css-cli --output dist/assets/style.css website/assets/style.css
 
+          cp -r website/.well-known dist/.well-known
+          cp website/.nojekyll dist/.nojekyll
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
