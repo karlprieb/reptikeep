@@ -244,7 +244,7 @@ export default function AnimalHistoryScreen() {
   );
 
   const types = useMemo(() => presentTypes(entries), [entries]);
-  const addActivity = useAddActivity(id);
+  const addActivity = useAddActivity(animal?.id);
 
   const filter = useMemo<DateFilter>(
     () =>

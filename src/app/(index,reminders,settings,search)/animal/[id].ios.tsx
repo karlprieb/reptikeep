@@ -17,7 +17,7 @@ export default function AnimalDetailScreen() {
   const { t } = useTranslation();
   const headerHeight = useHeaderHeight();
   const { id, animal } = useAnimalRoute();
-  const addActivity = useAddActivity(id);
+  const addActivity = useAddActivity(animal?.id);
   const pendingDelete = useRef(false);
 
   useEffect(
@@ -61,6 +61,12 @@ export default function AnimalDetailScreen() {
           accessibilityLabel={t("animal.actions")}
           accessibilityHint={t("animal.actionsHint")}
         >
+          <Stack.Toolbar.MenuAction
+            icon="qrcode"
+            onPress={() => router.push(`/animal/${id}/label`)}
+          >
+            {t("label.menuItem")}
+          </Stack.Toolbar.MenuAction>
           <Stack.Toolbar.MenuAction
             icon="doc.text"
             onPress={() => router.push(`/animal/${id}/documents`)}

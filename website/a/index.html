@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>ReptiKeep · Enclosure label</title>
+    <meta
+      name="description"
+      content="You scanned a ReptiKeep enclosure label. Install the app to open this animal's profile directly, or open it now if it's already installed."
+    />
+    <meta name="robots" content="noindex" />
+    <link rel="canonical" href="https://reptikeep.com/a/" />
+
+    <meta
+      name="theme-color"
+      content="#f2e4cc"
+      media="(prefers-color-scheme: light)"
+    />
+    <meta
+      name="theme-color"
+      content="#120d09"
+      media="(prefers-color-scheme: dark)"
+    />
+
+    <link rel="icon" href="../assets/icon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="../assets/style.css" />
+  </head>
+  <body>
+    <svg
+      aria-hidden="true"
+      style="position: absolute; width: 0; height: 0; overflow: hidden"
+    >
+      <symbol id="rk-mark" viewBox="0 0 96 96">
+        <path
+          fill="none"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="11"
+          d="M25 51c7-6 9 6 17 13 3 2.5 6 1.5 8.5-2L70 35"
+        />
+        <path
+          fill="none"
+          stroke="var(--accent)"
+          stroke-linecap="round"
+          stroke-width="11"
+          d="M63.5 43.9 70 35"
+        />
+        <circle cx="67.6" cy="38.6" r="2.2" fill="var(--surface)" />
+      </symbol>
+      <symbol id="rk-download" viewBox="0 0 16 16">
+        <path
+          d="M8 2v9M4.5 7.5 8 11l3.5-3.5M2.5 13.5h11"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.6"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />
+      </symbol>
+    </svg>
+    <a class="skip" href="#main">Skip to content</a>
+
+    <div class="sheet">
+      <header class="masthead pad">
+        <a class="mark" href="../"> ReptiKeep </a>
+        <nav aria-label="Sections">
+          <a href="../#record">The record</a>
+          <a href="../#loop">The loop</a>
+          <a href="../#platforms">Platforms</a>
+          <a href="https://github.com/karlprieb/reptikeep">GitHub</a>
+        </nav>
+      </header>
+
+      <main id="main">
+        <section class="block pad">
+          <svg
+            class="hero-mark"
+            viewBox="0 0 96 96"
+            aria-hidden="true"
+            width="64"
+            height="64"
+          >
+            <use href="#rk-mark" />
+          </svg>
+          <h1>You scanned an enclosure label.</h1>
+          <p class="lead">
+            That QR code opens this animal's profile straight from the
+            enclosure glass. Install ReptiKeep to see it, or open it now if
+            the app is already on this device.
+          </p>
+
+          <div class="cta">
+            <a
+              class="btn btn-primary"
+              href="https://testflight.apple.com/join/NE9QP7kc"
+            >
+              <svg class="btn-glyph" viewBox="0 0 16 16" aria-hidden="true">
+                <use href="#rk-download" />
+              </svg>
+              Join the TestFlight
+            </a>
+            <button type="button" class="btn btn-secondary" disabled>
+              Get it on Google Play
+              <span class="btn-badge">Soon</span>
+            </button>
+            <a id="open-app" class="textlink" href="#" hidden>
+              Open in ReptiKeep
+              <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+                <path
+                  d="M2 8h11M9 4l4 4-4 4"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.7"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+            </a>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <footer class="foot">
+      <div class="foot-inner pad">
+        <div>
+          <a class="mark" href="../">
+            <svg class="mark-glyph" viewBox="0 0 96 96" aria-hidden="true">
+              <use href="#rk-mark" />
+            </svg>
+            ReptiKeep
+          </a>
+          <p class="tagline">Feed. Shed. Repeat.</p>
+          <p class="foot-blurb">
+            An offline-first husbandry record for people who keep reptiles.
+            Open source, MIT licensed, self-hostable.
+          </p>
+        </div>
+
+        <div>
+          <h2>Project</h2>
+          <ul>
+            <li>
+              <a href="https://github.com/karlprieb/reptikeep"
+                >Source on GitHub</a
+              >
+            </li>
+            <li>
+              <a href="https://github.com/karlprieb/reptikeep/issues"
+                >Report an issue</a
+              >
+            </li>
+            <li>
+              <a href="https://github.com/karlprieb/reptikeep/blob/main/LICENSE"
+                >MIT licence</a
+              >
+            </li>
+            <li><a href="../privacy-policy.html">Privacy Policy</a></li>
+            <li><a href="../terms.html">Terms &amp; Conditions</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <h2>Language</h2>
+          <p class="lang">
+            <span aria-current="true">English</span>
+            <span aria-hidden="true">/</span>
+            <a href="../pt-br/a/?id=" hreflang="pt-BR" lang="pt-BR"
+              >Portugu&ecirc;s</a
+            >
+          </p>
+        </div>
+      </div>
+
+      <div class="colophon pad">
+        <span>&copy; 2026 Karl Prieb &middot; MIT</span>
+      </div>
+    </footer>
+
+    <script>
+      (function () {
+        var params = new URLSearchParams(location.search);
+        var id = params.get("id");
+        if (!id) return;
+
+        var log = params.get("log") === "1" ? "&log=1" : "";
+        var link = document.getElementById("open-app");
+        link.href = "reptikeep://a/?id=" + encodeURIComponent(id) + log;
+        link.hidden = false;
+
+        var ptLink = document.querySelector('a[hreflang="pt-BR"]');
+        if (ptLink) {
+          ptLink.href = "../pt-br/a/?id=" + encodeURIComponent(id) + log;
+        }
+      })();
+    </script>
+  </body>
+</html>

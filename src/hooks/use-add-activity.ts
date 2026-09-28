@@ -1,19 +1,26 @@
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import { useRef, useState } from "react";
 
 import type { ActivityType } from "@/constants/theme";
 
 export function useAddActivity(animalId: string | undefined) {
-  const [visible, setVisible] = useState(false);
+  const [opened, setOpened] = useState(false);
   const pending = useRef<ActivityType | null>(null);
+  const { log } = useLocalSearchParams<{ log?: string }>();
+  const openedFromLabel = log === "1" && Boolean(animalId);
+
+  const hide = () => {
+    setOpened(false);
+    if (openedFromLabel) router.setParams({ log: undefined });
+  };
 
   return {
-    visible,
-    open: () => setVisible(true),
-    close: () => setVisible(false),
+    visible: opened || openedFromLabel,
+    open: () => setOpened(true),
+    close: hide,
     pick: (type: ActivityType) => {
       pending.current = type;
-      setVisible(false);
+      hide();
     },
     dismiss: () => {
       const type = pending.current;

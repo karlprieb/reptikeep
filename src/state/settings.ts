@@ -3,6 +3,7 @@ import { syncObservable } from "@legendapp/state/sync";
 import * as Localization from "expo-localization";
 
 import i18n, { resolveLanguage, type SupportedLanguage } from "@/i18n";
+import type { LabelSize, LabelTarget, PaperSize } from "@/utils/animal-label";
 import type { AnimalSort } from "@/utils/animal-sort";
 import { persistPlugin } from "./persist";
 
@@ -10,12 +11,27 @@ export type LanguageSetting = "system" | SupportedLanguage;
 
 export type ReptileViewMode = "single" | "grid" | "list";
 
+export interface LabelDefaults {
+  size: LabelSize;
+  target: LabelTarget;
+  paper: PaperSize;
+  customWidthMm: number;
+}
+
 const DEFAULT_REPTILE_SORT: AnimalSort = { field: "name", direction: "asc" };
+
+export const DEFAULT_LABEL_DEFAULTS: LabelDefaults = {
+  size: "card",
+  target: "profile",
+  paper: "a4",
+  customWidthMm: 122,
+};
 
 export const settings$ = observable({
   language: "system" as LanguageSetting,
   reptileSort: DEFAULT_REPTILE_SORT,
   reptileView: "single" as ReptileViewMode,
+  labelDefaults: DEFAULT_LABEL_DEFAULTS,
 });
 
 export function setLanguage(lang: LanguageSetting): void {
@@ -29,6 +45,10 @@ export function setReptileSort(sort: AnimalSort): void {
 
 export function setReptileView(view: ReptileViewMode): void {
   settings$.reptileView.set(view);
+}
+
+export function setLabelDefaults(patch: Partial<LabelDefaults>): void {
+  settings$.labelDefaults.set({ ...settings$.labelDefaults.peek(), ...patch });
 }
 
 function applyLanguage(lang: LanguageSetting): void {

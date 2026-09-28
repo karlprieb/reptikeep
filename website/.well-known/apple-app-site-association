@@ -1,0 +1,12 @@
+{
+  "applinks": {
+    "details": [
+      {
+        "appIDs": ["3K9KUB8992.app.reptikeep"],
+        "components": [
+          { "/": "/a/*", "comment": "Enclosure label QR codes" }
+        ]
+      }
+    ]
+  }
+}

@@ -11,6 +11,7 @@
       "bundleIdentifier": "app.reptikeep",
       "appleTeamId": "3K9KUB8992",
       "buildNumber": "4",
+      "associatedDomains": ["applinks:reptikeep.com"],
       "config": {
         "usesNonExemptEncryption": false
       }
@@ -25,7 +26,21 @@
       "versionCode": 2,
       "predictiveBackGestureEnabled": true,
       "allowBackup": false,
-      "blockedPermissions": ["android.permission.RECORD_AUDIO"]
+      "blockedPermissions": ["android.permission.RECORD_AUDIO"],
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "autoVerify": true,
+          "data": [
+            {
+              "scheme": "https",
+              "host": "reptikeep.com",
+              "pathPrefix": "/a/"
+            }
+          ],
+          "category": ["BROWSABLE", "DEFAULT"]
+        }
+      ]
     },
     "plugins": [
       "expo-router",
