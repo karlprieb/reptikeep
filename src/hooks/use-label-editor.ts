@@ -58,6 +58,7 @@ export function useLabelEditor(
   const generation = useRef(0);
   const shownPreview = useRef<string | undefined>(undefined);
   const lastOutput = useRef<string | undefined>(undefined);
+  const outputBusy = useRef(false);
   const reportError = useRef(onError);
   useEffect(() => {
     reportError.current = onError;
@@ -104,7 +105,8 @@ export function useLabelEditor(
   );
 
   const output = async (send: (uri: string) => Promise<void>) => {
-    if (!animal) return;
+    if (!animal || outputBusy.current) return;
+    outputBusy.current = true;
     try {
       const uri = await createLabelPdf(
         animal,
@@ -116,6 +118,8 @@ export function useLabelEditor(
       await send(uri);
     } catch {
       reportError.current();
+    } finally {
+      outputBusy.current = false;
     }
   };
 

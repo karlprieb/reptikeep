@@ -41,6 +41,21 @@ describe("redirectSystemPath", () => {
     expect(redirectSystemPath({ path: "/settings" })).toBe("/settings");
   });
 
+  it("leaves /a/ links on other hosts alone", () => {
+    for (const path of [
+      `https://example.com/a/?id=${uuid}`,
+      `reptikeep://other/a/?id=${uuid}`,
+    ]) {
+      expect(redirectSystemPath({ path })).toBe(path);
+    }
+  });
+
+  it("rewrites a bare label path", () => {
+    expect(redirectSystemPath({ path: `/a/?id=${uuid}` })).toBe(
+      `/animal/${uuid}`,
+    );
+  });
+
   it("never throws on malformed input", () => {
     expect(() => redirectSystemPath({ path: "" })).not.toThrow();
     expect(() =>

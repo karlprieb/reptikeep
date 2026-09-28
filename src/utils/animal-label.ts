@@ -424,27 +424,24 @@ async function loadFontFacesCss(): Promise<string> {
 
 const LABEL_PHOTO_MAX_WIDTH = 600;
 
-async function loadPhotoDataUri(photo: string): Promise<string | undefined> {
+async function loadPhotoDataUri(photo: string): Promise<string> {
+  const context = ImageManipulator.manipulate(getAnimalPhotoUri(photo));
   try {
-    const context = ImageManipulator.manipulate(getAnimalPhotoUri(photo));
+    context.resize({ width: LABEL_PHOTO_MAX_WIDTH });
+    const image = await context.renderAsync();
     try {
-      context.resize({ width: LABEL_PHOTO_MAX_WIDTH });
-      const image = await context.renderAsync();
-      try {
-        const { base64 } = await image.saveAsync({
-          format: SaveFormat.JPEG,
-          compress: 0.8,
-          base64: true,
-        });
-        return base64 ? `data:image/jpeg;base64,${base64}` : undefined;
-      } finally {
-        image.release();
-      }
+      const { base64 } = await image.saveAsync({
+        format: SaveFormat.JPEG,
+        compress: 0.8,
+        base64: true,
+      });
+      if (!base64) throw new Error("Label photo could not be encoded");
+      return `data:image/jpeg;base64,${base64}`;
     } finally {
-      context.release();
+      image.release();
     }
-  } catch {
-    return undefined;
+  } finally {
+    context.release();
   }
 }
 

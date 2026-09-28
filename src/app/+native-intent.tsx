@@ -5,9 +5,12 @@ export function redirectSystemPath({ path }: { path: string }): string {
   try {
     const url = new URL(path, "https://reptikeep.com");
     const isLabelPath =
-      url.pathname === "/a/" ||
-      url.pathname === "/a" ||
-      (url.hostname === "a" && (url.pathname === "/" || url.pathname === ""));
+      (url.protocol === "https:" &&
+        url.hostname === "reptikeep.com" &&
+        (url.pathname === "/a/" || url.pathname === "/a")) ||
+      (url.protocol === "reptikeep:" &&
+        url.hostname === "a" &&
+        (url.pathname === "/" || url.pathname === ""));
     if (!isLabelPath) return path;
 
     const rawId = url.searchParams.get("id");
