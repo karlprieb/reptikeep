@@ -68,6 +68,15 @@ function toDate(stored?: string): Date {
   return (stored ? fromCalendarDate(stored) : null) ?? new Date();
 }
 
+function addAnimalOrDiscardPhoto(record: Animal, managedPhoto?: string) {
+  try {
+    addAnimal(record);
+  } catch (error) {
+    deleteManagedAnimalPhoto(managedPhoto);
+    throw error;
+  }
+}
+
 export function useReptileForm(animal?: Animal) {
   const { t, i18n } = useTranslation();
   const language = i18n.language as SupportedLanguage;
@@ -175,12 +184,10 @@ export function useReptileForm(animal?: Animal) {
       ? await importAnimalPhoto(photo, created.id)
       : undefined;
 
-    try {
-      addAnimal(managedPhoto ? { ...created, photo: managedPhoto } : created);
-    } catch (error) {
-      deleteManagedAnimalPhoto(managedPhoto);
-      throw error;
-    }
+    addAnimalOrDiscardPhoto(
+      managedPhoto ? { ...created, photo: managedPhoto } : created,
+      managedPhoto,
+    );
   };
 
   const saveEdit = async (current: Animal, fields: ReptileFormFields) => {
@@ -201,33 +208,33 @@ export function useReptileForm(animal?: Animal) {
   const handleConfirm = async () => {
     if (!canSave || savingRef.current) return;
 
+    const fields: ReptileFormFields = {
+      name: name.trim(),
+      commonName: commonName.trim() || undefined,
+      scientificName: scientificName.trim() || undefined,
+      sex,
+      acquiredDate: knowsAcquired ? toCalendarDate(acquiredDate) : undefined,
+      birthDate: knownBirthDate ? toCalendarDate(birthDate) : undefined,
+      defaults,
+      feedingSchedule: usesFeedingSchedule
+        ? careScheduleFromFields(feedingSelection, feedingDays)
+        : undefined,
+      waterSchedule: scheduleFromFields(waterSelection, waterDays),
+      cleaningSchedule: scheduleFromFields(cleaningSelection, cleaningDays),
+      reminders: {
+        feed: feedingReminder,
+        water: waterReminder,
+        cleaning: cleaningReminder,
+      },
+    };
+
     savingRef.current = true;
     setIsSaving(true);
     setSaveError(undefined);
 
+    const saved = animal ? saveEdit(animal, fields) : saveNew(fields);
     try {
-      const fields: ReptileFormFields = {
-        name: name.trim(),
-        commonName: commonName.trim() || undefined,
-        scientificName: scientificName.trim() || undefined,
-        sex,
-        acquiredDate: knowsAcquired ? toCalendarDate(acquiredDate) : undefined,
-        birthDate: knownBirthDate ? toCalendarDate(birthDate) : undefined,
-        defaults,
-        feedingSchedule: usesFeedingSchedule
-          ? careScheduleFromFields(feedingSelection, feedingDays)
-          : undefined,
-        waterSchedule: scheduleFromFields(waterSelection, waterDays),
-        cleaningSchedule: scheduleFromFields(cleaningSelection, cleaningDays),
-        reminders: {
-          feed: feedingReminder,
-          water: waterReminder,
-          cleaning: cleaningReminder,
-        },
-      };
-      if (animal) await saveEdit(animal, fields);
-      else await saveNew(fields);
-
+      await saved;
       router.back();
     } catch {
       setSaveError(t("reptileForm.photoSaveError"));

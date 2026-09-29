@@ -126,21 +126,22 @@ export function AddMedicalSheet({
 
   const handleSave = async () => {
     if (!canSave || savingRef.current) return;
+    const record = createMedicalActivity({
+      animalId,
+      occurredAt: draft.occurredAt.toISOString(),
+      summary: draft.summary,
+      notes: optionalText(draft.notes),
+    });
     savingRef.current = true;
     setSaving(true);
     setSaveError(undefined);
+    const saved = saveMedicalActivity(
+      activity ? asEditOf(record, activity) : record,
+      pending,
+      removedIds,
+    );
     try {
-      const record = createMedicalActivity({
-        animalId,
-        occurredAt: draft.occurredAt.toISOString(),
-        summary: draft.summary,
-        notes: optionalText(draft.notes),
-      });
-      await saveMedicalActivity(
-        activity ? asEditOf(record, activity) : record,
-        pending,
-        removedIds,
-      );
+      await saved;
       router.back();
     } catch {
       setSaveError(t("medicalForm.saveError"));

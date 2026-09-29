@@ -65,6 +65,18 @@ function withDocuments(
   return documents > 0 ? `${sentence} ${documentSentence}` : sentence;
 }
 
+function summarizeBackup(parsed: Awaited<ReturnType<typeof parseBackup>>) {
+  return {
+    scopes: parsed.manifest.scopes,
+    animals: Object.keys(parsed.data.animals ?? {}).length,
+    records: activityTables.reduce(
+      (count, table) => count + Object.keys(parsed.data[table] ?? {}).length,
+      0,
+    ),
+    documents: Object.keys(parsed.data.documents ?? {}).length,
+  };
+}
+
 export default function BackupRestoreScreen() {
   const { t } = useTranslation();
   const theme = useTheme();
@@ -110,13 +122,12 @@ export default function BackupRestoreScreen() {
     setSuccess(undefined);
     setProgress("export");
     AccessibilityInfo.announceForAccessibility(t("backup.exportingTitle"));
+    const options = exportAll
+      ? undefined
+      : { animalIds: selectedAnimalIds, includePreferences };
     let archive: File | undefined;
     try {
-      archive = await createBackup(
-        exportAll
-          ? undefined
-          : { animalIds: selectedAnimalIds, includePreferences },
-      );
+      archive = await createBackup(options);
       setProgress(undefined);
       await shareBackup(archive);
     } catch (error) {
@@ -143,16 +154,7 @@ export default function BackupRestoreScreen() {
         AccessibilityInfo.announceForAccessibility(t("backup.inspectingTitle"));
         const parsed = await parseBackup(file);
         setProgress(undefined);
-        const summary = {
-          scopes: parsed.manifest.scopes,
-          animals: Object.keys(parsed.data.animals ?? {}).length,
-          records: activityTables.reduce(
-            (count, table) =>
-              count + Object.keys(parsed.data[table] ?? {}).length,
-            0,
-          ),
-          documents: Object.keys(parsed.data.documents ?? {}).length,
-        };
+        const summary = summarizeBackup(parsed);
         Alert.alert(
           t("backup.restoreTitle"),
           withDocuments(
