@@ -1,9 +1,7 @@
 import { fireEvent, render, screen } from "@testing-library/react-native";
 
-import {
-  ActivityTypeFilter,
-  presentTypes,
-} from "@/components/activity-type-filter";
+import { ActivityTypeFilter } from "@/components/activity-type-filter";
+import { presentTypes } from "@/utils/activity-filter";
 import type { ActivityType } from "@/constants/theme";
 import type { AnimalActivity } from "@/utils/animal-activity";
 import "@/i18n";

@@ -22,72 +22,210 @@ import {
   toggleable,
   weight,
 } from "@expo/ui/jetpack-compose/modifiers";
-import { useValue } from "@legendapp/state/react";
-import * as DocumentPicker from "expo-document-picker";
 import { File } from "expo-file-system";
-import { useState } from "react";
-import { AccessibilityInfo, ScrollView, StyleSheet, View } from "react-native";
+import { useState, type Dispatch, type SetStateAction } from "react";
+import { ScrollView, StyleSheet, View } from "react-native";
 import { useTranslation } from "react-i18next";
 
 import { Spacing, type Theme } from "@/constants/theme";
 import { composeTextStyle, SECTION_LABEL } from "@/constants/type-font-compose";
+import { useBackupRestore } from "@/hooks/use-backup-restore";
 import { useTheme } from "@/hooks/use-theme";
-import { animals$ } from "@/state/animal";
 import { resetAppData } from "@/state/reset";
-import {
-  cleanupBackupArchive,
-  createBackup,
-  parseBackup,
-  restoreBackup,
-  shareBackup,
-  type RestoredBackup,
-} from "@/utils/backup";
 
 import CHECK_ICON from "@/assets/images/icons/check.xml";
 
 const ROW_MIN_HEIGHT = 64;
 const ACTION_ICON_SIZE = 24;
 
-const activityTables = [
-  "feedings",
-  "weights",
-  "sheds",
-  "defecations",
-  "habitats",
-  "medical",
-] as const;
+function ProgressDialog({ theme, copy }: { theme: Theme; copy: string }) {
+  const { t } = useTranslation();
 
-function withDocuments(
-  sentence: string,
-  documentSentence: string,
-  documents: number,
-): string {
-  return documents > 0 ? `${sentence} ${documentSentence}` : sentence;
+  return (
+    <View style={styles.dialogHost} pointerEvents="box-none">
+      <Host matchContents seedColor={theme.primary}>
+        <AlertDialog
+          colors={{
+            containerColor: theme.surface,
+            iconContentColor: theme.accentInk,
+            titleContentColor: theme.text,
+            textContentColor: theme.textSecondary,
+          }}
+          properties={{
+            dismissOnBackPress: false,
+            dismissOnClickOutside: false,
+          }}
+        >
+          <AlertDialog.Icon>
+            <CircularProgressIndicator
+              color={theme.accentInk}
+              trackColor={theme.surfaceSunken}
+            />
+          </AlertDialog.Icon>
+          <AlertDialog.Title>
+            <Text style={SECTION_LABEL} color={theme.text}>
+              {t(`backup.${copy}Title`)}
+            </Text>
+          </AlertDialog.Title>
+          <AlertDialog.Text>
+            <Text style={composeTextStyle("body")} color={theme.textSecondary}>
+              {t(`backup.${copy}Message`)}
+            </Text>
+          </AlertDialog.Text>
+        </AlertDialog>
+      </Host>
+    </View>
+  );
 }
 
-function summarizeBackup(parsed: Awaited<ReturnType<typeof parseBackup>>) {
-  return {
-    scopes: parsed.manifest.scopes,
-    animals: Object.keys(parsed.data.animals ?? {}).length,
-    records: activityTables.reduce(
-      (count, table) => count + Object.keys(parsed.data[table] ?? {}).length,
-      0,
-    ),
-    documents: Object.keys(parsed.data.documents ?? {}).length,
-  };
+type RestoreConfirmDialogProps = {
+  theme: Theme;
+  pending: { file: File; summary: string };
+  onConfirm: () => void;
+  onDismiss: () => void;
+};
+
+function RestoreConfirmDialog({
+  theme,
+  pending,
+  onConfirm,
+  onDismiss,
+}: RestoreConfirmDialogProps) {
+  const { t } = useTranslation();
+
+  return (
+    <View style={styles.dialogHost} pointerEvents="box-none">
+      <Host matchContents seedColor={theme.primary}>
+        <AlertDialog
+          colors={{
+            containerColor: theme.surface,
+            titleContentColor: theme.text,
+            textContentColor: theme.textSecondary,
+          }}
+          onDismissRequest={onDismiss}
+        >
+          <AlertDialog.Title>
+            <Text style={SECTION_LABEL} color={theme.text}>
+              {t("backup.restoreTitle")}
+            </Text>
+          </AlertDialog.Title>
+          <AlertDialog.Text>
+            <Text style={composeTextStyle("body")} color={theme.textSecondary}>
+              {pending.summary}
+            </Text>
+          </AlertDialog.Text>
+          <AlertDialog.ConfirmButton>
+            <TextButton
+              onClick={onConfirm}
+              colors={{ contentColor: theme.danger }}
+            >
+              <Text style={composeTextStyle("body")}>
+                {t("backup.restoreConfirm")}
+              </Text>
+            </TextButton>
+          </AlertDialog.ConfirmButton>
+          <AlertDialog.DismissButton>
+            <TextButton
+              onClick={onDismiss}
+              colors={{ contentColor: theme.textSecondary }}
+            >
+              <Text style={composeTextStyle("body")}>
+                {t("settings.cancel")}
+              </Text>
+            </TextButton>
+          </AlertDialog.DismissButton>
+        </AlertDialog>
+      </Host>
+    </View>
+  );
+}
+
+type ExportOptionsProps = {
+  theme: Theme;
+  exportAll: boolean;
+  animals: { id: string; name: string }[];
+  animalLabel: string;
+  animalIds: string[];
+  onAnimalIdsChange: Dispatch<SetStateAction<string[]>>;
+  includePreferences: boolean;
+  onIncludePreferencesChange: (value: boolean) => void;
+};
+
+function ExportOptions({
+  theme,
+  exportAll,
+  animals,
+  animalLabel,
+  animalIds,
+  onAnimalIdsChange,
+  includePreferences,
+  onIncludePreferencesChange,
+}: ExportOptionsProps) {
+  const { t } = useTranslation();
+  if (exportAll) return null;
+
+  return (
+    <>
+      {!exportAll && animals.length > 0 ? (
+        <AnimalMenu
+          theme={theme}
+          label={animalLabel}
+          hint={t("a11y.backup.animals")}
+          animals={animals.map((animal) => ({
+            id: animal.id,
+            name: animal.name,
+          }))}
+          selectedIds={animalIds}
+          onToggle={(id, on) =>
+            onAnimalIdsChange((current) =>
+              on
+                ? [...new Set([...current, id])]
+                : current.filter((value) => value !== id),
+            )
+          }
+        />
+      ) : null}
+
+      {!exportAll && animals.length === 0 ? (
+        <SectionFooter theme={theme} text={t("backup.animalsEmpty")} />
+      ) : null}
+
+      {!exportAll ? (
+        <ToggleRow
+          theme={theme}
+          title={t("backup.includePreferences")}
+          hint={t("a11y.backup.preferences")}
+          checked={includePreferences}
+          onCheckedChange={onIncludePreferencesChange}
+        />
+      ) : null}
+    </>
+  );
 }
 
 export default function BackupRestoreScreen() {
   const { t } = useTranslation();
   const theme = useTheme();
-  const animals = Object.values(useValue(animals$));
-  const [exportAll, setExportAll] = useState(true);
-  const [animalIds, setAnimalIds] = useState<string[]>([]);
-  const [includePreferences, setIncludePreferences] = useState(false);
-  const [busy, setBusy] = useState(false);
-  const [progress, setProgress] = useState<"export" | "inspect" | "restore">();
-  const [success, setSuccess] = useState<RestoredBackup>();
-  const [error, setError] = useState<string>();
+  const {
+    animals,
+    exportAll,
+    setExportAll,
+    animalIds,
+    setAnimalIds,
+    includePreferences,
+    setIncludePreferences,
+    busy,
+    success,
+    error,
+    customSelection,
+    animalSelectionLabel,
+    successMessage,
+    exportBackup,
+    confirmRestore,
+    chooseBackup,
+    copy,
+    progress,
+  } = useBackupRestore();
   const [isAdvancedPresented, setIsAdvancedPresented] = useState(false);
   const [pendingRestore, setPendingRestore] = useState<{
     file: File;
@@ -95,114 +233,9 @@ export default function BackupRestoreScreen() {
   }>();
   const [showReset, setShowReset] = useState(false);
 
-  const selectedAnimalIds = animalIds.filter((id) =>
-    animals.some((animal) => animal.id === id),
-  );
-  const customSelection = selectedAnimalIds.length > 0 || includePreferences;
-  const animalSelectionLabel =
-    selectedAnimalIds.length === 0
-      ? t("backup.animalsNone")
-      : selectedAnimalIds.length === 1
-        ? t("backup.animalsOne", {
-            animalName: animals.find(
-              (animal) => animal.id === selectedAnimalIds[0],
-            )!.name,
-          })
-        : t("backup.animalsSelected", { count: selectedAnimalIds.length });
-
-  const logBackupError = (operation: string, error: unknown) => {
-    if (__DEV__) console.error(`Backup ${operation} failed`, error);
-  };
-  const successMessage = (restored: RestoredBackup) =>
-    withDocuments(
-      t("backup.success", { ...restored, count: restored.animals }),
-      t("backup.documentsRestored", { count: restored.documents }),
-      restored.documents,
-    );
-
-  const exportBackup = async () => {
-    setBusy(true);
-    setError(undefined);
-    setSuccess(undefined);
-    setProgress("export");
-    AccessibilityInfo.announceForAccessibility(t("backup.exportingTitle"));
-    const options = exportAll
-      ? undefined
-      : { animalIds: selectedAnimalIds, includePreferences };
-    let archive: File | undefined;
-    try {
-      archive = await createBackup(options);
-      setProgress(undefined);
-      await shareBackup(archive);
-    } catch (error) {
-      logBackupError("export", error);
-      setError(t("backup.error"));
-    }
-    setProgress(undefined);
-    setBusy(false);
-    if (archive) cleanupBackupArchive(archive);
-  };
-
-  const confirmRestore = async (candidate: File) => {
-    setBusy(true);
-    setError(undefined);
-    setProgress("restore");
-    AccessibilityInfo.announceForAccessibility(t("backup.restoringTitle"));
-    try {
-      const restored = await restoreBackup(candidate);
-      setSuccess(restored);
-      AccessibilityInfo.announceForAccessibility(successMessage(restored));
-    } catch (error) {
-      logBackupError("restore", error);
-      setError(t("backup.restoreError"));
-    }
-    setProgress(undefined);
-    setBusy(false);
-  };
-
-  const chooseBackup = async () => {
-    setError(undefined);
-    setSuccess(undefined);
-    try {
-      setBusy(true);
-      const result = await DocumentPicker.getDocumentAsync({
-        multiple: false,
-        copyToCacheDirectory: true,
-        type: "application/zip",
-      });
-      if (!result.canceled) {
-        const file = new File(result.assets[0].uri);
-        setProgress("inspect");
-        AccessibilityInfo.announceForAccessibility(t("backup.inspectingTitle"));
-        const parsed = await parseBackup(file);
-        setProgress(undefined);
-        const summary = summarizeBackup(parsed);
-        setPendingRestore({
-          file,
-          summary: withDocuments(
-            t("backup.restoreMessage", { ...summary, count: summary.animals }),
-            t("backup.documentsIncluded", { count: summary.documents }),
-            summary.documents,
-          ),
-        });
-      }
-    } catch {
-      setError(t("backup.error"));
-    }
-    setProgress(undefined);
-    setBusy(false);
-  };
-
   const askReset = () => setShowReset(true);
 
   const exportDisabled = busy || (!exportAll && !customSelection);
-
-  const copy =
-    progress === "export"
-      ? "exporting"
-      : progress === "inspect"
-        ? "inspecting"
-        : "restoring";
 
   return (
     <>
@@ -225,39 +258,16 @@ export default function BackupRestoreScreen() {
               onCheckedChange={setExportAll}
             />
 
-            {!exportAll && animals.length > 0 ? (
-              <AnimalMenu
-                theme={theme}
-                label={animalSelectionLabel}
-                hint={t("a11y.backup.animals")}
-                animals={animals.map((animal) => ({
-                  id: animal.id,
-                  name: animal.name,
-                }))}
-                selectedIds={animalIds}
-                onToggle={(id, on) =>
-                  setAnimalIds((current) =>
-                    on
-                      ? [...new Set([...current, id])]
-                      : current.filter((value) => value !== id),
-                  )
-                }
-              />
-            ) : null}
-
-            {!exportAll && animals.length === 0 ? (
-              <SectionFooter theme={theme} text={t("backup.animalsEmpty")} />
-            ) : null}
-
-            {!exportAll ? (
-              <ToggleRow
-                theme={theme}
-                title={t("backup.includePreferences")}
-                hint={t("a11y.backup.preferences")}
-                checked={includePreferences}
-                onCheckedChange={setIncludePreferences}
-              />
-            ) : null}
+            <ExportOptions
+              theme={theme}
+              exportAll={exportAll}
+              animals={animals}
+              animalLabel={animalSelectionLabel}
+              animalIds={animalIds}
+              onAnimalIdsChange={setAnimalIds}
+              includePreferences={includePreferences}
+              onIncludePreferencesChange={setIncludePreferences}
+            />
 
             <Column
               modifiers={[
@@ -290,7 +300,11 @@ export default function BackupRestoreScreen() {
               ]}
             >
               <OutlinedButton
-                onClick={chooseBackup}
+                onClick={() =>
+                  chooseBackup((file, summary) =>
+                    setPendingRestore({ file, summary }),
+                  )
+                }
                 enabled={!busy}
                 colors={{
                   contentColor: theme.text,
@@ -338,95 +352,18 @@ export default function BackupRestoreScreen() {
         </Host>
       </ScrollView>
 
-      {progress ? (
-        <View style={styles.dialogHost} pointerEvents="box-none">
-          <Host matchContents seedColor={theme.primary}>
-            <AlertDialog
-              colors={{
-                containerColor: theme.surface,
-                iconContentColor: theme.accentInk,
-                titleContentColor: theme.text,
-                textContentColor: theme.textSecondary,
-              }}
-              properties={{
-                dismissOnBackPress: false,
-                dismissOnClickOutside: false,
-              }}
-            >
-              <AlertDialog.Icon>
-                <CircularProgressIndicator
-                  color={theme.accentInk}
-                  trackColor={theme.surfaceSunken}
-                />
-              </AlertDialog.Icon>
-              <AlertDialog.Title>
-                <Text style={SECTION_LABEL} color={theme.text}>
-                  {t(`backup.${copy}Title`)}
-                </Text>
-              </AlertDialog.Title>
-              <AlertDialog.Text>
-                <Text
-                  style={composeTextStyle("body")}
-                  color={theme.textSecondary}
-                >
-                  {t(`backup.${copy}Message`)}
-                </Text>
-              </AlertDialog.Text>
-            </AlertDialog>
-          </Host>
-        </View>
-      ) : null}
+      {progress ? <ProgressDialog theme={theme} copy={copy} /> : null}
 
       {pendingRestore ? (
-        <View style={styles.dialogHost} pointerEvents="box-none">
-          <Host matchContents seedColor={theme.primary}>
-            <AlertDialog
-              colors={{
-                containerColor: theme.surface,
-                titleContentColor: theme.text,
-                textContentColor: theme.textSecondary,
-              }}
-              onDismissRequest={() => setPendingRestore(undefined)}
-            >
-              <AlertDialog.Title>
-                <Text style={SECTION_LABEL} color={theme.text}>
-                  {t("backup.restoreTitle")}
-                </Text>
-              </AlertDialog.Title>
-              <AlertDialog.Text>
-                <Text
-                  style={composeTextStyle("body")}
-                  color={theme.textSecondary}
-                >
-                  {pendingRestore.summary}
-                </Text>
-              </AlertDialog.Text>
-              <AlertDialog.ConfirmButton>
-                <TextButton
-                  onClick={() => {
-                    confirmRestore(pendingRestore.file);
-                    setPendingRestore(undefined);
-                  }}
-                  colors={{ contentColor: theme.danger }}
-                >
-                  <Text style={composeTextStyle("body")}>
-                    {t("backup.restoreConfirm")}
-                  </Text>
-                </TextButton>
-              </AlertDialog.ConfirmButton>
-              <AlertDialog.DismissButton>
-                <TextButton
-                  onClick={() => setPendingRestore(undefined)}
-                  colors={{ contentColor: theme.textSecondary }}
-                >
-                  <Text style={composeTextStyle("body")}>
-                    {t("settings.cancel")}
-                  </Text>
-                </TextButton>
-              </AlertDialog.DismissButton>
-            </AlertDialog>
-          </Host>
-        </View>
+        <RestoreConfirmDialog
+          theme={theme}
+          pending={pendingRestore}
+          onConfirm={() => {
+            confirmRestore(pendingRestore.file);
+            setPendingRestore(undefined);
+          }}
+          onDismiss={() => setPendingRestore(undefined)}
+        />
       ) : null}
 
       {showReset ? (

@@ -51,7 +51,11 @@ import {
   type ScheduleSelection,
 } from "@/utils/schedule";
 import { MenuField, SwitchRow } from "@/components/form-sheet";
-import { FROZEN_TAGS, useReptileForm } from "@/components/use-reptile-form";
+import {
+  FROZEN_TAGS,
+  useReptileForm,
+  type ReptileFormController,
+} from "@/components/use-reptile-form";
 import { Radius, Spacing, StackAboveFontScale } from "@/constants/theme";
 import { composeTextStyle } from "@/constants/type-font-compose";
 import { useColorScheme, useTheme } from "@/hooks/use-theme";
@@ -109,32 +113,19 @@ type ReptileFormSheetProps = {
   animal?: Animal;
 };
 
-export function ReptileFormSheet({ animal }: ReptileFormSheetProps) {
-  const theme = useTheme();
-  const scheme = useColorScheme();
-  const insets = useSafeAreaInsets();
+type SectionProps = {
+  form: ReptileFormController;
+  theme: FormTheme;
+  iconSize: number;
+};
+
+function IdentitySection({ form, theme, iconSize }: SectionProps) {
   const { t } = useTranslation();
-  const form = useReptileForm(animal);
-  const { fontScale } = useWindowDimensions();
-
-  const { name, commonName, scientificName } = form;
-
-  const nameText = useNativeState(name);
-  const commonNameText = useNativeState(commonName);
-  const scientificNameText = useNativeState(scientificName);
-
+  const nameText = useNativeState(form.name);
+  const commonNameText = useNativeState(form.commonName);
+  const scientificNameText = useNativeState(form.scientificName);
   const [nameDirty, setNameDirty] = useState(false);
-  const [scrollY] = useState(() => new Animated.Value(0));
-  const snackbar = useRef<SnackbarHostRef>(null);
-
-  useEffect(() => {
-    if (!form.saveError) return;
-    void snackbar.current?.showSnackbar({
-      message: form.saveError,
-      duration: "long",
-      withDismissAction: true,
-    });
-  }, [form.saveError]);
+  const nameInvalid = nameDirty && form.name.trim().length === 0;
 
   const applySpecies = (species: ReptileSpecies) => {
     form.handleSelectSpecies(species);
@@ -142,15 +133,494 @@ export function ReptileFormSheet({ animal }: ReptileFormSheetProps) {
     scientificNameText.set(species.scientificName);
   };
 
+  return (
+    <Section>
+      <OutlinedTextField
+        value={nameText}
+        onValueChange={(value) => {
+          setNameDirty(true);
+          form.setName(value);
+        }}
+        colors={fieldColors(theme)}
+        keyboardOptions={{ capitalization: "words" }}
+        isError={nameInvalid}
+        singleLine
+        modifiers={[fillMaxWidth()]}
+      >
+        <OutlinedTextField.Label>
+          <Text>{t("reptileForm.name")}</Text>
+        </OutlinedTextField.Label>
+        {nameInvalid ? (
+          <OutlinedTextField.SupportingText>
+            <Text>{t("reptileForm.nameRequired")}</Text>
+          </OutlinedTextField.SupportingText>
+        ) : null}
+      </OutlinedTextField>
+
+      <SuggestionField
+        value={commonNameText}
+        onValueChange={(value) => {
+          form.setCommonName(value);
+          form.setCommonSuggestionsDismissed(false);
+        }}
+        label={t("reptileForm.commonName")}
+        theme={theme}
+        suggestions={form.commonSuggestions}
+        headlineFor={(species) => species.commonNames[form.language]}
+        supportingFor={(species) => species.scientificName}
+        onSelect={applySpecies}
+      />
+
+      <SuggestionField
+        value={scientificNameText}
+        onValueChange={(value) => {
+          form.setScientificName(value);
+          form.setScientificSuggestionsDismissed(false);
+        }}
+        label={t("reptileForm.scientificName")}
+        theme={theme}
+        suggestions={form.scientificSuggestions}
+        headlineFor={(species) => species.scientificName}
+        supportingFor={(species) => species.commonNames[form.language]}
+        onSelect={applySpecies}
+      />
+
+      <MenuField
+        label={t("reptileForm.sex")}
+        value={form.sexLabels[form.sex]}
+        theme={theme}
+        iconSize={iconSize}
+        items={form.SEX_VALUES.map((value) => ({
+          value,
+          label: form.sexLabels[value],
+          selected: value === form.sex,
+        }))}
+        onSelect={(value) => form.setSex(value as Animal["sex"])}
+      />
+
+      <SwitchRow
+        label={t("reptileForm.knownBirthDate")}
+        checked={form.knownBirthDate}
+        onCheckedChange={form.setKnownBirthDate}
+        theme={theme}
+      />
+
+      {form.knownBirthDate ? (
+        <DateField
+          label={t("reptileForm.birthDate")}
+          date={form.birthDate}
+          onSelect={form.setBirthDate}
+          theme={theme}
+          iconSize={iconSize}
+          confirmLabel={t("newReptile.save")}
+          dismissLabel={t("newReptile.cancel")}
+        />
+      ) : null}
+
+      <DateField
+        label={t("reptileForm.acquired")}
+        date={form.acquiredDate}
+        onSelect={(value) => {
+          form.setAcquiredDate(value);
+          form.setKnowsAcquired(true);
+        }}
+        theme={theme}
+        iconSize={iconSize}
+        confirmLabel={t("newReptile.save")}
+        dismissLabel={t("newReptile.cancel")}
+      />
+    </Section>
+  );
+}
+
+function FeedingSection({ form, theme, iconSize }: SectionProps) {
+  const { t } = useTranslation();
+
+  return (
+    <Section
+      title={t("feedingSchedule.section")}
+      footer={
+        form.feedingValid ? form.feedingFooter : t("schedule.invalidDays")
+      }
+      footerColor={form.feedingValid ? undefined : theme.danger}
+    >
+      <SwitchRow
+        label={t("feedingSchedule.enabled")}
+        checked={form.usesFeedingSchedule}
+        onCheckedChange={form.setUsesFeedingSchedule}
+        theme={theme}
+        hint={t("a11y.feedingSchedule.enabled.hint")}
+      />
+      {form.usesFeedingSchedule ? (
+        <>
+          <ScheduleFields
+            selection={form.feedingSelection}
+            onSelectionChange={form.setFeedingSelection}
+            customDays={form.feedingDays}
+            onCustomDaysChange={form.setFeedingDays}
+            valid={form.feedingValid}
+            theme={theme}
+            iconSize={iconSize}
+            showInherit={false}
+            hint={t("a11y.feedingSchedule.frequency.hint")}
+            daysHint={t("a11y.feedingSchedule.customDays.hint")}
+          />
+          <SwitchRow
+            label={t("reminders.enabled")}
+            checked={form.feedingReminder}
+            onCheckedChange={form.handleFeedingReminder}
+            theme={theme}
+            hint={t("a11y.reminders.feed.hint")}
+          />
+        </>
+      ) : null}
+    </Section>
+  );
+}
+
+type CareRoutineSectionProps = {
+  routine: "water" | "cleaning";
+  theme: FormTheme;
+  iconSize: number;
+  collectionSchedule: Parameters<typeof describeSchedule>[0];
+  selection: ReptileFormController["waterSelection"];
+  onSelectionChange: ReptileFormController["setWaterSelection"];
+  days: string;
+  onDaysChange: (days: string) => void;
+  valid: boolean;
+  footer: string;
+  scheduled: boolean;
+  reminder: boolean;
+  onReminderChange: (on: boolean) => void;
+};
+
+function CareRoutineSection({
+  routine,
+  theme,
+  iconSize,
+  collectionSchedule,
+  selection,
+  onSelectionChange,
+  days,
+  onDaysChange,
+  valid,
+  footer,
+  scheduled,
+  reminder,
+  onReminderChange,
+}: CareRoutineSectionProps) {
+  const { t } = useTranslation();
+  const scheduleKey = `${routine}Schedule` as const;
+
+  return (
+    <Section
+      title={t(`${scheduleKey}.section`)}
+      footer={footer}
+      footerColor={valid ? undefined : theme.danger}
+    >
+      <ScheduleFields
+        selection={selection}
+        onSelectionChange={onSelectionChange}
+        customDays={days}
+        onCustomDaysChange={onDaysChange}
+        valid={valid}
+        theme={theme}
+        iconSize={iconSize}
+        showInherit
+        inheritedLabel={t("defaults.followGlobal", {
+          value: describeSchedule(collectionSchedule, t),
+        })}
+        hint={t(`a11y.${scheduleKey}.frequency.hint`)}
+        daysHint={t(`a11y.${scheduleKey}.customDays.hint`)}
+      />
+      {scheduled ? (
+        <SwitchRow
+          label={t("reminders.enabled")}
+          checked={reminder}
+          onCheckedChange={onReminderChange}
+          theme={theme}
+          hint={t(`a11y.reminders.${routine}.hint`)}
+        />
+      ) : null}
+    </Section>
+  );
+}
+
+type DefaultMenuFieldProps<T extends string> = {
+  label: string;
+  hint: string;
+  options: readonly T[];
+  describe: (value: T) => string;
+  inherited: T | undefined;
+  value: T | undefined;
+  onChange: (value: T | undefined) => void;
+  theme: FormTheme;
+  iconSize: number;
+};
+
+function DefaultMenuField<T extends string>({
+  label,
+  hint,
+  options,
+  describe,
+  inherited,
+  value,
+  onChange,
+  theme,
+  iconSize,
+}: DefaultMenuFieldProps<T>) {
+  const { t } = useTranslation();
+  const followGlobal = t("defaults.followGlobal", {
+    value: describe(inherited as T),
+  });
+  const followItem: { value: ""; label: string; selected: boolean }[] =
+    inherited === undefined
+      ? []
+      : [
+          {
+            value: "" as const,
+            label: followGlobal,
+            selected: value === undefined,
+          },
+        ];
+
+  return (
+    <MenuField
+      label={label}
+      hint={hint}
+      value={value === undefined ? followGlobal : describe(value)}
+      theme={theme}
+      iconSize={iconSize}
+      items={[
+        ...followItem,
+        ...options.map((option) => ({
+          value: option as T | "",
+          label: describe(option),
+          selected: value === option,
+        })),
+      ]}
+      onSelect={(selected) =>
+        onChange(selected === "" ? undefined : (selected as T))
+      }
+    />
+  );
+}
+
+function DefaultsSection({ form, theme, iconSize }: SectionProps) {
+  const { t } = useTranslation();
+  const { animal, defaults, globalDefaults, setDefaults } = form;
+  const common = { theme, iconSize };
+  const tagOf = (frozen: boolean | undefined) =>
+    frozen === undefined ? undefined : form.frozenTag(frozen);
+
+  return (
+    <Section
+      title={t("defaults.section")}
+      footer={
+        animal
+          ? t("defaults.animalFooter", { animalName: animal.name })
+          : t("defaults.animalFooterNew")
+      }
+    >
+      <DefaultMenuField
+        {...common}
+        label={t("defaults.mealMeasure")}
+        hint={t("a11y.defaults.mealMeasure.hint")}
+        options={FEEDING_MEASURES}
+        describe={(value) => t(`feedingForm.measure.${value}`)}
+        inherited={globalDefaults.mealMeasure}
+        value={defaults.mealMeasure}
+        onChange={(mealMeasure) =>
+          setDefaults((current) => ({ ...current, mealMeasure }))
+        }
+      />
+      <DefaultMenuField
+        {...common}
+        label={t("defaults.frozen")}
+        hint={t("a11y.defaults.frozen.hint")}
+        options={FROZEN_TAGS}
+        describe={(tag) => frozenLabel(tag === "true", t)}
+        inherited={tagOf(globalDefaults.frozen)}
+        value={tagOf(defaults.frozen)}
+        onChange={(tag) =>
+          setDefaults((current) => ({
+            ...current,
+            frozen: tag === undefined ? undefined : tag === "true",
+          }))
+        }
+      />
+      <DefaultMenuField
+        {...common}
+        label={t("defaults.weightUnit")}
+        hint={t("a11y.defaults.weightUnit.hint")}
+        options={WEIGHT_UNITS}
+        describe={(value) => t(`feedingForm.units.${value}`)}
+        inherited={globalDefaults.weightUnit}
+        value={defaults.weightUnit}
+        onChange={(weightUnit) =>
+          setDefaults((current) => ({ ...current, weightUnit }))
+        }
+      />
+      <DefaultMenuField
+        {...common}
+        label={t("defaults.poopType")}
+        hint={t("a11y.defaults.poopType.hint")}
+        options={DEFECATION_TYPES}
+        describe={(value) => t(`timeline.poop.${value}`)}
+        inherited={globalDefaults.poopType}
+        value={defaults.poopType}
+        onChange={(poopType) =>
+          setDefaults((current) => ({ ...current, poopType }))
+        }
+      />
+    </Section>
+  );
+}
+
+type TopBarProps = SectionProps & {
+  animal?: Animal;
+  topInset: number;
+  lifted: Animated.AnimatedInterpolation<number>;
+};
+
+function TopBar({
+  form,
+  theme,
+  iconSize,
+  animal,
+  topInset,
+  lifted,
+}: TopBarProps) {
+  const { t } = useTranslation();
+
+  return (
+    <View
+      style={[styles.topBar, { paddingTop: topInset }]}
+      pointerEvents="box-none"
+    >
+      <Animated.View
+        pointerEvents="none"
+        style={[StyleSheet.absoluteFill, { backgroundColor: theme.bg }]}
+      />
+      <Animated.View
+        pointerEvents="none"
+        style={[
+          StyleSheet.absoluteFill,
+          { backgroundColor: theme.surface, opacity: lifted },
+        ]}
+      />
+      <Host
+        style={styles.topBarHost}
+        matchContents={{ horizontal: false, vertical: true }}
+        seedColor={theme.primary}
+      >
+        <Row
+          verticalAlignment="center"
+          horizontalArrangement={{ spacedBy: Spacing["2xs"] }}
+          modifiers={[
+            fillMaxWidth(),
+            defaultMinSize({ minHeight: TOP_BAR_HEIGHT }),
+            padding(EDGE_INSET, Spacing["2xs"], Spacing.md, Spacing["2xs"]),
+          ]}
+        >
+          <IconButton
+            onClick={() => router.back()}
+            enabled={!form.isSaving}
+            colors={{ contentColor: theme.textSecondary }}
+          >
+            <Icon
+              source={CLOSE_ICON}
+              tint={theme.textSecondary}
+              size={iconSize}
+              contentDescription={
+                animal ? t("editReptile.cancel") : t("newReptile.cancel")
+              }
+            />
+          </IconButton>
+
+          <Text
+            style={TITLE_LARGE}
+            color={theme.text}
+            maxLines={1}
+            overflow="ellipsis"
+            modifiers={[weight(1)]}
+          >
+            {animal ? t("editReptile.title") : t("newReptile.title")}
+          </Text>
+
+          <Button
+            onClick={form.handleConfirm}
+            enabled={form.canSave}
+            colors={{
+              containerColor: theme.primary,
+              contentColor: theme.onPrimary,
+              disabledContainerColor: theme.surfaceSunken,
+              disabledContentColor: theme.textMuted,
+            }}
+          >
+            <Text style={LABEL_LARGE}>{t("newReptile.save")}</Text>
+          </Button>
+        </Row>
+      </Host>
+    </View>
+  );
+}
+
+function SaveErrorSnackbar({
+  message,
+  bottomInset,
+  theme,
+}: {
+  message: string | undefined;
+  bottomInset: number;
+  theme: FormTheme;
+}) {
+  const snackbar = useRef<SnackbarHostRef>(null);
+
+  useEffect(() => {
+    if (!message) return;
+    void snackbar.current?.showSnackbar({
+      message,
+      duration: "long",
+      withDismissAction: true,
+    });
+  }, [message]);
+
+  return (
+    <View
+      style={[styles.snackbar, { bottom: bottomInset + Spacing.md }]}
+      pointerEvents="box-none"
+    >
+      <Host matchContents>
+        <SnackbarHost ref={snackbar} modifiers={[fillMaxWidth()]}>
+          <Snackbar
+            containerColor={theme.surfaceSunken}
+            contentColor={theme.text}
+            actionContentColor={theme.text}
+            dismissActionContentColor={theme.textSecondary}
+          />
+        </SnackbarHost>
+      </Host>
+    </View>
+  );
+}
+
+export function ReptileFormSheet({ animal }: ReptileFormSheetProps) {
+  const theme = useTheme();
+  const scheme = useColorScheme();
+  const insets = useSafeAreaInsets();
+  const form = useReptileForm(animal);
+  const { fontScale } = useWindowDimensions();
+  const [scrollY] = useState(() => new Animated.Value(0));
+
   const iconSize = ACTION_ICON_SIZE * Math.min(fontScale, 2);
   const horizontalInset = Spacing.md * Math.min(fontScale, StackAboveFontScale);
-  const nameInvalid = nameDirty && name.trim().length === 0;
-
   const lifted = scrollY.interpolate({
     inputRange: [0, LIFT_RANGE],
     outputRange: [0, 1],
     extrapolate: "clamp",
   });
+  const common = { theme, iconSize };
 
   return (
     <View style={[styles.root, { backgroundColor: theme.bg }]}>
@@ -192,470 +662,54 @@ export function ReptileFormSheet({ animal }: ReptileFormSheetProps) {
               onPickPhoto={form.handlePickPhoto}
               onRemovePhoto={form.handleRemovePhoto}
             />
-
-            <Section>
-              <OutlinedTextField
-                value={nameText}
-                onValueChange={(value) => {
-                  setNameDirty(true);
-                  form.setName(value);
-                }}
-                colors={fieldColors(theme)}
-                keyboardOptions={{ capitalization: "words" }}
-                isError={nameInvalid}
-                singleLine
-                modifiers={[fillMaxWidth()]}
-              >
-                <OutlinedTextField.Label>
-                  <Text>{t("reptileForm.name")}</Text>
-                </OutlinedTextField.Label>
-                {nameInvalid ? (
-                  <OutlinedTextField.SupportingText>
-                    <Text>{t("reptileForm.nameRequired")}</Text>
-                  </OutlinedTextField.SupportingText>
-                ) : null}
-              </OutlinedTextField>
-
-              <SuggestionField
-                value={commonNameText}
-                onValueChange={(value) => {
-                  form.setCommonName(value);
-                  form.setCommonSuggestionsDismissed(false);
-                }}
-                label={t("reptileForm.commonName")}
-                theme={theme}
-                suggestions={form.commonSuggestions}
-                headlineFor={(species) => species.commonNames[form.language]}
-                supportingFor={(species) => species.scientificName}
-                onSelect={applySpecies}
-              />
-
-              <SuggestionField
-                value={scientificNameText}
-                onValueChange={(value) => {
-                  form.setScientificName(value);
-                  form.setScientificSuggestionsDismissed(false);
-                }}
-                label={t("reptileForm.scientificName")}
-                theme={theme}
-                suggestions={form.scientificSuggestions}
-                headlineFor={(species) => species.scientificName}
-                supportingFor={(species) => species.commonNames[form.language]}
-                onSelect={applySpecies}
-              />
-
-              <MenuField
-                label={t("reptileForm.sex")}
-                value={form.sexLabels[form.sex]}
-                theme={theme}
-                iconSize={iconSize}
-                items={form.SEX_VALUES.map((value) => ({
-                  value,
-                  label: form.sexLabels[value],
-                  selected: value === form.sex,
-                }))}
-                onSelect={(value) => form.setSex(value as Animal["sex"])}
-              />
-
-              <SwitchRow
-                label={t("reptileForm.knownBirthDate")}
-                checked={form.knownBirthDate}
-                onCheckedChange={form.setKnownBirthDate}
-                theme={theme}
-              />
-
-              {form.knownBirthDate ? (
-                <DateField
-                  label={t("reptileForm.birthDate")}
-                  date={form.birthDate}
-                  onSelect={form.setBirthDate}
-                  theme={theme}
-                  iconSize={iconSize}
-                  confirmLabel={t("newReptile.save")}
-                  dismissLabel={t("newReptile.cancel")}
-                />
-              ) : null}
-
-              <DateField
-                label={t("reptileForm.acquired")}
-                date={form.acquiredDate}
-                onSelect={(value) => {
-                  form.setAcquiredDate(value);
-                  form.setKnowsAcquired(true);
-                }}
-                theme={theme}
-                iconSize={iconSize}
-                confirmLabel={t("newReptile.save")}
-                dismissLabel={t("newReptile.cancel")}
-              />
-            </Section>
-
-            <Section
-              title={t("feedingSchedule.section")}
-              footer={
-                form.feedingValid
-                  ? form.feedingFooter
-                  : t("schedule.invalidDays")
-              }
-              footerColor={form.feedingValid ? undefined : theme.danger}
-            >
-              <SwitchRow
-                label={t("feedingSchedule.enabled")}
-                checked={form.usesFeedingSchedule}
-                onCheckedChange={form.setUsesFeedingSchedule}
-                theme={theme}
-                hint={t("a11y.feedingSchedule.enabled.hint")}
-              />
-              {form.usesFeedingSchedule ? (
-                <>
-                  <ScheduleFields
-                    selection={form.feedingSelection}
-                    onSelectionChange={form.setFeedingSelection}
-                    customDays={form.feedingDays}
-                    onCustomDaysChange={form.setFeedingDays}
-                    valid={form.feedingValid}
-                    theme={theme}
-                    iconSize={iconSize}
-                    showInherit={false}
-                    hint={t("a11y.feedingSchedule.frequency.hint")}
-                    daysHint={t("a11y.feedingSchedule.customDays.hint")}
-                  />
-                  <SwitchRow
-                    label={t("reminders.enabled")}
-                    checked={form.feedingReminder}
-                    onCheckedChange={form.handleFeedingReminder}
-                    theme={theme}
-                    hint={t("a11y.reminders.feed.hint")}
-                  />
-                </>
-              ) : null}
-            </Section>
-
-            <Section
-              title={t("waterSchedule.section")}
+            <IdentitySection form={form} {...common} />
+            <FeedingSection form={form} {...common} />
+            <CareRoutineSection
+              {...common}
+              routine="water"
+              collectionSchedule={form.collectionWater}
+              selection={form.waterSelection}
+              onSelectionChange={form.setWaterSelection}
+              days={form.waterDays}
+              onDaysChange={form.setWaterDays}
+              valid={form.waterValid}
               footer={form.waterFooter}
-              footerColor={form.waterValid ? undefined : theme.danger}
-            >
-              <ScheduleFields
-                selection={form.waterSelection}
-                onSelectionChange={form.setWaterSelection}
-                customDays={form.waterDays}
-                onCustomDaysChange={form.setWaterDays}
-                valid={form.waterValid}
-                theme={theme}
-                iconSize={iconSize}
-                showInherit
-                inheritedLabel={t("defaults.followGlobal", {
-                  value: describeSchedule(form.collectionWater, t),
-                })}
-                hint={t("a11y.waterSchedule.frequency.hint")}
-                daysHint={t("a11y.waterSchedule.customDays.hint")}
-              />
-              {form.waterScheduled ? (
-                <SwitchRow
-                  label={t("reminders.enabled")}
-                  checked={form.waterReminder}
-                  onCheckedChange={form.handleWaterReminder}
-                  theme={theme}
-                  hint={t("a11y.reminders.water.hint")}
-                />
-              ) : null}
-            </Section>
-
-            <Section
-              title={t("cleaningSchedule.section")}
+              scheduled={form.waterScheduled}
+              reminder={form.waterReminder}
+              onReminderChange={form.handleWaterReminder}
+            />
+            <CareRoutineSection
+              {...common}
+              routine="cleaning"
+              collectionSchedule={form.collectionCleaning}
+              selection={form.cleaningSelection}
+              onSelectionChange={form.setCleaningSelection}
+              days={form.cleaningDays}
+              onDaysChange={form.setCleaningDays}
+              valid={form.cleaningValid}
               footer={form.cleaningFooter}
-              footerColor={form.cleaningValid ? undefined : theme.danger}
-            >
-              <ScheduleFields
-                selection={form.cleaningSelection}
-                onSelectionChange={form.setCleaningSelection}
-                customDays={form.cleaningDays}
-                onCustomDaysChange={form.setCleaningDays}
-                valid={form.cleaningValid}
-                theme={theme}
-                iconSize={iconSize}
-                showInherit
-                inheritedLabel={t("defaults.followGlobal", {
-                  value: describeSchedule(form.collectionCleaning, t),
-                })}
-                hint={t("a11y.cleaningSchedule.frequency.hint")}
-                daysHint={t("a11y.cleaningSchedule.customDays.hint")}
-              />
-              {form.cleaningScheduled ? (
-                <SwitchRow
-                  label={t("reminders.enabled")}
-                  checked={form.cleaningReminder}
-                  onCheckedChange={form.handleCleaningReminder}
-                  theme={theme}
-                  hint={t("a11y.reminders.cleaning.hint")}
-                />
-              ) : null}
-            </Section>
-
-            <Section
-              title={t("defaults.section")}
-              footer={
-                animal
-                  ? t("defaults.animalFooter", { animalName: animal.name })
-                  : t("defaults.animalFooterNew")
-              }
-            >
-              <MenuField
-                label={t("defaults.mealMeasure")}
-                hint={t("a11y.defaults.mealMeasure.hint")}
-                value={
-                  form.defaults.mealMeasure === undefined
-                    ? t("defaults.followGlobal", {
-                        value: t(
-                          `feedingForm.measure.${form.globalDefaults.mealMeasure}`,
-                        ),
-                      })
-                    : t(`feedingForm.measure.${form.defaults.mealMeasure}`)
-                }
-                theme={theme}
-                iconSize={iconSize}
-                items={[
-                  ...(form.globalDefaults.mealMeasure === undefined
-                    ? []
-                    : [
-                        {
-                          value: "" as const,
-                          label: t("defaults.followGlobal", {
-                            value: t(
-                              `feedingForm.measure.${form.globalDefaults.mealMeasure}`,
-                            ),
-                          }),
-                          selected: form.defaults.mealMeasure === undefined,
-                        },
-                      ]),
-                  ...FEEDING_MEASURES.map((value) => ({
-                    value,
-                    label: t(`feedingForm.measure.${value}`),
-                    selected: form.defaults.mealMeasure === value,
-                  })),
-                ]}
-                onSelect={(value) =>
-                  form.setDefaults((current) => ({
-                    ...current,
-                    mealMeasure: value === "" ? undefined : value,
-                  }))
-                }
-              />
-
-              <MenuField
-                label={t("defaults.frozen")}
-                hint={t("a11y.defaults.frozen.hint")}
-                value={
-                  form.defaults.frozen === undefined
-                    ? t("defaults.followGlobal", {
-                        value: frozenLabel(form.globalDefaults.frozen, t),
-                      })
-                    : frozenLabel(form.defaults.frozen, t)
-                }
-                theme={theme}
-                iconSize={iconSize}
-                items={[
-                  ...(form.globalDefaults.frozen === undefined
-                    ? []
-                    : [
-                        {
-                          value: "" as const,
-                          label: t("defaults.followGlobal", {
-                            value: frozenLabel(form.globalDefaults.frozen, t),
-                          }),
-                          selected: form.defaults.frozen === undefined,
-                        },
-                      ]),
-                  ...FROZEN_TAGS.map((tag) => ({
-                    value: tag,
-                    label: frozenLabel(tag === "true", t),
-                    selected:
-                      form.defaults.frozen !== undefined &&
-                      form.frozenTag(form.defaults.frozen) === tag,
-                  })),
-                ]}
-                onSelect={(value) =>
-                  form.setDefaults((current) => ({
-                    ...current,
-                    frozen: value === "" ? undefined : value === "true",
-                  }))
-                }
-              />
-
-              <MenuField
-                label={t("defaults.weightUnit")}
-                hint={t("a11y.defaults.weightUnit.hint")}
-                value={
-                  form.defaults.weightUnit === undefined
-                    ? t("defaults.followGlobal", {
-                        value: t(
-                          `feedingForm.units.${form.globalDefaults.weightUnit}`,
-                        ),
-                      })
-                    : t(`feedingForm.units.${form.defaults.weightUnit}`)
-                }
-                theme={theme}
-                iconSize={iconSize}
-                items={[
-                  ...(form.globalDefaults.weightUnit === undefined
-                    ? []
-                    : [
-                        {
-                          value: "" as const,
-                          label: t("defaults.followGlobal", {
-                            value: t(
-                              `feedingForm.units.${form.globalDefaults.weightUnit}`,
-                            ),
-                          }),
-                          selected: form.defaults.weightUnit === undefined,
-                        },
-                      ]),
-                  ...WEIGHT_UNITS.map((value) => ({
-                    value,
-                    label: t(`feedingForm.units.${value}`),
-                    selected: form.defaults.weightUnit === value,
-                  })),
-                ]}
-                onSelect={(value) =>
-                  form.setDefaults((current) => ({
-                    ...current,
-                    weightUnit: value === "" ? undefined : value,
-                  }))
-                }
-              />
-
-              <MenuField
-                label={t("defaults.poopType")}
-                hint={t("a11y.defaults.poopType.hint")}
-                value={
-                  form.defaults.poopType === undefined
-                    ? t("defaults.followGlobal", {
-                        value: t(
-                          `timeline.poop.${form.globalDefaults.poopType}`,
-                        ),
-                      })
-                    : t(`timeline.poop.${form.defaults.poopType}`)
-                }
-                theme={theme}
-                iconSize={iconSize}
-                items={[
-                  ...(form.globalDefaults.poopType === undefined
-                    ? []
-                    : [
-                        {
-                          value: "" as const,
-                          label: t("defaults.followGlobal", {
-                            value: t(
-                              `timeline.poop.${form.globalDefaults.poopType}`,
-                            ),
-                          }),
-                          selected: form.defaults.poopType === undefined,
-                        },
-                      ]),
-                  ...DEFECATION_TYPES.map((value) => ({
-                    value,
-                    label: t(`timeline.poop.${value}`),
-                    selected: form.defaults.poopType === value,
-                  })),
-                ]}
-                onSelect={(value) =>
-                  form.setDefaults((current) => ({
-                    ...current,
-                    poopType: value === "" ? undefined : value,
-                  }))
-                }
-              />
-            </Section>
+              scheduled={form.cleaningScheduled}
+              reminder={form.cleaningReminder}
+              onReminderChange={form.handleCleaningReminder}
+            />
+            <DefaultsSection form={form} {...common} />
           </Column>
         </Host>
       </Animated.ScrollView>
 
-      <View
-        style={[styles.topBar, { paddingTop: insets.top }]}
-        pointerEvents="box-none"
-      >
-        <Animated.View
-          pointerEvents="none"
-          style={[StyleSheet.absoluteFill, { backgroundColor: theme.bg }]}
-        />
-        <Animated.View
-          pointerEvents="none"
-          style={[
-            StyleSheet.absoluteFill,
-            { backgroundColor: theme.surface, opacity: lifted },
-          ]}
-        />
-        <Host
-          style={styles.topBarHost}
-          matchContents={{ horizontal: false, vertical: true }}
-          seedColor={theme.primary}
-        >
-          <Row
-            verticalAlignment="center"
-            horizontalArrangement={{ spacedBy: Spacing["2xs"] }}
-            modifiers={[
-              fillMaxWidth(),
-              defaultMinSize({ minHeight: TOP_BAR_HEIGHT }),
-              padding(EDGE_INSET, Spacing["2xs"], Spacing.md, Spacing["2xs"]),
-            ]}
-          >
-            <IconButton
-              onClick={() => router.back()}
-              enabled={!form.isSaving}
-              colors={{ contentColor: theme.textSecondary }}
-            >
-              <Icon
-                source={CLOSE_ICON}
-                tint={theme.textSecondary}
-                size={iconSize}
-                contentDescription={
-                  animal ? t("editReptile.cancel") : t("newReptile.cancel")
-                }
-              />
-            </IconButton>
+      <TopBar
+        form={form}
+        {...common}
+        animal={animal}
+        topInset={insets.top}
+        lifted={lifted}
+      />
 
-            <Text
-              style={TITLE_LARGE}
-              color={theme.text}
-              maxLines={1}
-              overflow="ellipsis"
-              modifiers={[weight(1)]}
-            >
-              {animal ? t("editReptile.title") : t("newReptile.title")}
-            </Text>
-
-            <Button
-              onClick={form.handleConfirm}
-              enabled={form.canSave}
-              colors={{
-                containerColor: theme.primary,
-                contentColor: theme.onPrimary,
-                disabledContainerColor: theme.surfaceSunken,
-                disabledContentColor: theme.textMuted,
-              }}
-            >
-              <Text style={LABEL_LARGE}>{t("newReptile.save")}</Text>
-            </Button>
-          </Row>
-        </Host>
-      </View>
-
-      <View
-        style={[styles.snackbar, { bottom: insets.bottom + Spacing.md }]}
-        pointerEvents="box-none"
-      >
-        <Host matchContents>
-          <SnackbarHost ref={snackbar} modifiers={[fillMaxWidth()]}>
-            <Snackbar
-              containerColor={theme.surfaceSunken}
-              contentColor={theme.text}
-              actionContentColor={theme.text}
-              dismissActionContentColor={theme.textSecondary}
-            />
-          </SnackbarHost>
-        </Host>
-      </View>
+      <SaveErrorSnackbar
+        message={form.saveError}
+        bottomInset={insets.bottom}
+        theme={theme}
+      />
     </View>
   );
 }

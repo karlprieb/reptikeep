@@ -1,4 +1,3 @@
-import { useSelector as useValue } from "@legendapp/state/react";
 import {
   Column,
   DropdownMenu,
@@ -20,8 +19,8 @@ import {
   Shapes,
   weight,
 } from "@expo/ui/jetpack-compose/modifiers";
-import { router, useLocalSearchParams } from "expo-router";
-import { useMemo, useState } from "react";
+import { router } from "expo-router";
+import { useState } from "react";
 import {
   Animated,
   StatusBar,
@@ -36,10 +35,7 @@ import {
   ActivityHistoryList,
   ActivityPanel,
 } from "@/components/activity-timeline";
-import {
-  ActivityTypeFilter,
-  presentTypes,
-} from "@/components/activity-type-filter";
+import { ActivityTypeFilter } from "@/components/activity-type-filter";
 import { AddActivitySheet } from "@/components/add-activity-sheet";
 import { AnimalNotFound, useAnimalRoute } from "@/components/animal-route";
 import { EmptyStateContent } from "@/components/empty-state";
@@ -47,32 +43,14 @@ import {
   ACTION_ICON_SIZE,
   TOP_BAR_HEIGHT,
   useScrollLift,
-} from "@/components/form-sheet";
-import {
-  Radius,
-  Spacing,
-  StackAboveFontScale,
-  type ActivityType,
-} from "@/constants/theme";
+} from "@/utils/form-sheet-shared";
+import { Radius, Spacing, StackAboveFontScale } from "@/constants/theme";
 import { composeTextStyle } from "@/constants/type-font-compose";
 import { useAddActivity } from "@/hooks/use-add-activity";
+import { useHistoryFilters } from "@/hooks/use-history-filters";
 import { useColorScheme, useTheme } from "@/hooks/use-theme";
-import { activityStores } from "@/state/activity-stores";
-import {
-  filterActivity,
-  isRangePreset,
-  RANGE_PRESETS,
-  resolveDateFilter,
-  type DateFilter,
-  type RangePreset,
-} from "@/utils/activity-filter";
-import { animalActivityFeed } from "@/utils/animal-activity";
-import {
-  calendarDateOf,
-  formatAbsoluteDate,
-  fromCalendarDate,
-  toCalendarDate,
-} from "@/utils/format-date";
+import { RANGE_PRESETS, type RangePreset } from "@/utils/activity-filter";
+import { formatAbsoluteDate } from "@/utils/format-date";
 
 import ADD_ICON from "@/assets/images/icons/add.xml";
 import ARROW_BACK_ICON from "@/assets/images/icons/arrow-back.xml";
@@ -214,94 +192,33 @@ export default function AnimalHistoryScreen() {
   const { t } = useTranslation();
   const { fontScale } = useWindowDimensions();
   const { id, animal } = useAnimalRoute();
-  const feedings = useValue(activityStores.feed.$);
-  const weights = useValue(activityStores.weight.$);
-  const sheds = useValue(activityStores.shed.$);
-  const defecations = useValue(activityStores.poop.$);
-  const habitats = useValue(activityStores.habitat.$);
-  const medical = useValue(activityStores.medical.$);
   const [menuOpen, setMenuOpen] = useState(false);
   const { scrollY, lifted, onScroll } = useScrollLift();
-
-  const { type, preset, from, to } = useLocalSearchParams<{
-    type?: string;
-    preset?: string;
-    from?: string;
-    to?: string;
-  }>();
-
-  const entries = useMemo(
-    () =>
-      animalActivityFeed(id, {
-        feedings,
-        weights,
-        sheds,
-        defecations,
-        habitats,
-        medical,
-      }),
-    [defecations, feedings, habitats, id, medical, sheds, weights],
-  );
-
-  const types = useMemo(() => presentTypes(entries), [entries]);
+  const {
+    entries,
+    types,
+    filter,
+    activeType,
+    shown,
+    range,
+    activeRange,
+    setType,
+    setPreset: applyPreset,
+    clearFilters,
+    openCustomRange: pushCustomRange,
+  } = useHistoryFilters(id);
   const addActivity = useAddActivity(animal?.id);
-
-  const filter = useMemo<DateFilter>(
-    () =>
-      preset === "custom" && from && to
-        ? { preset: "custom", from, to }
-        : { preset: isRangePreset(preset) ? preset : "all" },
-    [preset, from, to],
-  );
-
-  const selectedType =
-    type !== undefined && type in activityStores
-      ? (type as ActivityType)
-      : null;
-  const activeType =
-    selectedType && types.includes(selectedType) ? selectedType : null;
-
-  const today = toCalendarDate(new Date());
-  const shown = useMemo(
-    () =>
-      filterActivity(
-        entries,
-        filter,
-        activeType,
-        fromCalendarDate(today) ?? new Date(),
-      ),
-    [entries, filter, activeType, today],
-  );
 
   if (!animal) return <AnimalNotFound />;
 
-  const range = resolveDateFilter(
-    filter,
-    fromCalendarDate(today) ?? new Date(),
-  );
-  const activeRange = filter.preset !== "all";
   const iconSize = ACTION_ICON_SIZE * Math.min(fontScale, 2);
-
-  const setType = (next: ActivityType | null) =>
-    router.setParams({ type: next ?? "" });
   const setPreset = (next: RangePreset) => {
     setMenuOpen(false);
-    router.setParams({ preset: next, from: "", to: "" });
+    applyPreset(next);
   };
-  const clearFilters = () =>
-    router.setParams({ type: "", preset: "all", from: "", to: "" });
-
-  const earliest =
-    entries.length > 0
-      ? (calendarDateOf(entries[entries.length - 1].occurredAt) ?? today)
-      : today;
-  const seed = range ?? { from: earliest, to: today };
-
   const openCustomRange = () => {
     setMenuOpen(false);
-    router.push(
-      `/animal/${id}/history-range?from=${seed.from}&to=${seed.to}&earliest=${earliest}&type=${activeType ?? ""}`,
-    );
+    pushCustomRange();
   };
 
   const filterBar =

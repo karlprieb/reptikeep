@@ -24,13 +24,13 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { AnimalNotFound, useAnimalRoute } from "@/components/animal-route";
 import { EmptyState } from "@/components/empty-state";
+import { formSheetAndroidStyles as styles } from "@/constants/form-sheet-android";
 import {
   ACTION_ICON_SIZE,
-  formSheetAndroidStyles as styles,
   TITLE_LARGE,
   TOP_BAR_HEIGHT,
   useScrollLift,
-} from "@/components/form-sheet";
+} from "@/utils/form-sheet-shared";
 import { DocumentKindIcons } from "@/constants/document-icons";
 import { Spacing } from "@/constants/theme";
 import { composeTextStyle } from "@/constants/type-font-compose";

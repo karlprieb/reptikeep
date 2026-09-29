@@ -27,15 +27,6 @@ import {
 } from "@/constants/theme";
 import { typeFont } from "@/constants/type-font";
 import { useTheme } from "@/hooks/use-theme";
-import type { AnimalActivity } from "@/utils/animal-activity";
-
-export function presentTypes(entries: AnimalActivity[]): ActivityType[] {
-  const seen = new Set(entries.map((entry) => entry.type));
-
-  return (Object.keys(CategoryColors) as ActivityType[]).filter((type) =>
-    seen.has(type),
-  );
-}
 
 type ChipProps = {
   label: string;

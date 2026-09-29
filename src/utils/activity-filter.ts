@@ -1,4 +1,4 @@
-import type { ActivityType } from "@/constants/theme";
+import { CategoryColors, type ActivityType } from "@/constants/theme";
 import type { AnimalActivity } from "@/utils/animal-activity";
 import { calendarDateOf, toCalendarDate } from "@/utils/format-date";
 
@@ -76,4 +76,14 @@ export function filterActivity(
 
     return range.from <= day && day <= range.to;
   });
+}
+
+export function presentTypes(
+  entries: { type: ActivityType }[],
+): ActivityType[] {
+  const seen = new Set(entries.map((entry) => entry.type));
+
+  return (Object.keys(CategoryColors) as ActivityType[]).filter((type) =>
+    seen.has(type),
+  );
 }

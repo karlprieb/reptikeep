@@ -23,15 +23,13 @@ import { useTranslation } from "react-i18next";
 import { Alert, View } from "react-native";
 
 import {
-  asEditOf,
   FormSectionFooter,
   FormSectionHeader,
   FormSheetChrome,
-  formSheetStyles as styles,
-  optionalText,
-  useDraft,
   useFormModifiers,
 } from "@/components/form-sheet";
+import { formSheetStyles as styles } from "@/constants/form-sheet-ios";
+import { asEditOf, optionalText, useDraft } from "@/utils/form-sheet-shared";
 import { useTheme } from "@/hooks/use-theme";
 import {
   createMedicalActivity,

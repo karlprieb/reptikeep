@@ -25,15 +25,13 @@ import { View } from "react-native";
 import { useTranslation } from "react-i18next";
 
 import {
-  asEditOf,
   FormSectionFooter,
   FormSectionHeader,
   FormSheetChrome,
-  formSheetStyles as styles,
-  optionalText,
-  useDraft,
   useFormModifiers,
 } from "@/components/form-sheet";
+import { formSheetStyles as styles } from "@/constants/form-sheet-ios";
+import { asEditOf, optionalText, useDraft } from "@/utils/form-sheet-shared";
 import { useFoodTypeSuggestions } from "@/hooks/use-food-type-suggestions";
 import { useTheme } from "@/hooks/use-theme";
 import {

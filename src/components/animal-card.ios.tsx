@@ -38,20 +38,17 @@ import {
 import { typeFont } from "@/constants/type-font";
 import type { Animal } from "@/state/animal";
 import type { CareSchedule } from "@/state/care-schedule";
-import { overdueRoutines, SEX_SYMBOLS } from "@/utils/animal-card-status";
+import { SEX_SYMBOLS } from "@/utils/animal-card-status";
+import {
+  buildAnimalCardModel,
+  type OverdueTaskId,
+} from "@/utils/animal-card-model";
 import { useAnimalPhotoUri } from "@/utils/animal-photo-storage";
-import { feedingStatus } from "@/utils/feeding-status";
 
 const SCRIM_GRADIENT_COLORS = ["rgba(14, 9, 4, 1)", "rgba(14, 9, 4, 0)"];
 const ON_PHOTO_TEXT = "#FFFFFF";
 const ON_PHOTO_TEXT_SECONDARY = "rgba(255, 255, 255, 0.82)";
 const ICON_MAX_SCALE = 2;
-
-type OverdueTask = {
-  id: "feed" | "water" | "cleaning";
-  icon: SFSymbolName;
-  label: string;
-};
 
 export type AnimalCardProps = {
   animal: Animal;
@@ -65,6 +62,12 @@ export type AnimalCardProps = {
   lastCleanAt?: string;
   placeholderLayout?: "compact" | "grid";
   onPress: () => void;
+};
+
+const TASK_ICONS: Record<OverdueTaskId, SFSymbolName> = {
+  feed: ActivitySymbols.feed,
+  water: "drop.fill",
+  cleaning: "sparkles",
 };
 
 function AnimalCardBase({
@@ -87,64 +90,21 @@ function AnimalCardBase({
   const isPlaceholder = !animal.photo;
   const monogram = animal.name.trim().slice(0, 1).toLocaleUpperCase();
   const symbol = SEX_SYMBOLS[animal.sex];
-  const sex = animal.sex === "unknown" ? null : t(`sex.${animal.sex}`);
   const hint = t("a11y.animalCard.hint", { animalName: animal.name });
   const titleColor = isPlaceholder ? theme.text : ON_PHOTO_TEXT;
   const subtitleColor = isPlaceholder
     ? theme.textSecondary
     : ON_PHOTO_TEXT_SECONDARY;
 
-  const feeding = feedingStatus(t, lastFedAt, animal.feedingSchedule);
-  const { water: waterOverdue, cleaning: cleaningOverdue } = overdueRoutines({
-    feedingSchedule: animal.feedingSchedule,
+  const { feeding, overdueTasks, label } = buildAnimalCardModel(t, {
+    animal,
     lastFedAt,
     waterSchedule,
     lastWaterChangeAt,
     cleaningSchedule,
     lastCleanAt,
   });
-  const overdueTasks: OverdueTask[] = [
-    ...(feeding.overdue
-      ? [
-          {
-            id: "feed" as const,
-            icon: ActivitySymbols.feed,
-            label: feeding.line,
-          },
-        ]
-      : []),
-    ...(waterOverdue
-      ? [
-          {
-            id: "water" as const,
-            icon: "drop.fill" as SFSymbolName,
-            label: t("water.overdue"),
-          },
-        ]
-      : []),
-    ...(cleaningOverdue
-      ? [
-          {
-            id: "cleaning" as const,
-            icon: "sparkles" as SFSymbolName,
-            label: t("cleaning.overdue"),
-          },
-        ]
-      : []),
-  ];
   const feedingColor = feeding.overdue ? theme.danger : subtitleColor;
-
-  const label = [
-    animal.name,
-    animal.commonName,
-    animal.scientificName,
-    sex,
-    ...(overdueTasks.length > 0
-      ? overdueTasks.map((task) => task.label)
-      : [lastFedAt ? `${t("detail.lastFed")} ${feeding.line}` : feeding.line]),
-  ]
-    .filter((part): part is string => Boolean(part))
-    .join(", ");
 
   return (
     <Pressable
@@ -251,7 +211,7 @@ function AnimalCardBase({
                     ]}
                   >
                     <Image
-                      systemName={task.icon}
+                      systemName={TASK_ICONS[task.id]}
                       modifiers={[
                         typeFont("bodyS"),
                         foregroundStyle(theme.danger),

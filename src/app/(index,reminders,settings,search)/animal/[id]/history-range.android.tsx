@@ -6,16 +6,14 @@ import { useTranslation } from "react-i18next";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { AnimalNotFound, useAnimalRoute } from "@/components/animal-route";
+import { DateField, FormSheetTopBar, Section } from "@/components/form-sheet";
+import { formSheetAndroidStyles as styles } from "@/constants/form-sheet-android";
 import {
   ACTION_ICON_SIZE,
-  DateField,
-  FormSheetTopBar,
-  formSheetAndroidStyles as styles,
-  Section,
   TOP_BAR_HEIGHT,
   useDraft,
   useScrollLift,
-} from "@/components/form-sheet";
+} from "@/utils/form-sheet-shared";
 import { Spacing, StackAboveFontScale } from "@/constants/theme";
 import { useTheme } from "@/hooks/use-theme";
 import { fromCalendarDate, toCalendarDate } from "@/utils/format-date";

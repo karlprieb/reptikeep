@@ -25,18 +25,19 @@ import { useTranslation } from "react-i18next";
 
 import { AnimalNotFound, useAnimalRoute } from "@/components/animal-route";
 import {
-  ACTION_ICON_SIZE,
-  DATA_STYLE,
-  fieldColors,
   FormSheetSnackbar,
   MenuField,
   Section,
   SwitchRow,
+} from "@/components/form-sheet";
+import {
+  ACTION_ICON_SIZE,
   TITLE_LARGE,
   TOP_BAR_HEIGHT,
   useScrollLift,
-  type SnackbarHostRef,
-} from "@/components/form-sheet";
+} from "@/utils/form-sheet-shared";
+import { DATA_STYLE, fieldColors } from "@/constants/form-sheet-android";
+import { type SnackbarHostRef } from "@expo/ui/jetpack-compose";
 import { ThemedText } from "@/components/themed-text";
 import { Radius, Spacing } from "@/constants/theme";
 import { useLabelEditor } from "@/hooks/use-label-editor";

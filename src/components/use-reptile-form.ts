@@ -77,15 +77,13 @@ function addAnimalOrDiscardPhoto(record: Animal, managedPhoto?: string) {
   }
 }
 
-export function useReptileForm(animal?: Animal) {
-  const { t, i18n } = useTranslation();
-  const language = i18n.language as SupportedLanguage;
+type Translate = ReturnType<typeof useTranslation>["t"];
+type ClockTime = { hour: number; minute: number };
 
-  const existingPhoto = animal?.photo
-    ? getAnimalPhotoUri(animal.photo)
-    : undefined;
-
-  const [name, setName] = useState(animal?.name ?? "");
+function useSpeciesFields(
+  animal: Animal | undefined,
+  language: SupportedLanguage,
+) {
   const [commonName, setCommonName] = useState(animal?.commonName ?? "");
   const [scientificName, setScientificName] = useState(
     animal?.scientificName ?? "",
@@ -103,145 +101,35 @@ export function useReptileForm(animal?: Animal) {
   const scientificSuggestions = scientificSuggestionsDismissed
     ? []
     : searchScientificName(scientificName).slice(0, SPECIES_SUGGESTION_LIMIT);
-  const [sex, setSex] = useState<Animal["sex"]>(animal?.sex ?? "unknown");
-  const [knownBirthDate, setKnownBirthDate] = useState(
-    Boolean(animal?.birthDate),
-  );
-  const [birthDate, setBirthDate] = useState(() => toDate(animal?.birthDate));
-  const [acquiredDate, setAcquiredDate] = useState(() =>
-    toDate(animal?.acquiredDate),
-  );
-  const [knowsAcquired, setKnowsAcquired] = useState(
-    !animal || Boolean(animal.acquiredDate),
-  );
+
+  const handleSelectSpecies = (species: ReptileSpecies) => {
+    setCommonName(species.commonNames[language]);
+    setScientificName(species.scientificName);
+    setCommonSuggestionsDismissed(true);
+    setScientificSuggestionsDismissed(true);
+  };
+
+  return {
+    commonName,
+    setCommonName,
+    scientificName,
+    setScientificName,
+    commonSuggestions,
+    scientificSuggestions,
+    setCommonSuggestionsDismissed,
+    setScientificSuggestionsDismissed,
+    handleSelectSpecies,
+  };
+}
+
+function usePhotoField(
+  existingPhoto: string | undefined,
+  setSaveError: (message: string | undefined) => void,
+  t: Translate,
+) {
   const [photo, setPhoto] = useState<AnimalPhotoSource | undefined>(
     existingPhoto ? { uri: existingPhoto } : undefined,
   );
-  const [defaults, setDefaults] = useState<AnimalLoggingDefaults>(
-    animal?.defaults ?? {},
-  );
-  const [usesFeedingSchedule, setUsesFeedingSchedule] = useState(
-    Boolean(animal?.feedingSchedule),
-  );
-  const [feedingSelection, setFeedingSelection] = useState<ScheduleSelection>(
-    () => scheduleSelection(animal?.feedingSchedule, "weekly"),
-  );
-  const [feedingDays, setFeedingDays] = useState(() =>
-    scheduleCustomDays(animal?.feedingSchedule),
-  );
-  const [feedingReminder, setFeedingReminder] = useState(
-    animal ? animal.reminders?.feed === true : true,
-  );
-  const [waterSelection, setWaterSelection] = useState<ScheduleSelection>(() =>
-    scheduleSelection(animal?.waterSchedule, SCHEDULE_INHERIT),
-  );
-  const [waterDays, setWaterDays] = useState(() =>
-    scheduleCustomDays(animal?.waterSchedule),
-  );
-  const [waterReminder, setWaterReminder] = useState(
-    animal?.reminders?.water !== false,
-  );
-  const [cleaningSelection, setCleaningSelection] = useState<ScheduleSelection>(
-    () => scheduleSelection(animal?.cleaningSchedule, SCHEDULE_INHERIT),
-  );
-  const [cleaningDays, setCleaningDays] = useState(() =>
-    scheduleCustomDays(animal?.cleaningSchedule),
-  );
-  const [cleaningReminder, setCleaningReminder] = useState(
-    animal?.reminders?.cleaning !== false,
-  );
-  const globalDefaults = useValue(defaults$);
-  const collectionWater = useValue(careSchedules$.water);
-  const collectionCleaning = useValue(careSchedules$.cleaning);
-  const reminderTime = useValue(reminders$);
-  const [isSaving, setIsSaving] = useState(false);
-  const [saveError, setSaveError] = useState<string>();
-  const savingRef = useRef(false);
-
-  const photoUri = photo?.uri;
-  const feedingValid =
-    !usesFeedingSchedule || isScheduleValid(feedingSelection, feedingDays);
-  const waterValid = isScheduleValid(waterSelection, waterDays);
-  const waterScheduled =
-    waterSelection === SCHEDULE_INHERIT
-      ? Boolean(collectionWater)
-      : waterSelection !== "off";
-  const cleaningValid = isScheduleValid(cleaningSelection, cleaningDays);
-  const cleaningScheduled =
-    cleaningSelection === SCHEDULE_INHERIT
-      ? Boolean(collectionCleaning)
-      : cleaningSelection !== "off";
-  const canSave =
-    name.trim().length > 0 &&
-    feedingValid &&
-    waterValid &&
-    cleaningValid &&
-    !isSaving;
-
-  const saveNew = async (fields: ReptileFormFields) => {
-    const created = createAnimal(fields);
-    const managedPhoto = photo
-      ? await importAnimalPhoto(photo, created.id)
-      : undefined;
-
-    addAnimalOrDiscardPhoto(
-      managedPhoto ? { ...created, photo: managedPhoto } : created,
-      managedPhoto,
-    );
-  };
-
-  const saveEdit = async (current: Animal, fields: ReptileFormFields) => {
-    let nextPhoto: string | undefined;
-    if (photo) {
-      nextPhoto = isManagedAnimalPhoto(photo.uri)
-        ? existingPhoto
-        : await importAnimalPhoto(photo, current.id);
-    }
-
-    addAnimal({ ...current, ...fields, photo: nextPhoto });
-
-    if (existingPhoto && existingPhoto !== nextPhoto) {
-      deleteManagedAnimalPhoto(existingPhoto);
-    }
-  };
-
-  const handleConfirm = async () => {
-    if (!canSave || savingRef.current) return;
-
-    const fields: ReptileFormFields = {
-      name: name.trim(),
-      commonName: commonName.trim() || undefined,
-      scientificName: scientificName.trim() || undefined,
-      sex,
-      acquiredDate: knowsAcquired ? toCalendarDate(acquiredDate) : undefined,
-      birthDate: knownBirthDate ? toCalendarDate(birthDate) : undefined,
-      defaults,
-      feedingSchedule: usesFeedingSchedule
-        ? careScheduleFromFields(feedingSelection, feedingDays)
-        : undefined,
-      waterSchedule: scheduleFromFields(waterSelection, waterDays),
-      cleaningSchedule: scheduleFromFields(cleaningSelection, cleaningDays),
-      reminders: {
-        feed: feedingReminder,
-        water: waterReminder,
-        cleaning: cleaningReminder,
-      },
-    };
-
-    savingRef.current = true;
-    setIsSaving(true);
-    setSaveError(undefined);
-
-    const saved = animal ? saveEdit(animal, fields) : saveNew(fields);
-    try {
-      await saved;
-      router.back();
-    } catch {
-      setSaveError(t("reptileForm.photoSaveError"));
-    }
-    savingRef.current = false;
-    setIsSaving(false);
-  };
 
   const handlePickPhoto = async () => {
     setSaveError(undefined);
@@ -267,69 +155,251 @@ export function useReptileForm(animal?: Animal) {
     setSaveError(undefined);
   };
 
-  const handleSelectSpecies = (species: ReptileSpecies) => {
-    const commonName = species.commonNames[language];
-    setCommonName(commonName);
-    setScientificName(species.scientificName);
-    setCommonSuggestionsDismissed(true);
-    setScientificSuggestionsDismissed(true);
-  };
+  return { photo, handlePickPhoto, handleRemovePhoto };
+}
 
-  const handleFeedingReminder = (on: boolean) => {
-    setFeedingReminder(on);
+function useRoutineFields(
+  schedule: AnimalSchedule | CareSchedule | undefined,
+  defaultSelection: ScheduleSelection,
+  initialReminder: boolean,
+) {
+  const [selection, setSelection] = useState<ScheduleSelection>(() =>
+    scheduleSelection(schedule, defaultSelection),
+  );
+  const [days, setDays] = useState(() => scheduleCustomDays(schedule));
+  const [reminder, setReminder] = useState(initialReminder);
+
+  const handleReminder = (on: boolean) => {
+    setReminder(on);
     if (on) void requestReminderPermission();
   };
 
-  const handleWaterReminder = (on: boolean) => {
-    setWaterReminder(on);
-    if (on) void requestReminderPermission();
+  return {
+    selection,
+    setSelection,
+    days,
+    setDays,
+    reminder,
+    handleReminder,
+    valid: isScheduleValid(selection, days),
+  };
+}
+
+function isRoutineScheduled(
+  selection: ScheduleSelection,
+  collectionSchedule: unknown,
+) {
+  return selection === SCHEDULE_INHERIT
+    ? Boolean(collectionSchedule)
+    : selection !== "off";
+}
+
+function joinFooter(parts: (string | null)[]) {
+  return parts.filter((part): part is string => Boolean(part)).join(" ");
+}
+
+function reminderTimeFooter(t: Translate, time: ClockTime) {
+  return t("reminders.timeFooter", {
+    time: formatClockTime(time.hour, time.minute),
+  });
+}
+
+type RoutineFooterInput = {
+  scheduleKey: "waterSchedule" | "cleaningSchedule";
+  animal: Animal | undefined;
+  valid: boolean;
+  scheduled: boolean;
+  reminder: boolean;
+  time: ClockTime;
+  t: Translate;
+};
+
+function routineFooter({
+  scheduleKey,
+  animal,
+  valid,
+  scheduled,
+  reminder,
+  time,
+  t,
+}: RoutineFooterInput) {
+  if (!valid) return t("schedule.invalidDays");
+
+  return joinFooter([
+    animal
+      ? t(`${scheduleKey}.animalFooter`, { animalName: animal.name })
+      : t(`${scheduleKey}.animalFooterNew`),
+    scheduled && reminder ? reminderTimeFooter(t, time) : null,
+  ]);
+}
+
+async function saveNew(fields: ReptileFormFields, photo?: AnimalPhotoSource) {
+  const created = createAnimal(fields);
+  const managedPhoto = photo
+    ? await importAnimalPhoto(photo, created.id)
+    : undefined;
+
+  addAnimalOrDiscardPhoto(
+    managedPhoto ? { ...created, photo: managedPhoto } : created,
+    managedPhoto,
+  );
+}
+
+async function saveEdit(
+  current: Animal,
+  fields: ReptileFormFields,
+  photo: AnimalPhotoSource | undefined,
+  existingPhoto: string | undefined,
+) {
+  let nextPhoto: string | undefined;
+  if (photo) {
+    nextPhoto = isManagedAnimalPhoto(photo.uri)
+      ? existingPhoto
+      : await importAnimalPhoto(photo, current.id);
+  }
+
+  addAnimal({ ...current, ...fields, photo: nextPhoto });
+
+  if (existingPhoto && existingPhoto !== nextPhoto) {
+    deleteManagedAnimalPhoto(existingPhoto);
+  }
+}
+
+export function useReptileForm(animal?: Animal) {
+  const { t, i18n } = useTranslation();
+  const language = i18n.language as SupportedLanguage;
+
+  const existingPhoto = animal?.photo
+    ? getAnimalPhotoUri(animal.photo)
+    : undefined;
+
+  const [name, setName] = useState(animal?.name ?? "");
+  const species = useSpeciesFields(animal, language);
+  const [sex, setSex] = useState<Animal["sex"]>(animal?.sex ?? "unknown");
+  const [knownBirthDate, setKnownBirthDate] = useState(
+    Boolean(animal?.birthDate),
+  );
+  const [birthDate, setBirthDate] = useState(() => toDate(animal?.birthDate));
+  const [acquiredDate, setAcquiredDate] = useState(() =>
+    toDate(animal?.acquiredDate),
+  );
+  const [knowsAcquired, setKnowsAcquired] = useState(
+    !animal || Boolean(animal.acquiredDate),
+  );
+  const [defaults, setDefaults] = useState<AnimalLoggingDefaults>(
+    animal?.defaults ?? {},
+  );
+  const [usesFeedingSchedule, setUsesFeedingSchedule] = useState(
+    Boolean(animal?.feedingSchedule),
+  );
+  const feeding = useRoutineFields(
+    animal?.feedingSchedule,
+    "weekly",
+    animal ? animal.reminders?.feed === true : true,
+  );
+  const water = useRoutineFields(
+    animal?.waterSchedule,
+    SCHEDULE_INHERIT,
+    animal?.reminders?.water !== false,
+  );
+  const cleaning = useRoutineFields(
+    animal?.cleaningSchedule,
+    SCHEDULE_INHERIT,
+    animal?.reminders?.cleaning !== false,
+  );
+  const globalDefaults = useValue(defaults$);
+  const collectionWater = useValue(careSchedules$.water);
+  const collectionCleaning = useValue(careSchedules$.cleaning);
+  const reminderTime = useValue(reminders$);
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string>();
+  const savingRef = useRef(false);
+  const { photo, handlePickPhoto, handleRemovePhoto } = usePhotoField(
+    existingPhoto,
+    setSaveError,
+    t,
+  );
+
+  const feedingValid = !usesFeedingSchedule || feeding.valid;
+  const waterScheduled = isRoutineScheduled(water.selection, collectionWater);
+  const cleaningScheduled = isRoutineScheduled(
+    cleaning.selection,
+    collectionCleaning,
+  );
+  const canSave =
+    name.trim().length > 0 &&
+    feedingValid &&
+    water.valid &&
+    cleaning.valid &&
+    !isSaving;
+
+  const buildFields = (): ReptileFormFields => ({
+    name: name.trim(),
+    commonName: species.commonName.trim() || undefined,
+    scientificName: species.scientificName.trim() || undefined,
+    sex,
+    acquiredDate: knowsAcquired ? toCalendarDate(acquiredDate) : undefined,
+    birthDate: knownBirthDate ? toCalendarDate(birthDate) : undefined,
+    defaults,
+    feedingSchedule: usesFeedingSchedule
+      ? careScheduleFromFields(feeding.selection, feeding.days)
+      : undefined,
+    waterSchedule: scheduleFromFields(water.selection, water.days),
+    cleaningSchedule: scheduleFromFields(cleaning.selection, cleaning.days),
+    reminders: {
+      feed: feeding.reminder,
+      water: water.reminder,
+      cleaning: cleaning.reminder,
+    },
+  });
+
+  const handleConfirm = async () => {
+    if (!canSave || savingRef.current) return;
+
+    const fields = buildFields();
+    savingRef.current = true;
+    setIsSaving(true);
+    setSaveError(undefined);
+
+    const saved = animal
+      ? saveEdit(animal, fields, photo, existingPhoto)
+      : saveNew(fields, photo);
+    try {
+      await saved;
+      router.back();
+    } catch {
+      setSaveError(t("reptileForm.photoSaveError"));
+    }
+    savingRef.current = false;
+    setIsSaving(false);
   };
 
-  const handleCleaningReminder = (on: boolean) => {
-    setCleaningReminder(on);
-    if (on) void requestReminderPermission();
-  };
-
-  const feedingFooter = [
+  const feedingFooter = joinFooter([
     t("feedingSchedule.footer"),
-    usesFeedingSchedule && feedingReminder
-      ? t("reminders.timeFooter", {
-          time: formatClockTime(reminderTime.hour, reminderTime.minute),
-        })
+    usesFeedingSchedule && feeding.reminder
+      ? reminderTimeFooter(t, reminderTime)
       : null,
-  ]
-    .filter((part): part is string => Boolean(part))
-    .join(" ");
+  ]);
 
-  const waterFooter = !waterValid
-    ? t("schedule.invalidDays")
-    : [
-        animal
-          ? t("waterSchedule.animalFooter", { animalName: animal.name })
-          : t("waterSchedule.animalFooterNew"),
-        waterScheduled && waterReminder
-          ? t("reminders.timeFooter", {
-              time: formatClockTime(reminderTime.hour, reminderTime.minute),
-            })
-          : null,
-      ]
-        .filter((part): part is string => Boolean(part))
-        .join(" ");
+  const waterFooter = routineFooter({
+    scheduleKey: "waterSchedule",
+    animal,
+    valid: water.valid,
+    scheduled: waterScheduled,
+    reminder: water.reminder,
+    time: reminderTime,
+    t,
+  });
 
-  const cleaningFooter = !cleaningValid
-    ? t("schedule.invalidDays")
-    : [
-        animal
-          ? t("cleaningSchedule.animalFooter", { animalName: animal.name })
-          : t("cleaningSchedule.animalFooterNew"),
-        cleaningScheduled && cleaningReminder
-          ? t("reminders.timeFooter", {
-              time: formatClockTime(reminderTime.hour, reminderTime.minute),
-            })
-          : null,
-      ]
-        .filter((part): part is string => Boolean(part))
-        .join(" ");
+  const cleaningFooter = routineFooter({
+    scheduleKey: "cleaningSchedule",
+    animal,
+    valid: cleaning.valid,
+    scheduled: cleaningScheduled,
+    reminder: cleaning.reminder,
+    time: reminderTime,
+    t,
+  });
 
   const sexLabels: Record<Animal["sex"], string> = {
     unknown: t("sex.unknown"),
@@ -348,14 +418,15 @@ export function useReptileForm(animal?: Animal) {
     sexLabels,
     name,
     setName,
-    commonName,
-    setCommonName,
-    scientificName,
-    setScientificName,
-    commonSuggestions,
-    scientificSuggestions,
-    setCommonSuggestionsDismissed,
-    setScientificSuggestionsDismissed,
+    commonName: species.commonName,
+    setCommonName: species.setCommonName,
+    scientificName: species.scientificName,
+    setScientificName: species.setScientificName,
+    commonSuggestions: species.commonSuggestions,
+    scientificSuggestions: species.scientificSuggestions,
+    setCommonSuggestionsDismissed: species.setCommonSuggestionsDismissed,
+    setScientificSuggestionsDismissed:
+      species.setScientificSuggestionsDismissed,
     sex,
     setSex,
     knownBirthDate,
@@ -366,32 +437,32 @@ export function useReptileForm(animal?: Animal) {
     setAcquiredDate,
     knowsAcquired,
     setKnowsAcquired,
-    photoUri,
+    photoUri: photo?.uri,
     defaults,
     setDefaults,
     usesFeedingSchedule,
     setUsesFeedingSchedule,
-    feedingSelection,
-    setFeedingSelection,
-    feedingDays,
-    setFeedingDays,
+    feedingSelection: feeding.selection,
+    setFeedingSelection: feeding.setSelection,
+    feedingDays: feeding.days,
+    setFeedingDays: feeding.setDays,
     feedingValid,
-    feedingReminder,
+    feedingReminder: feeding.reminder,
     feedingFooter,
-    waterSelection,
-    setWaterSelection,
-    waterDays,
-    setWaterDays,
-    waterValid,
+    waterSelection: water.selection,
+    setWaterSelection: water.setSelection,
+    waterDays: water.days,
+    setWaterDays: water.setDays,
+    waterValid: water.valid,
     waterScheduled,
-    cleaningSelection,
-    setCleaningSelection,
-    cleaningDays,
-    setCleaningDays,
-    cleaningValid,
+    cleaningSelection: cleaning.selection,
+    setCleaningSelection: cleaning.setSelection,
+    cleaningDays: cleaning.days,
+    setCleaningDays: cleaning.setDays,
+    cleaningValid: cleaning.valid,
     cleaningScheduled,
-    waterReminder,
-    cleaningReminder,
+    waterReminder: water.reminder,
+    cleaningReminder: cleaning.reminder,
     canSave,
     isSaving,
     saveError,
@@ -400,10 +471,10 @@ export function useReptileForm(animal?: Animal) {
     handleConfirm,
     handlePickPhoto,
     handleRemovePhoto,
-    handleSelectSpecies,
-    handleFeedingReminder,
-    handleWaterReminder,
-    handleCleaningReminder,
+    handleSelectSpecies: species.handleSelectSpecies,
+    handleFeedingReminder: feeding.handleReminder,
+    handleWaterReminder: water.handleReminder,
+    handleCleaningReminder: cleaning.handleReminder,
   };
 }
 

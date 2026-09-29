@@ -12,7 +12,6 @@ import {
   tint,
 } from "@expo/ui/swift-ui/modifiers";
 import { router, Stack } from "expo-router";
-import { StyleSheet } from "react-native";
 import { useTranslation } from "react-i18next";
 
 import { Typography } from "@/constants/theme";
@@ -20,9 +19,6 @@ import { typeFont } from "@/constants/type-font";
 import { useColorScheme, useTheme } from "@/hooks/use-theme";
 import type { SupportedLanguage } from "@/i18n/resolve-language";
 import { swiftUILocaleIdentifier } from "@/i18n/resolve-language";
-import { asEditOf, optionalText, useDraft } from "@/utils/form-sheet-shared";
-
-export { asEditOf, optionalText, useDraft };
 
 export type FormSheetChromeProps = {
   namespace: string;
@@ -198,12 +194,3 @@ export function useFormModifiers() {
     row: [listRowBackground(theme.surface)],
   };
 }
-
-export const formSheetStyles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  host: {
-    flex: 1,
-  },
-});

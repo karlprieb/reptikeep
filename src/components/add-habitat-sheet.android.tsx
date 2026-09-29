@@ -12,19 +12,23 @@ import { useTranslation } from "react-i18next";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import {
-  ACTION_ICON_SIZE,
-  asEditOf,
   DateTimeField,
-  fieldColors,
   FormSheetTopBar,
-  formSheetAndroidStyles as styles,
-  optionalText,
   Section,
   SwitchRow,
+} from "@/components/form-sheet";
+import {
+  formSheetAndroidStyles as styles,
+  fieldColors,
+} from "@/constants/form-sheet-android";
+import {
+  ACTION_ICON_SIZE,
+  asEditOf,
+  optionalText,
   TOP_BAR_HEIGHT,
   useDraft,
   useScrollLift,
-} from "@/components/form-sheet";
+} from "@/utils/form-sheet-shared";
 import { Spacing, StackAboveFontScale } from "@/constants/theme";
 import { useTheme } from "@/hooks/use-theme";
 import { type CareRoutine } from "@/state/care-schedule";
