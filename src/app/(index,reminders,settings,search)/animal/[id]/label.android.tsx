@@ -19,7 +19,13 @@ import {
 } from "@expo/ui/jetpack-compose/modifiers";
 import { router } from "expo-router";
 import { useRef, useState } from "react";
-import { Animated, StatusBar, StyleSheet, View } from "react-native";
+import {
+  Animated,
+  KeyboardAvoidingView,
+  StatusBar,
+  StyleSheet,
+  View,
+} from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import PdfRendererView from "react-native-pdf-renderer";
 import { useTranslation } from "react-i18next";
@@ -109,7 +115,10 @@ export default function AnimalLabelScreen() {
     label.hasContent ? void label.share() : showMessage(t("label.empty"));
 
   return (
-    <View style={[styles.root, { backgroundColor: theme.bg }]}>
+    <KeyboardAvoidingView
+      style={[styles.root, { backgroundColor: theme.bg }]}
+      behavior="padding"
+    >
       <Animated.ScrollView
         style={styles.scroll}
         contentContainerStyle={{
@@ -342,7 +351,7 @@ export default function AnimalLabelScreen() {
         insetsBottom={insets.bottom}
         theme={theme}
       />
-    </View>
+    </KeyboardAvoidingView>
   );
 }
 

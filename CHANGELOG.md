@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- On Android, typing in Notes and other multi-line fields on activity forms
+  no longer hides your text behind the keyboard.
+
 ## [0.7.0] - 2026-09-28
 
 ### Added

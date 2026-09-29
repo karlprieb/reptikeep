@@ -37,6 +37,7 @@ import { useEffect, useRef, useState } from "react";
 import {
   Animated,
   Image,
+  KeyboardAvoidingView,
   StatusBar,
   StyleSheet,
   useWindowDimensions,
@@ -623,7 +624,10 @@ export function ReptileFormSheet({ animal }: ReptileFormSheetProps) {
   const common = { theme, iconSize };
 
   return (
-    <View style={[styles.root, { backgroundColor: theme.bg }]}>
+    <KeyboardAvoidingView
+      style={[styles.root, { backgroundColor: theme.bg }]}
+      behavior="padding"
+    >
       <StatusBar
         translucent
         backgroundColor="transparent"
@@ -710,7 +714,7 @@ export function ReptileFormSheet({ animal }: ReptileFormSheetProps) {
         bottomInset={insets.bottom}
         theme={theme}
       />
-    </View>
+    </KeyboardAvoidingView>
   );
 }
 

@@ -23,7 +23,7 @@ import {
 import { useValue } from "@legendapp/state/react";
 import { router } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
-import { Animated, StyleSheet, View } from "react-native";
+import { Animated, KeyboardAvoidingView, StyleSheet, View } from "react-native";
 import { useTranslation } from "react-i18next";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -79,242 +79,244 @@ export default function SettingsScreen() {
 
   return (
     <>
-      <Animated.ScrollView
-        style={[styles.scroll, { backgroundColor: theme.bg }]}
-        contentContainerStyle={{
-          paddingTop: appBarHeight,
-          paddingBottom: Spacing["2xl"],
-        }}
-        scrollEventThrottle={16}
-        onScroll={Animated.event(
-          [{ nativeEvent: { contentOffset: { y: scrollY } } }],
-          { useNativeDriver: true },
-        )}
-      >
-        <Host
-          style={styles.host}
-          matchContents={{ horizontal: false, vertical: true }}
-          seedColor={theme.primary}
+      <KeyboardAvoidingView style={{ flex: 1 }} behavior="padding">
+        <Animated.ScrollView
+          style={[styles.scroll, { backgroundColor: theme.bg }]}
+          contentContainerStyle={{
+            paddingTop: appBarHeight,
+            paddingBottom: Spacing["2xl"],
+          }}
+          scrollEventThrottle={16}
+          onScroll={Animated.event(
+            [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+            { useNativeDriver: true },
+          )}
         >
-          <Column modifiers={[fillMaxWidth()]}>
-            <SectionHeader theme={theme} title={t("defaults.section")} />
-            <MenuRow
-              theme={theme}
-              title={t("defaults.mealMeasure")}
-              value={t(`feedingForm.measure.${globalDefaults.mealMeasure}`)}
-              hint={t("a11y.defaults.mealMeasure.hint")}
-              items={FEEDING_MEASURES.map((value) => ({
-                value,
-                label: t(`feedingForm.measure.${value}`),
-              }))}
-              selected={globalDefaults.mealMeasure}
-              onSelect={(value) => defaults$.mealMeasure.set(value)}
-            />
-            <ToggleRow
-              theme={theme}
-              title={t("defaults.frozen")}
-              supporting={t(
-                globalDefaults.frozen
-                  ? "defaults.frozenYes"
-                  : "defaults.frozenNo",
-              )}
-              hint={t("a11y.defaults.frozen.hint")}
-              checked={globalDefaults.frozen}
-              onCheckedChange={(value) => defaults$.frozen.set(value)}
-            />
-            <MenuRow
-              theme={theme}
-              title={t("defaults.weightUnit")}
-              value={t(`feedingForm.units.${globalDefaults.weightUnit}`)}
-              hint={t("a11y.defaults.weightUnit.hint")}
-              items={WEIGHT_UNITS.map((value) => ({
-                value,
-                label: t(`feedingForm.units.${value}`),
-              }))}
-              selected={globalDefaults.weightUnit}
-              onSelect={(value) => defaults$.weightUnit.set(value)}
-            />
-            <MenuRow
-              theme={theme}
-              title={t("defaults.poopType")}
-              value={t(`timeline.poop.${globalDefaults.poopType}`)}
-              hint={t("a11y.defaults.poopType.hint")}
-              items={DEFECATION_TYPES.map((value) => ({
-                value,
-                label: t(`timeline.poop.${value}`),
-              }))}
-              selected={globalDefaults.poopType}
-              onSelect={(value) => defaults$.poopType.set(value)}
-            />
-            <SectionFooter theme={theme} text={t("defaults.globalFooter")} />
-
-            <SectionHeader
-              theme={theme}
-              title={t("reminders.settings.section")}
-            />
-            <NavRow
-              theme={theme}
-              title={t("reminders.settings.time")}
-              value={reminderLabel}
-              hint={t("a11y.reminders.time.hint")}
-              onClick={() => setShowTimePicker(true)}
-            />
-            <SectionFooter
-              theme={theme}
-              text={t("reminders.settings.footer")}
-            />
-
-            <SectionHeader theme={theme} title={t("waterSchedule.section")} />
-            <ToggleRow
-              theme={theme}
-              title={t("waterSchedule.enabled")}
-              hint={t("a11y.waterSchedule.enabled.hint")}
-              checked={Boolean(water.schedule)}
-              onCheckedChange={water.setEnabled}
-            />
-            {water.schedule ? (
+          <Host
+            style={styles.host}
+            matchContents={{ horizontal: false, vertical: true }}
+            seedColor={theme.primary}
+          >
+            <Column modifiers={[fillMaxWidth()]}>
+              <SectionHeader theme={theme} title={t("defaults.section")} />
               <MenuRow
                 theme={theme}
-                title={t("schedule.frequency.label")}
-                value={t(`schedule.frequency.${water.selection}`)}
-                hint={t("a11y.waterSchedule.frequency.hint")}
-                items={frequencyItems}
-                selected={water.selection}
-                onSelect={water.setSelection}
+                title={t("defaults.mealMeasure")}
+                value={t(`feedingForm.measure.${globalDefaults.mealMeasure}`)}
+                hint={t("a11y.defaults.mealMeasure.hint")}
+                items={FEEDING_MEASURES.map((value) => ({
+                  value,
+                  label: t(`feedingForm.measure.${value}`),
+                }))}
+                selected={globalDefaults.mealMeasure}
+                onSelect={(value) => defaults$.mealMeasure.set(value)}
               />
-            ) : null}
-            {water.schedule && water.selection === "custom" ? (
-              <DaysRow
+              <ToggleRow
                 theme={theme}
-                value={water.days}
-                onChange={water.setDays}
-                valid={water.valid}
-                hint={t("a11y.waterSchedule.customDays.hint")}
+                title={t("defaults.frozen")}
+                supporting={t(
+                  globalDefaults.frozen
+                    ? "defaults.frozenYes"
+                    : "defaults.frozenNo",
+                )}
+                hint={t("a11y.defaults.frozen.hint")}
+                checked={globalDefaults.frozen}
+                onCheckedChange={(value) => defaults$.frozen.set(value)}
               />
-            ) : null}
-            <SectionFooter
-              theme={theme}
-              text={
-                water.valid
-                  ? t("waterSchedule.globalFooter")
-                  : t("schedule.invalidDays")
-              }
-              color={water.valid ? undefined : theme.danger}
-            />
-
-            <SectionHeader
-              theme={theme}
-              title={t("cleaningSchedule.section")}
-            />
-            <ToggleRow
-              theme={theme}
-              title={t("cleaningSchedule.enabled")}
-              hint={t("a11y.cleaningSchedule.enabled.hint")}
-              checked={Boolean(cleaning.schedule)}
-              onCheckedChange={cleaning.setEnabled}
-            />
-            {cleaning.schedule ? (
               <MenuRow
                 theme={theme}
-                title={t("schedule.frequency.label")}
-                value={t(`schedule.frequency.${cleaning.selection}`)}
-                hint={t("a11y.cleaningSchedule.frequency.hint")}
-                items={frequencyItems}
-                selected={cleaning.selection}
-                onSelect={cleaning.setSelection}
+                title={t("defaults.weightUnit")}
+                value={t(`feedingForm.units.${globalDefaults.weightUnit}`)}
+                hint={t("a11y.defaults.weightUnit.hint")}
+                items={WEIGHT_UNITS.map((value) => ({
+                  value,
+                  label: t(`feedingForm.units.${value}`),
+                }))}
+                selected={globalDefaults.weightUnit}
+                onSelect={(value) => defaults$.weightUnit.set(value)}
               />
-            ) : null}
-            {cleaning.schedule && cleaning.selection === "custom" ? (
-              <DaysRow
+              <MenuRow
                 theme={theme}
-                value={cleaning.days}
-                onChange={cleaning.setDays}
-                valid={cleaning.valid}
-                hint={t("a11y.cleaningSchedule.customDays.hint")}
+                title={t("defaults.poopType")}
+                value={t(`timeline.poop.${globalDefaults.poopType}`)}
+                hint={t("a11y.defaults.poopType.hint")}
+                items={DEFECATION_TYPES.map((value) => ({
+                  value,
+                  label: t(`timeline.poop.${value}`),
+                }))}
+                selected={globalDefaults.poopType}
+                onSelect={(value) => defaults$.poopType.set(value)}
               />
-            ) : null}
-            <SectionFooter
-              theme={theme}
-              text={
-                cleaning.valid
-                  ? t("cleaningSchedule.globalFooter")
-                  : t("schedule.invalidDays")
-              }
-              color={cleaning.valid ? undefined : theme.danger}
-            />
+              <SectionFooter theme={theme} text={t("defaults.globalFooter")} />
 
-            <SectionHeader theme={theme} title={t("settings.general")} />
-            <MenuRow
-              theme={theme}
-              title={t("settings.language")}
-              value={t(
-                LANGUAGE_OPTIONS.find(
-                  (option) => option.value === currentLanguage,
-                )?.labelKey ?? "settings.followDevice",
-              )}
-              hint={t("a11y.language.hint")}
-              items={LANGUAGE_OPTIONS.map((option) => ({
-                value: option.value,
-                label: t(option.labelKey),
-              }))}
-              selected={currentLanguage}
-              onSelect={setLanguage}
-            />
-            <NavRow
-              theme={theme}
-              title={t("backup.title")}
-              hint={t("a11y.backup.open")}
-              onClick={() => router.push("/backup-restore" as never)}
-            />
-            <SectionFooter theme={theme} text={t("settings.subtitle")} />
+              <SectionHeader
+                theme={theme}
+                title={t("reminders.settings.section")}
+              />
+              <NavRow
+                theme={theme}
+                title={t("reminders.settings.time")}
+                value={reminderLabel}
+                hint={t("a11y.reminders.time.hint")}
+                onClick={() => setShowTimePicker(true)}
+              />
+              <SectionFooter
+                theme={theme}
+                text={t("reminders.settings.footer")}
+              />
 
-            <NavRow
-              theme={theme}
-              title={t("about.title")}
-              hint={t("a11y.about.openHint")}
-              onClick={() => router.push("/about")}
-              modifiersTop
-            />
-          </Column>
-        </Host>
-      </Animated.ScrollView>
+              <SectionHeader theme={theme} title={t("waterSchedule.section")} />
+              <ToggleRow
+                theme={theme}
+                title={t("waterSchedule.enabled")}
+                hint={t("a11y.waterSchedule.enabled.hint")}
+                checked={Boolean(water.schedule)}
+                onCheckedChange={water.setEnabled}
+              />
+              {water.schedule ? (
+                <MenuRow
+                  theme={theme}
+                  title={t("schedule.frequency.label")}
+                  value={t(`schedule.frequency.${water.selection}`)}
+                  hint={t("a11y.waterSchedule.frequency.hint")}
+                  items={frequencyItems}
+                  selected={water.selection}
+                  onSelect={water.setSelection}
+                />
+              ) : null}
+              {water.schedule && water.selection === "custom" ? (
+                <DaysRow
+                  theme={theme}
+                  value={water.days}
+                  onChange={water.setDays}
+                  valid={water.valid}
+                  hint={t("a11y.waterSchedule.customDays.hint")}
+                />
+              ) : null}
+              <SectionFooter
+                theme={theme}
+                text={
+                  water.valid
+                    ? t("waterSchedule.globalFooter")
+                    : t("schedule.invalidDays")
+                }
+                color={water.valid ? undefined : theme.danger}
+              />
 
-      {showTimePicker ? (
-        <View style={styles.dialogHost} pointerEvents="box-none">
-          <Host matchContents seedColor={theme.primary}>
-            <TimePickerDialog
-              initialDate={reminderDate.toISOString()}
-              onDateSelected={(next) => {
-                reminders$.set({
-                  hour: next.getHours(),
-                  minute: next.getMinutes(),
-                });
-                setShowTimePicker(false);
-              }}
-              onDismissRequest={() => setShowTimePicker(false)}
-              color={theme.primary}
-              elementColors={{
-                containerColor: theme.surface,
-                clockDialColor: theme.surfaceSunken,
-                clockDialSelectedContentColor: theme.onPrimary,
-                clockDialUnselectedContentColor: theme.text,
-                selectorColor: theme.primary,
-                timeSelectorSelectedContainerColor: theme.primary,
-                timeSelectorSelectedContentColor: theme.onPrimary,
-                timeSelectorUnselectedContainerColor: theme.surfaceSunken,
-                timeSelectorUnselectedContentColor: theme.text,
-                periodSelectorBorderColor: theme.border,
-                periodSelectorSelectedContainerColor: theme.primary,
-                periodSelectorSelectedContentColor: theme.onPrimary,
-                periodSelectorUnselectedContainerColor: theme.surface,
-                periodSelectorUnselectedContentColor: theme.text,
-              }}
-              confirmButtonLabel={t("settings.ok")}
-              dismissButtonLabel={t("settings.cancel")}
-            />
+              <SectionHeader
+                theme={theme}
+                title={t("cleaningSchedule.section")}
+              />
+              <ToggleRow
+                theme={theme}
+                title={t("cleaningSchedule.enabled")}
+                hint={t("a11y.cleaningSchedule.enabled.hint")}
+                checked={Boolean(cleaning.schedule)}
+                onCheckedChange={cleaning.setEnabled}
+              />
+              {cleaning.schedule ? (
+                <MenuRow
+                  theme={theme}
+                  title={t("schedule.frequency.label")}
+                  value={t(`schedule.frequency.${cleaning.selection}`)}
+                  hint={t("a11y.cleaningSchedule.frequency.hint")}
+                  items={frequencyItems}
+                  selected={cleaning.selection}
+                  onSelect={cleaning.setSelection}
+                />
+              ) : null}
+              {cleaning.schedule && cleaning.selection === "custom" ? (
+                <DaysRow
+                  theme={theme}
+                  value={cleaning.days}
+                  onChange={cleaning.setDays}
+                  valid={cleaning.valid}
+                  hint={t("a11y.cleaningSchedule.customDays.hint")}
+                />
+              ) : null}
+              <SectionFooter
+                theme={theme}
+                text={
+                  cleaning.valid
+                    ? t("cleaningSchedule.globalFooter")
+                    : t("schedule.invalidDays")
+                }
+                color={cleaning.valid ? undefined : theme.danger}
+              />
+
+              <SectionHeader theme={theme} title={t("settings.general")} />
+              <MenuRow
+                theme={theme}
+                title={t("settings.language")}
+                value={t(
+                  LANGUAGE_OPTIONS.find(
+                    (option) => option.value === currentLanguage,
+                  )?.labelKey ?? "settings.followDevice",
+                )}
+                hint={t("a11y.language.hint")}
+                items={LANGUAGE_OPTIONS.map((option) => ({
+                  value: option.value,
+                  label: t(option.labelKey),
+                }))}
+                selected={currentLanguage}
+                onSelect={setLanguage}
+              />
+              <NavRow
+                theme={theme}
+                title={t("backup.title")}
+                hint={t("a11y.backup.open")}
+                onClick={() => router.push("/backup-restore" as never)}
+              />
+              <SectionFooter theme={theme} text={t("settings.subtitle")} />
+
+              <NavRow
+                theme={theme}
+                title={t("about.title")}
+                hint={t("a11y.about.openHint")}
+                onClick={() => router.push("/about")}
+                modifiersTop
+              />
+            </Column>
           </Host>
-        </View>
-      ) : null}
+        </Animated.ScrollView>
+
+        {showTimePicker ? (
+          <View style={styles.dialogHost} pointerEvents="box-none">
+            <Host matchContents seedColor={theme.primary}>
+              <TimePickerDialog
+                initialDate={reminderDate.toISOString()}
+                onDateSelected={(next) => {
+                  reminders$.set({
+                    hour: next.getHours(),
+                    minute: next.getMinutes(),
+                  });
+                  setShowTimePicker(false);
+                }}
+                onDismissRequest={() => setShowTimePicker(false)}
+                color={theme.primary}
+                elementColors={{
+                  containerColor: theme.surface,
+                  clockDialColor: theme.surfaceSunken,
+                  clockDialSelectedContentColor: theme.onPrimary,
+                  clockDialUnselectedContentColor: theme.text,
+                  selectorColor: theme.primary,
+                  timeSelectorSelectedContainerColor: theme.primary,
+                  timeSelectorSelectedContentColor: theme.onPrimary,
+                  timeSelectorUnselectedContainerColor: theme.surfaceSunken,
+                  timeSelectorUnselectedContentColor: theme.text,
+                  periodSelectorBorderColor: theme.border,
+                  periodSelectorSelectedContainerColor: theme.primary,
+                  periodSelectorSelectedContentColor: theme.onPrimary,
+                  periodSelectorUnselectedContainerColor: theme.surface,
+                  periodSelectorUnselectedContentColor: theme.text,
+                }}
+                confirmButtonLabel={t("settings.ok")}
+                dismissButtonLabel={t("settings.cancel")}
+              />
+            </Host>
+          </View>
+        ) : null}
+      </KeyboardAvoidingView>
 
       <MaterialAppBar title={t("settings.title")} scrollY={scrollY} />
     </>
