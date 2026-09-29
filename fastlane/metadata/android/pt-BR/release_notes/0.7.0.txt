@@ -1,0 +1,1 @@
+Agora dá para imprimir uma etiqueta para o terrário de cada animal, com código QR, nome, espécie e datas. É só escanear o código com o celular para abrir o réptil no app, ou já cair direto no registro de uma nova atividade.
