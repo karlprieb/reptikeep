@@ -6,12 +6,9 @@ import { View } from "react-native";
 import { useTranslation } from "react-i18next";
 
 import { AnimalNotFound, useAnimalRoute } from "@/components/animal-route";
-import {
-  FormSectionFooter,
-  formSheetStyles as styles,
-  useDraft,
-  useFormModifiers,
-} from "@/components/form-sheet";
+import { FormSectionFooter, useFormModifiers } from "@/components/form-sheet";
+import { formSheetStyles as styles } from "@/constants/form-sheet-ios";
+import { useDraft } from "@/utils/form-sheet-shared";
 import { Typography } from "@/constants/theme";
 import { useTheme } from "@/hooks/use-theme";
 import { fromCalendarDate, toCalendarDate } from "@/utils/format-date";

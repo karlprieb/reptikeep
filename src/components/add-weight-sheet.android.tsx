@@ -13,21 +13,25 @@ import { useTranslation } from "react-i18next";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import {
-  ACTION_ICON_SIZE,
-  asEditOf,
-  DATA_STYLE,
   DateTimeField,
-  fieldColors,
   FormSheetTopBar,
-  formSheetAndroidStyles as styles,
   LabeledRow,
-  optionalText,
   Section,
   SegmentedField,
+} from "@/components/form-sheet";
+import {
+  formSheetAndroidStyles as styles,
+  DATA_STYLE,
+  fieldColors,
+} from "@/constants/form-sheet-android";
+import {
+  ACTION_ICON_SIZE,
+  asEditOf,
+  optionalText,
   TOP_BAR_HEIGHT,
   useDraft,
   useScrollLift,
-} from "@/components/form-sheet";
+} from "@/utils/form-sheet-shared";
 import { Spacing, StackAboveFontScale } from "@/constants/theme";
 import { useTheme } from "@/hooks/use-theme";
 import { animalDefaults } from "@/state/logging-defaults";

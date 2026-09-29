@@ -2,7 +2,7 @@ import {
   cardRows,
   selectCardColumns,
   sheetScrolls,
-} from "@/components/add-activity-sheet";
+} from "@/utils/activity-sheet-layout";
 
 describe("selectCardColumns", () => {
   it("keeps two columns through the largest non-accessibility size", () => {

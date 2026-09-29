@@ -29,21 +29,25 @@ import { useTranslation } from "react-i18next";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import {
-  ACTION_ICON_SIZE,
   DateTimeField,
-  fieldColors,
   FormSheetTopBar,
-  formSheetAndroidStyles as styles,
   MenuField,
-  optionalText,
   Section,
   SegmentedField,
   SwitchRow,
+} from "@/components/form-sheet";
+import {
+  formSheetAndroidStyles as styles,
+  fieldColors,
+} from "@/constants/form-sheet-android";
+import {
+  ACTION_ICON_SIZE,
+  optionalText,
   TOP_BAR_HEIGHT,
   asEditOf,
   useDraft,
   useScrollLift,
-} from "@/components/form-sheet";
+} from "@/utils/form-sheet-shared";
 import { Radius, Spacing, StackAboveFontScale } from "@/constants/theme";
 import { composeTextStyle } from "@/constants/type-font-compose";
 import { useFoodTypeSuggestions } from "@/hooks/use-food-type-suggestions";

@@ -26,7 +26,7 @@ import {
   ACTION_ICON_SIZE,
   TOP_BAR_HEIGHT,
   useScrollLift,
-} from "@/components/form-sheet";
+} from "@/utils/form-sheet-shared";
 import { Spacing } from "@/constants/theme";
 import { useAddActivity } from "@/hooks/use-add-activity";
 import { useColorScheme, useTheme } from "@/hooks/use-theme";

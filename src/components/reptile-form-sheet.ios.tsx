@@ -44,7 +44,11 @@ import {
 import { ScheduleFields } from "@/components/schedule-fields";
 import { describeSchedule } from "@/utils/schedule";
 import { ThemedText } from "@/components/themed-text";
-import { FROZEN_TAGS, useReptileForm } from "@/components/use-reptile-form";
+import {
+  FROZEN_TAGS,
+  useReptileForm,
+  type ReptileFormController,
+} from "@/components/use-reptile-form";
 import { Spacing } from "@/constants/theme";
 import { typeFont } from "@/constants/type-font";
 import { useTheme } from "@/hooks/use-theme";
@@ -86,30 +90,181 @@ function SpeciesSuggestionRows({
   );
 }
 
-export function ReptileFormSheet({ animal }: ReptileFormSheetProps) {
+type RowModifiers = ReturnType<typeof useFormModifiers>["row"];
+
+type FormSectionProps = {
+  form: ReptileFormController;
+  rowModifiers: RowModifiers;
+};
+
+function PhotoSection({ form }: { form: ReptileFormController }) {
   const theme = useTheme();
   const { t } = useTranslation();
-  const modifiers = useFormModifiers();
-  const form = useReptileForm(animal);
+  const { photoUri, handlePickPhoto, handleRemovePhoto } = form;
 
+  return (
+    <Section>
+      <Button
+        onPress={handlePickPhoto}
+        modifiers={[
+          buttonStyle("plain"),
+          listRowBackground(theme.surfaceSunken),
+          listRowInsets({
+            top: 0,
+            leading: 0,
+            bottom: 0,
+            trailing: 0,
+          }),
+          frame({
+            maxWidth: Infinity,
+            minHeight: 140,
+            maxHeight: 140,
+            alignment: "center",
+          }),
+          accessibilityLabel(
+            photoUri ? t("reptileForm.changePhoto") : t("reptileForm.addPhoto"),
+          ),
+        ]}
+      >
+        {photoUri ? (
+          <Image
+            uiImage={photoUri}
+            modifiers={[
+              resizable(),
+              aspectRatio({ contentMode: "fill" }),
+              frame({ maxWidth: Infinity, maxHeight: Infinity }),
+              clipped(),
+            ]}
+          />
+        ) : (
+          <VStack spacing={Spacing["2xs"]}>
+            <Image
+              systemName="camera.fill"
+              modifiers={[
+                font({ size: 28 }),
+                foregroundStyle(theme.textSecondary),
+              ]}
+            />
+            <Text
+              modifiers={[
+                typeFont("bodyS"),
+                foregroundStyle(theme.textSecondary),
+              ]}
+            >
+              {t("reptileForm.addPhoto")}
+            </Text>
+          </VStack>
+        )}
+      </Button>
+
+      {photoUri ? (
+        <Button
+          label={t("reptileForm.removePhoto")}
+          systemImage="trash"
+          role="destructive"
+          onPress={handleRemovePhoto}
+          modifiers={[
+            tint(theme.danger),
+            foregroundStyle(theme.danger),
+            listRowBackground(theme.surface),
+          ]}
+        />
+      ) : null}
+    </Section>
+  );
+}
+
+type NameFieldStates = {
+  nameText: ReturnType<typeof useNativeState<string>>;
+  commonNameText: ReturnType<typeof useNativeState<string>>;
+  scientificNameText: ReturnType<typeof useNativeState<string>>;
+};
+
+function DetailsSection({
+  form,
+  rowModifiers,
+  nameText,
+  commonNameText,
+  scientificNameText,
+}: FormSectionProps & NameFieldStates) {
+  const theme = useTheme();
+  const { t } = useTranslation();
   const {
     language,
-    SEX_VALUES,
-    globalDefaults,
-    collectionWater,
-    collectionCleaning,
-    frozenTag,
-    sexLabels,
-    name,
     setName,
-    commonName,
     setCommonName,
-    scientificName,
     setScientificName,
     commonSuggestions,
     scientificSuggestions,
     setCommonSuggestionsDismissed,
     setScientificSuggestionsDismissed,
+    handleSelectSpecies,
+  } = form;
+  return (
+    <Section
+      header={<FormSectionHeader>{t("reptileForm.details")}</FormSectionHeader>}
+      modifiers={rowModifiers}
+    >
+      <TextField
+        text={nameText}
+        placeholder={t("reptileForm.name")}
+        onTextChange={setName}
+        modifiers={[
+          accessibilityLabel(t("reptileForm.name")),
+          textInputAutocapitalization("words"),
+        ]}
+      />
+      <TextField
+        text={commonNameText}
+        placeholder={t("reptileForm.commonName")}
+        onTextChange={(value) => {
+          setCommonName(value);
+          setCommonSuggestionsDismissed(false);
+        }}
+        modifiers={[
+          accessibilityLabel(t("reptileForm.commonName")),
+          textInputAutocapitalization("words"),
+        ]}
+      />
+      <SpeciesSuggestionRows
+        suggestions={commonSuggestions}
+        labelFor={(species) =>
+          `${species.commonNames[language]} · ${species.scientificName}`
+        }
+        onSelect={handleSelectSpecies}
+        hint={t("a11y.reptileForm.speciesSuggestion.hint")}
+        color={theme.textSecondary}
+      />
+      <TextField
+        text={scientificNameText}
+        placeholder={t("reptileForm.scientificName")}
+        onTextChange={(value) => {
+          setScientificName(value);
+          setScientificSuggestionsDismissed(false);
+        }}
+        modifiers={[
+          accessibilityLabel(t("reptileForm.scientificName")),
+          textInputAutocapitalization("words"),
+        ]}
+      />
+      <SpeciesSuggestionRows
+        suggestions={scientificSuggestions}
+        labelFor={(species) =>
+          `${species.scientificName} · ${species.commonNames[language]}`
+        }
+        onSelect={handleSelectSpecies}
+        hint={t("a11y.reptileForm.speciesSuggestion.hint")}
+        color={theme.textSecondary}
+      />
+    </Section>
+  );
+}
+
+function ProfileSection({ form, rowModifiers }: FormSectionProps) {
+  const { t } = useTranslation();
+  const {
+    SEX_VALUES,
+    sexLabels,
     sex,
     setSex,
     knownBirthDate,
@@ -119,53 +274,292 @@ export function ReptileFormSheet({ animal }: ReptileFormSheetProps) {
     acquiredDate,
     setAcquiredDate,
     setKnowsAcquired,
-    photoUri,
-    defaults,
-    setDefaults,
+  } = form;
+
+  return (
+    <Section modifiers={rowModifiers}>
+      <Picker
+        label={t("reptileForm.sex")}
+        selection={sex}
+        onSelectionChange={(value) => setSex(value as Animal["sex"])}
+        modifiers={[pickerStyle("menu")]}
+      >
+        {SEX_VALUES.map((value) => (
+          <Text key={value} modifiers={[tag(value)]}>
+            {sexLabels[value]}
+          </Text>
+        ))}
+      </Picker>
+      <Toggle
+        label={t("reptileForm.knownBirthDate")}
+        isOn={knownBirthDate}
+        onIsOnChange={setKnownBirthDate}
+      />
+      {knownBirthDate ? (
+        <DatePicker
+          title={t("reptileForm.birthDate")}
+          selection={birthDate}
+          displayedComponents={["date"]}
+          onDateChange={setBirthDate}
+          modifiers={[datePickerStyle("compact")]}
+        />
+      ) : null}
+      <DatePicker
+        title={t("reptileForm.acquired")}
+        selection={acquiredDate}
+        displayedComponents={["date"]}
+        onDateChange={(value) => {
+          setAcquiredDate(value);
+          setKnowsAcquired(true);
+        }}
+        modifiers={[datePickerStyle("compact")]}
+      />
+    </Section>
+  );
+}
+
+function FeedingSection({ form, rowModifiers }: FormSectionProps) {
+  const theme = useTheme();
+  const { t } = useTranslation();
+  const {
+    feedingValid,
+    feedingFooter,
     usesFeedingSchedule,
     setUsesFeedingSchedule,
     feedingSelection,
     setFeedingSelection,
     feedingDays,
     setFeedingDays,
-    feedingValid,
     feedingReminder,
-    feedingFooter,
-    waterSelection,
-    setWaterSelection,
-    waterDays,
-    setWaterDays,
-    waterValid,
-    waterScheduled,
-    cleaningSelection,
-    setCleaningSelection,
-    cleaningDays,
-    setCleaningDays,
-    cleaningValid,
-    cleaningScheduled,
-    waterReminder,
-    cleaningReminder,
-    canSave,
-    isSaving,
-    saveError,
-    waterFooter,
-    cleaningFooter,
-    handleConfirm,
-    handlePickPhoto,
-    handleRemovePhoto,
-    handleSelectSpecies,
     handleFeedingReminder,
-    handleWaterReminder,
-    handleCleaningReminder,
   } = form;
-  const nameText = useNativeState(name);
-  const commonNameText = useNativeState(commonName);
-  const scientificNameText = useNativeState(scientificName);
-  useEffect(() => nameText.set(name), [name, nameText]);
-  useEffect(() => commonNameText.set(commonName), [commonName, commonNameText]);
+
+  return (
+    <Section
+      header={
+        <FormSectionHeader>{t("feedingSchedule.section")}</FormSectionHeader>
+      }
+      footer={
+        <FormSectionFooter color={feedingValid ? undefined : theme.danger}>
+          {feedingValid ? feedingFooter : t("schedule.invalidDays")}
+        </FormSectionFooter>
+      }
+      modifiers={rowModifiers}
+    >
+      <Toggle
+        label={t("feedingSchedule.enabled")}
+        isOn={usesFeedingSchedule}
+        onIsOnChange={setUsesFeedingSchedule}
+        modifiers={[accessibilityHint(t("a11y.feedingSchedule.enabled.hint"))]}
+      />
+      {usesFeedingSchedule ? (
+        <>
+          <ScheduleFields
+            subject={t("feedingSchedule.section")}
+            hint={t("a11y.feedingSchedule.frequency.hint")}
+            daysHint={t("a11y.feedingSchedule.customDays.hint")}
+            selection={feedingSelection}
+            onSelectionChange={setFeedingSelection}
+            customDays={feedingDays}
+            onCustomDaysChange={setFeedingDays}
+          />
+          <Toggle
+            label={t("reminders.enabled")}
+            isOn={feedingReminder}
+            onIsOnChange={handleFeedingReminder}
+            modifiers={[
+              accessibilityLabel(
+                `${t("feedingSchedule.section")}: ${t("reminders.enabled")}`,
+              ),
+              accessibilityHint(t("a11y.reminders.feed.hint")),
+            ]}
+          />
+        </>
+      ) : null}
+    </Section>
+  );
+}
+
+type CareRoutineSectionProps = {
+  routine: "water" | "cleaning";
+  rowModifiers: RowModifiers;
+  collectionSchedule: Parameters<typeof describeSchedule>[0];
+  selection: ReptileFormController["waterSelection"];
+  onSelectionChange: ReptileFormController["setWaterSelection"];
+  days: string;
+  onDaysChange: (days: string) => void;
+  valid: boolean;
+  footer: string;
+  scheduled: boolean;
+  reminder: boolean;
+  onReminderChange: (on: boolean) => void;
+};
+
+function CareRoutineSection({
+  routine,
+  rowModifiers,
+  collectionSchedule,
+  selection,
+  onSelectionChange,
+  days,
+  onDaysChange,
+  valid,
+  footer,
+  scheduled,
+  reminder,
+  onReminderChange,
+}: CareRoutineSectionProps) {
+  const theme = useTheme();
+  const { t } = useTranslation();
+  const scheduleKey = `${routine}Schedule` as const;
+
+  return (
+    <Section
+      header={
+        <FormSectionHeader>{t(`${scheduleKey}.section`)}</FormSectionHeader>
+      }
+      footer={
+        <FormSectionFooter color={valid ? undefined : theme.danger}>
+          {footer}
+        </FormSectionFooter>
+      }
+      modifiers={rowModifiers}
+    >
+      <ScheduleFields
+        subject={t(`${scheduleKey}.section`)}
+        hint={t(`a11y.${scheduleKey}.frequency.hint`)}
+        daysHint={t(`a11y.${scheduleKey}.customDays.hint`)}
+        inheritedLabel={t("defaults.followGlobal", {
+          value: describeSchedule(collectionSchedule, t),
+        })}
+        offLabel={t("schedule.off")}
+        selection={selection}
+        onSelectionChange={onSelectionChange}
+        customDays={days}
+        onCustomDaysChange={onDaysChange}
+      />
+      {scheduled ? (
+        <Toggle
+          label={t("reminders.enabled")}
+          isOn={reminder}
+          onIsOnChange={onReminderChange}
+          modifiers={[
+            accessibilityLabel(
+              `${t(`${scheduleKey}.section`)}: ${t("reminders.enabled")}`,
+            ),
+            accessibilityHint(t(`a11y.reminders.${routine}.hint`)),
+          ]}
+        />
+      ) : null}
+    </Section>
+  );
+}
+
+function DefaultsSection({ form, rowModifiers }: FormSectionProps) {
+  const { t } = useTranslation();
+  const { animal, defaults, setDefaults, globalDefaults, frozenTag } = form;
+
+  return (
+    <Section
+      header={<FormSectionHeader>{t("defaults.section")}</FormSectionHeader>}
+      footer={
+        <FormSectionFooter>
+          {animal
+            ? t("defaults.animalFooter", { animalName: animal.name })
+            : t("defaults.animalFooterNew")}
+        </FormSectionFooter>
+      }
+      modifiers={rowModifiers}
+    >
+      <DefaultPicker
+        label={t("defaults.mealMeasure")}
+        hint={t("a11y.defaults.mealMeasure.hint")}
+        options={FEEDING_MEASURES}
+        describe={(value) => t(`feedingForm.measure.${value}`)}
+        inherited={form.globalDefaults?.mealMeasure}
+        value={defaults.mealMeasure}
+        onChange={(mealMeasure) =>
+          setDefaults((current) => ({ ...current, mealMeasure }))
+        }
+      />
+      <DefaultPicker
+        label={t("defaults.frozen")}
+        hint={t("a11y.defaults.frozen.hint")}
+        options={FROZEN_TAGS}
+        describe={(value) =>
+          t(value === "true" ? "defaults.frozenYes" : "defaults.frozenNo")
+        }
+        inherited={frozenTag(globalDefaults.frozen)}
+        value={
+          defaults.frozen === undefined ? undefined : frozenTag(defaults.frozen)
+        }
+        onChange={(value) =>
+          setDefaults((current) => ({
+            ...current,
+            frozen: value && value === "true",
+          }))
+        }
+      />
+      <DefaultPicker
+        label={t("defaults.weightUnit")}
+        hint={t("a11y.defaults.weightUnit.hint")}
+        options={WEIGHT_UNITS}
+        describe={(value) => t(`feedingForm.units.${value}`)}
+        inherited={globalDefaults.weightUnit}
+        value={defaults.weightUnit}
+        onChange={(weightUnit) =>
+          setDefaults((current) => ({ ...current, weightUnit }))
+        }
+      />
+      <DefaultPicker
+        label={t("defaults.poopType")}
+        hint={t("a11y.defaults.poopType.hint")}
+        options={DEFECATION_TYPES}
+        describe={(value) => t(`timeline.poop.${value}`)}
+        inherited={globalDefaults.poopType}
+        value={defaults.poopType}
+        onChange={(poopType) =>
+          setDefaults((current) => ({ ...current, poopType }))
+        }
+      />
+    </Section>
+  );
+}
+
+function SaveErrorBanner({ message }: { message: string }) {
+  const theme = useTheme();
+
+  return (
+    <View style={[styles.saveError, { borderTopColor: theme.border }]}>
+      <ThemedText
+        accessibilityRole="alert"
+        accessibilityLiveRegion="assertive"
+        selectable
+        type="bodyS"
+        themeColor="danger"
+      >
+        {message}
+      </ThemedText>
+    </View>
+  );
+}
+
+export function ReptileFormSheet({ animal }: ReptileFormSheetProps) {
+  const theme = useTheme();
+  const modifiers = useFormModifiers();
+  const form = useReptileForm(animal);
+  const rowModifiers = modifiers.row;
+  const nameText = useNativeState(form.name);
+  const commonNameText = useNativeState(form.commonName);
+  const scientificNameText = useNativeState(form.scientificName);
+  useEffect(() => nameText.set(form.name), [form.name, nameText]);
   useEffect(
-    () => scientificNameText.set(scientificName),
-    [scientificName, scientificNameText],
+    () => commonNameText.set(form.commonName),
+    [form.commonName, commonNameText],
+  );
+  useEffect(
+    () => scientificNameText.set(form.scientificName),
+    [form.scientificName, scientificNameText],
   );
 
   return (
@@ -173,9 +567,9 @@ export function ReptileFormSheet({ animal }: ReptileFormSheetProps) {
       <FormSheetChrome
         namespace={animal ? "editReptile" : "newReptile"}
         animalName={animal?.name}
-        saveDisabled={!canSave}
-        cancelDisabled={isSaving}
-        onSave={handleConfirm}
+        saveDisabled={!form.canSave}
+        cancelDisabled={form.isSaving}
+        onSave={form.handleConfirm}
       />
 
       <View style={[styles.container, { backgroundColor: theme.bg }]}>
@@ -185,398 +579,49 @@ export function ReptileFormSheet({ animal }: ReptileFormSheetProps) {
           seedColor={theme.primary}
         >
           <Form modifiers={modifiers.form}>
-            <Section>
-              <Button
-                onPress={handlePickPhoto}
-                modifiers={[
-                  buttonStyle("plain"),
-                  listRowBackground(theme.surfaceSunken),
-                  listRowInsets({
-                    top: 0,
-                    leading: 0,
-                    bottom: 0,
-                    trailing: 0,
-                  }),
-                  frame({
-                    maxWidth: Infinity,
-                    minHeight: 140,
-                    maxHeight: 140,
-                    alignment: "center",
-                  }),
-                  accessibilityLabel(
-                    photoUri
-                      ? t("reptileForm.changePhoto")
-                      : t("reptileForm.addPhoto"),
-                  ),
-                ]}
-              >
-                {photoUri ? (
-                  <Image
-                    uiImage={photoUri}
-                    modifiers={[
-                      resizable(),
-                      aspectRatio({ contentMode: "fill" }),
-                      frame({ maxWidth: Infinity, maxHeight: Infinity }),
-                      clipped(),
-                    ]}
-                  />
-                ) : (
-                  <VStack spacing={Spacing["2xs"]}>
-                    <Image
-                      systemName="camera.fill"
-                      modifiers={[
-                        font({ size: 28 }),
-                        foregroundStyle(theme.textSecondary),
-                      ]}
-                    />
-                    <Text
-                      modifiers={[
-                        typeFont("bodyS"),
-                        foregroundStyle(theme.textSecondary),
-                      ]}
-                    >
-                      {t("reptileForm.addPhoto")}
-                    </Text>
-                  </VStack>
-                )}
-              </Button>
-
-              {photoUri ? (
-                <Button
-                  label={t("reptileForm.removePhoto")}
-                  systemImage="trash"
-                  role="destructive"
-                  onPress={handleRemovePhoto}
-                  modifiers={[
-                    tint(theme.danger),
-                    foregroundStyle(theme.danger),
-                    listRowBackground(theme.surface),
-                  ]}
-                />
-              ) : null}
-            </Section>
-
-            <Section
-              header={
-                <FormSectionHeader>
-                  {t("reptileForm.details")}
-                </FormSectionHeader>
-              }
-              modifiers={modifiers.row}
-            >
-              <TextField
-                text={nameText}
-                placeholder={t("reptileForm.name")}
-                onTextChange={setName}
-                modifiers={[
-                  accessibilityLabel(t("reptileForm.name")),
-                  textInputAutocapitalization("words"),
-                ]}
-              />
-              <TextField
-                text={commonNameText}
-                placeholder={t("reptileForm.commonName")}
-                onTextChange={(value) => {
-                  setCommonName(value);
-                  setCommonSuggestionsDismissed(false);
-                }}
-                modifiers={[
-                  accessibilityLabel(t("reptileForm.commonName")),
-                  textInputAutocapitalization("words"),
-                ]}
-              />
-              <SpeciesSuggestionRows
-                suggestions={commonSuggestions}
-                labelFor={(species) =>
-                  `${species.commonNames[language]} · ${species.scientificName}`
-                }
-                onSelect={handleSelectSpecies}
-                hint={t("a11y.reptileForm.speciesSuggestion.hint")}
-                color={theme.textSecondary}
-              />
-              <TextField
-                text={scientificNameText}
-                placeholder={t("reptileForm.scientificName")}
-                onTextChange={(value) => {
-                  setScientificName(value);
-                  setScientificSuggestionsDismissed(false);
-                }}
-                modifiers={[
-                  accessibilityLabel(t("reptileForm.scientificName")),
-                  textInputAutocapitalization("words"),
-                ]}
-              />
-              <SpeciesSuggestionRows
-                suggestions={scientificSuggestions}
-                labelFor={(species) =>
-                  `${species.scientificName} · ${species.commonNames[language]}`
-                }
-                onSelect={handleSelectSpecies}
-                hint={t("a11y.reptileForm.speciesSuggestion.hint")}
-                color={theme.textSecondary}
-              />
-            </Section>
-            <Section modifiers={modifiers.row}>
-              <Picker
-                label={t("reptileForm.sex")}
-                selection={sex}
-                onSelectionChange={(value) => setSex(value as Animal["sex"])}
-                modifiers={[pickerStyle("menu")]}
-              >
-                {SEX_VALUES.map((value) => (
-                  <Text key={value} modifiers={[tag(value)]}>
-                    {sexLabels[value]}
-                  </Text>
-                ))}
-              </Picker>
-              <Toggle
-                label={t("reptileForm.knownBirthDate")}
-                isOn={knownBirthDate}
-                onIsOnChange={setKnownBirthDate}
-              />
-              {knownBirthDate ? (
-                <DatePicker
-                  title={t("reptileForm.birthDate")}
-                  selection={birthDate}
-                  displayedComponents={["date"]}
-                  onDateChange={setBirthDate}
-                  modifiers={[datePickerStyle("compact")]}
-                />
-              ) : null}
-              <DatePicker
-                title={t("reptileForm.acquired")}
-                selection={acquiredDate}
-                displayedComponents={["date"]}
-                onDateChange={(value) => {
-                  setAcquiredDate(value);
-                  setKnowsAcquired(true);
-                }}
-                modifiers={[datePickerStyle("compact")]}
-              />
-            </Section>
-
-            <Section
-              header={
-                <FormSectionHeader>
-                  {t("feedingSchedule.section")}
-                </FormSectionHeader>
-              }
-              footer={
-                <FormSectionFooter
-                  color={feedingValid ? undefined : theme.danger}
-                >
-                  {feedingValid ? feedingFooter : t("schedule.invalidDays")}
-                </FormSectionFooter>
-              }
-              modifiers={modifiers.row}
-            >
-              <Toggle
-                label={t("feedingSchedule.enabled")}
-                isOn={usesFeedingSchedule}
-                onIsOnChange={setUsesFeedingSchedule}
-                modifiers={[
-                  accessibilityHint(t("a11y.feedingSchedule.enabled.hint")),
-                ]}
-              />
-              {usesFeedingSchedule ? (
-                <>
-                  <ScheduleFields
-                    subject={t("feedingSchedule.section")}
-                    hint={t("a11y.feedingSchedule.frequency.hint")}
-                    daysHint={t("a11y.feedingSchedule.customDays.hint")}
-                    selection={feedingSelection}
-                    onSelectionChange={setFeedingSelection}
-                    customDays={feedingDays}
-                    onCustomDaysChange={setFeedingDays}
-                  />
-                  <Toggle
-                    label={t("reminders.enabled")}
-                    isOn={feedingReminder}
-                    onIsOnChange={handleFeedingReminder}
-                    modifiers={[
-                      accessibilityLabel(
-                        `${t("feedingSchedule.section")}: ${t("reminders.enabled")}`,
-                      ),
-                      accessibilityHint(t("a11y.reminders.feed.hint")),
-                    ]}
-                  />
-                </>
-              ) : null}
-            </Section>
-
-            <Section
-              header={
-                <FormSectionHeader>
-                  {t("waterSchedule.section")}
-                </FormSectionHeader>
-              }
-              footer={
-                <FormSectionFooter
-                  color={waterValid ? undefined : theme.danger}
-                >
-                  {waterFooter}
-                </FormSectionFooter>
-              }
-              modifiers={modifiers.row}
-            >
-              <ScheduleFields
-                subject={t("waterSchedule.section")}
-                hint={t("a11y.waterSchedule.frequency.hint")}
-                daysHint={t("a11y.waterSchedule.customDays.hint")}
-                inheritedLabel={t("defaults.followGlobal", {
-                  value: describeSchedule(collectionWater, t),
-                })}
-                offLabel={t("schedule.off")}
-                selection={waterSelection}
-                onSelectionChange={setWaterSelection}
-                customDays={waterDays}
-                onCustomDaysChange={setWaterDays}
-              />
-              {waterScheduled ? (
-                <Toggle
-                  label={t("reminders.enabled")}
-                  isOn={waterReminder}
-                  onIsOnChange={handleWaterReminder}
-                  modifiers={[
-                    accessibilityLabel(
-                      `${t("waterSchedule.section")}: ${t("reminders.enabled")}`,
-                    ),
-                    accessibilityHint(t("a11y.reminders.water.hint")),
-                  ]}
-                />
-              ) : null}
-            </Section>
-
-            <Section
-              header={
-                <FormSectionHeader>
-                  {t("cleaningSchedule.section")}
-                </FormSectionHeader>
-              }
-              footer={
-                <FormSectionFooter
-                  color={cleaningValid ? undefined : theme.danger}
-                >
-                  {cleaningFooter}
-                </FormSectionFooter>
-              }
-              modifiers={modifiers.row}
-            >
-              <ScheduleFields
-                subject={t("cleaningSchedule.section")}
-                hint={t("a11y.cleaningSchedule.frequency.hint")}
-                daysHint={t("a11y.cleaningSchedule.customDays.hint")}
-                inheritedLabel={t("defaults.followGlobal", {
-                  value: describeSchedule(collectionCleaning, t),
-                })}
-                offLabel={t("schedule.off")}
-                selection={cleaningSelection}
-                onSelectionChange={setCleaningSelection}
-                customDays={cleaningDays}
-                onCustomDaysChange={setCleaningDays}
-              />
-              {cleaningScheduled ? (
-                <Toggle
-                  label={t("reminders.enabled")}
-                  isOn={cleaningReminder}
-                  onIsOnChange={handleCleaningReminder}
-                  modifiers={[
-                    accessibilityLabel(
-                      `${t("cleaningSchedule.section")}: ${t("reminders.enabled")}`,
-                    ),
-                    accessibilityHint(t("a11y.reminders.cleaning.hint")),
-                  ]}
-                />
-              ) : null}
-            </Section>
-
-            <Section
-              header={
-                <FormSectionHeader>{t("defaults.section")}</FormSectionHeader>
-              }
-              footer={
-                <FormSectionFooter>
-                  {animal
-                    ? t("defaults.animalFooter", { animalName: animal.name })
-                    : t("defaults.animalFooterNew")}
-                </FormSectionFooter>
-              }
-              modifiers={modifiers.row}
-            >
-              <DefaultPicker
-                label={t("defaults.mealMeasure")}
-                hint={t("a11y.defaults.mealMeasure.hint")}
-                options={FEEDING_MEASURES}
-                describe={(value) => t(`feedingForm.measure.${value}`)}
-                inherited={form.globalDefaults?.mealMeasure}
-                value={defaults.mealMeasure}
-                onChange={(mealMeasure) =>
-                  setDefaults((current) => ({ ...current, mealMeasure }))
-                }
-              />
-              <DefaultPicker
-                label={t("defaults.frozen")}
-                hint={t("a11y.defaults.frozen.hint")}
-                options={FROZEN_TAGS}
-                describe={(value) =>
-                  t(
-                    value === "true"
-                      ? "defaults.frozenYes"
-                      : "defaults.frozenNo",
-                  )
-                }
-                inherited={frozenTag(globalDefaults.frozen)}
-                value={
-                  defaults.frozen === undefined
-                    ? undefined
-                    : frozenTag(defaults.frozen)
-                }
-                onChange={(value) =>
-                  setDefaults((current) => ({
-                    ...current,
-                    frozen: value && value === "true",
-                  }))
-                }
-              />
-              <DefaultPicker
-                label={t("defaults.weightUnit")}
-                hint={t("a11y.defaults.weightUnit.hint")}
-                options={WEIGHT_UNITS}
-                describe={(value) => t(`feedingForm.units.${value}`)}
-                inherited={globalDefaults.weightUnit}
-                value={defaults.weightUnit}
-                onChange={(weightUnit) =>
-                  setDefaults((current) => ({ ...current, weightUnit }))
-                }
-              />
-              <DefaultPicker
-                label={t("defaults.poopType")}
-                hint={t("a11y.defaults.poopType.hint")}
-                options={DEFECATION_TYPES}
-                describe={(value) => t(`timeline.poop.${value}`)}
-                inherited={globalDefaults.poopType}
-                value={defaults.poopType}
-                onChange={(poopType) =>
-                  setDefaults((current) => ({ ...current, poopType }))
-                }
-              />
-            </Section>
+            <PhotoSection form={form} />
+            <DetailsSection
+              form={form}
+              rowModifiers={rowModifiers}
+              nameText={nameText}
+              commonNameText={commonNameText}
+              scientificNameText={scientificNameText}
+            />
+            <ProfileSection form={form} rowModifiers={rowModifiers} />
+            <FeedingSection form={form} rowModifiers={rowModifiers} />
+            <CareRoutineSection
+              routine="water"
+              rowModifiers={rowModifiers}
+              collectionSchedule={form.collectionWater}
+              selection={form.waterSelection}
+              onSelectionChange={form.setWaterSelection}
+              days={form.waterDays}
+              onDaysChange={form.setWaterDays}
+              valid={form.waterValid}
+              footer={form.waterFooter}
+              scheduled={form.waterScheduled}
+              reminder={form.waterReminder}
+              onReminderChange={form.handleWaterReminder}
+            />
+            <CareRoutineSection
+              routine="cleaning"
+              rowModifiers={rowModifiers}
+              collectionSchedule={form.collectionCleaning}
+              selection={form.cleaningSelection}
+              onSelectionChange={form.setCleaningSelection}
+              days={form.cleaningDays}
+              onDaysChange={form.setCleaningDays}
+              valid={form.cleaningValid}
+              footer={form.cleaningFooter}
+              scheduled={form.cleaningScheduled}
+              reminder={form.cleaningReminder}
+              onReminderChange={form.handleCleaningReminder}
+            />
+            <DefaultsSection form={form} rowModifiers={rowModifiers} />
           </Form>
         </Host>
 
-        {saveError ? (
-          <View style={[styles.saveError, { borderTopColor: theme.border }]}>
-            <ThemedText
-              accessibilityRole="alert"
-              accessibilityLiveRegion="assertive"
-              selectable
-              type="bodyS"
-              themeColor="danger"
-            >
-              {saveError}
-            </ThemedText>
-          </View>
-        ) : null}
+        {form.saveError ? <SaveErrorBanner message={form.saveError} /> : null}
       </View>
     </>
   );

@@ -1,1 +1,3 @@
-export default () => null;
+export default function HistoryRangeScreen() {
+  return null;
+}

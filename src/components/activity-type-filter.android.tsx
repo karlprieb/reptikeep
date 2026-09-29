@@ -13,16 +13,6 @@ import { useTheme } from "@/hooks/use-theme";
 
 import LIST_ICON from "@/assets/images/icons/list.xml";
 
-export function presentTypes(
-  entries: { type: ActivityType }[],
-): ActivityType[] {
-  const seen = new Set(entries.map((entry) => entry.type));
-
-  return (Object.keys(CategoryColors) as ActivityType[]).filter((type) =>
-    seen.has(type),
-  );
-}
-
 export type ActivityTypeFilterProps = {
   types: ActivityType[];
   selected: ActivityType | null;

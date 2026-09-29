@@ -2,17 +2,16 @@ import { fireEvent, render } from "@testing-library/react-native";
 import { router } from "expo-router";
 
 import { AnimalCard } from "@/components/animal-card";
-import {
-  cardBadgeAllowance,
-  NO_PHOTO_SINGLE_COLUMN_HEIGHT,
-  ReptileEmptyState,
-  ReptileList,
-  selectCardHeight,
-  selectColumnCount,
-} from "@/components/reptile-list";
+import { ReptileEmptyState, ReptileList } from "@/components/reptile-list";
 import { Colors } from "@/constants/theme";
 import type { Animal } from "@/state/animal";
 import { careSchedules$ } from "@/state/care-schedule";
+import {
+  cardBadgeAllowance,
+  NO_PHOTO_SINGLE_COLUMN_HEIGHT,
+  selectCardHeight,
+  selectColumnCount,
+} from "@/utils/reptile-list-layout";
 
 function makeAnimal(
   overrides: Partial<Animal> & Pick<Animal, "id" | "name">,

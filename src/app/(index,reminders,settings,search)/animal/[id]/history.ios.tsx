@@ -1,4 +1,3 @@
-import { useSelector as useValue } from "@legendapp/state/react";
 import { Button, HStack, Host, Spacer, Text, VStack } from "@expo/ui/swift-ui";
 import {
   accessibilityElement,
@@ -12,8 +11,7 @@ import {
   strokeBorder,
   tint,
 } from "@expo/ui/swift-ui/modifiers";
-import { router, Stack, useLocalSearchParams } from "expo-router";
-import { useMemo } from "react";
+import { Stack } from "expo-router";
 import {
   ScrollView,
   StyleSheet,
@@ -26,10 +24,7 @@ import {
   ActivityHistoryList,
   ActivityPanel,
 } from "@/components/activity-timeline";
-import {
-  ActivityTypeFilter,
-  presentTypes,
-} from "@/components/activity-type-filter";
+import { ActivityTypeFilter } from "@/components/activity-type-filter";
 import { AddActivitySheet } from "@/components/add-activity-sheet";
 import { AnimalNotFound, useAnimalRoute } from "@/components/animal-route";
 import { EmptyStateContent } from "@/components/empty-state";
@@ -38,28 +33,14 @@ import {
   MaxContentWidth,
   Radius,
   Spacing,
-  type ActivityType,
   StackAboveFontScale,
 } from "@/constants/theme";
 import { typeFont } from "@/constants/type-font";
 import { useAddActivity } from "@/hooks/use-add-activity";
+import { useHistoryFilters } from "@/hooks/use-history-filters";
 import { useTheme } from "@/hooks/use-theme";
-import { activityStores } from "@/state/activity-stores";
-import {
-  filterActivity,
-  isRangePreset,
-  RANGE_PRESETS,
-  resolveDateFilter,
-  type DateFilter,
-  type RangePreset,
-} from "@/utils/activity-filter";
-import { animalActivityFeed } from "@/utils/animal-activity";
-import {
-  calendarDateOf,
-  formatAbsoluteDate,
-  fromCalendarDate,
-  toCalendarDate,
-} from "@/utils/format-date";
+import { RANGE_PRESETS } from "@/utils/activity-filter";
+import { formatAbsoluteDate } from "@/utils/format-date";
 
 function RangeSummaryRow({
   from,
@@ -193,90 +174,24 @@ export default function AnimalHistoryScreen() {
   const { t } = useTranslation();
   const { fontScale } = useWindowDimensions();
   const { id, animal } = useAnimalRoute();
-  const feedings = useValue(activityStores.feed.$);
-  const weights = useValue(activityStores.weight.$);
-  const sheds = useValue(activityStores.shed.$);
-  const defecations = useValue(activityStores.poop.$);
-  const habitats = useValue(activityStores.habitat.$);
-  const medical = useValue(activityStores.medical.$);
-
-  const { type, preset, from, to } = useLocalSearchParams<{
-    type?: string;
-    preset?: string;
-    from?: string;
-    to?: string;
-  }>();
-
-  const entries = useMemo(
-    () =>
-      animalActivityFeed(id, {
-        feedings,
-        weights,
-        sheds,
-        defecations,
-        habitats,
-        medical,
-      }),
-    [defecations, feedings, habitats, id, medical, sheds, weights],
-  );
-
-  const types = useMemo(() => presentTypes(entries), [entries]);
-
+  const {
+    entries,
+    types,
+    filter,
+    activeType,
+    shown,
+    range,
+    activeRange,
+    setType,
+    setPreset,
+    clearFilters,
+    openCustomRange,
+  } = useHistoryFilters(id);
   const addActivity = useAddActivity(animal?.id);
-
-  const filter = useMemo<DateFilter>(
-    () =>
-      preset === "custom" && from && to
-        ? { preset: "custom", from, to }
-        : { preset: isRangePreset(preset) ? preset : "all" },
-    [preset, from, to],
-  );
-
-  const selectedType =
-    type !== undefined && type in activityStores
-      ? (type as ActivityType)
-      : null;
-  const activeType =
-    selectedType && types.includes(selectedType) ? selectedType : null;
-
-  const today = toCalendarDate(new Date());
-  const shown = useMemo(
-    () =>
-      filterActivity(
-        entries,
-        filter,
-        activeType,
-        fromCalendarDate(today) ?? new Date(),
-      ),
-    [entries, filter, activeType, today],
-  );
 
   if (!animal) return <AnimalNotFound />;
 
-  const range = resolveDateFilter(
-    filter,
-    fromCalendarDate(today) ?? new Date(),
-  );
   const stacked = fontScale >= StackAboveFontScale;
-  const activeRange = filter.preset !== "all";
-
-  const setType = (next: ActivityType | null) =>
-    router.setParams({ type: next ?? "" });
-  const setPreset = (next: RangePreset) =>
-    router.setParams({ preset: next, from: "", to: "" });
-  const clearFilters = () =>
-    router.setParams({ type: "", preset: "all", from: "", to: "" });
-
-  const earliest =
-    entries.length > 0
-      ? (calendarDateOf(entries[entries.length - 1].occurredAt) ?? today)
-      : today;
-  const seed = range ?? { from: earliest, to: today };
-
-  const openCustomRange = () =>
-    router.push(
-      `/animal/${id}/history-range?from=${seed.from}&to=${seed.to}&earliest=${earliest}&type=${activeType ?? ""}`,
-    );
 
   const filterBar = (
     <View style={styles.filterBar}>

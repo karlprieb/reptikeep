@@ -36,9 +36,9 @@ import {
 } from "@/constants/type-font-compose";
 import type { Animal } from "@/state/animal";
 import type { CareSchedule } from "@/state/care-schedule";
-import { overdueRoutines, SEX_SYMBOLS } from "@/utils/animal-card-status";
+import { buildAnimalCardModel } from "@/utils/animal-card-model";
+import { SEX_SYMBOLS } from "@/utils/animal-card-status";
 import { getAnimalPhotoUri } from "@/utils/animal-photo-storage";
-import { feedingStatus } from "@/utils/feeding-status";
 
 const SCRIM_COLOR = "14,9,4";
 const SCRIM_MAX_ALPHA = 0.92;
@@ -51,12 +51,6 @@ const CARE_ICONS = {
   water: require("@/assets/images/icons/water-drop.xml"),
   cleaning: require("@/assets/images/icons/sparkle.xml"),
 } as const;
-
-type OverdueTask = {
-  id: "feed" | "water" | "cleaning";
-  icon: (typeof CARE_ICONS)[keyof typeof CARE_ICONS];
-  label: string;
-};
 
 export type AnimalCardProps = {
   animal: Animal;
@@ -98,6 +92,8 @@ function PhotoScrim({
   );
 }
 
+const TASK_ICONS = CARE_ICONS;
+
 function AnimalCardBase({
   animal,
   width: cardWidth,
@@ -117,58 +113,21 @@ function AnimalCardBase({
   const isPlaceholder = !animal.photo;
   const monogram = animal.name.trim().slice(0, 1).toLocaleUpperCase();
   const symbol = SEX_SYMBOLS[animal.sex];
-  const sex = animal.sex === "unknown" ? null : t(`sex.${animal.sex}`);
   const hint = t("a11y.animalCard.hint", { animalName: animal.name });
   const titleColor = isPlaceholder ? theme.text : ON_PHOTO_TEXT;
   const subtitleColor = isPlaceholder
     ? theme.textSecondary
     : ON_PHOTO_TEXT_SECONDARY;
 
-  const feeding = feedingStatus(t, lastFedAt, animal.feedingSchedule);
-  const { water: waterOverdue, cleaning: cleaningOverdue } = overdueRoutines({
-    feedingSchedule: animal.feedingSchedule,
+  const { feeding, overdueTasks, label } = buildAnimalCardModel(t, {
+    animal,
     lastFedAt,
     waterSchedule,
     lastWaterChangeAt,
     cleaningSchedule,
     lastCleanAt,
   });
-  const overdueTasks: OverdueTask[] = [
-    ...(feeding.overdue
-      ? [{ id: "feed" as const, icon: CARE_ICONS.feed, label: feeding.line }]
-      : []),
-    ...(waterOverdue
-      ? [
-          {
-            id: "water" as const,
-            icon: CARE_ICONS.water,
-            label: t("water.overdue"),
-          },
-        ]
-      : []),
-    ...(cleaningOverdue
-      ? [
-          {
-            id: "cleaning" as const,
-            icon: CARE_ICONS.cleaning,
-            label: t("cleaning.overdue"),
-          },
-        ]
-      : []),
-  ];
   const feedingColor = feeding.overdue ? theme.danger : subtitleColor;
-
-  const label = [
-    animal.name,
-    animal.commonName,
-    animal.scientificName,
-    sex,
-    ...(overdueTasks.length > 0
-      ? overdueTasks.map((task) => task.label)
-      : [lastFedAt ? `${t("detail.lastFed")} ${feeding.line}` : feeding.line]),
-  ]
-    .filter((part): part is string => Boolean(part))
-    .join(", ");
 
   return (
     <Pressable
@@ -249,7 +208,7 @@ function AnimalCardBase({
                   ]}
                 >
                   <Icon
-                    source={task.icon}
+                    source={TASK_ICONS[task.id]}
                     tint={theme.danger}
                     size={iconSize}
                   />

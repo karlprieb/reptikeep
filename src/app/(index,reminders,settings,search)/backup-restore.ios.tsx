@@ -16,13 +16,10 @@ import {
   menuActionDismissBehavior,
   tint,
 } from "@expo/ui/swift-ui/modifiers";
-import { useValue } from "@legendapp/state/react";
-import * as DocumentPicker from "expo-document-picker";
 import { File } from "expo-file-system";
 import { useNavigation } from "expo-router";
 import { useEffect, useState } from "react";
 import {
-  AccessibilityInfo,
   ActivityIndicator,
   Alert,
   ScrollView,
@@ -34,166 +31,49 @@ import { useTranslation } from "react-i18next";
 import { useFormModifiers } from "@/components/form-sheet";
 import { ThemedText } from "@/components/themed-text";
 import { Radius, Spacing } from "@/constants/theme";
+import { useBackupRestore } from "@/hooks/use-backup-restore";
 import { useTheme } from "@/hooks/use-theme";
-import { animals$ } from "@/state/animal";
 import { resetAppData } from "@/state/reset";
-import {
-  cleanupBackupArchive,
-  createBackup,
-  parseBackup,
-  restoreBackup,
-  shareBackup,
-  type RestoredBackup,
-} from "@/utils/backup";
-
-const activityTables = [
-  "feedings",
-  "weights",
-  "sheds",
-  "defecations",
-  "habitats",
-  "medical",
-] as const;
 
 const SCRIM_COLOR = "rgba(26, 20, 14, 0.4)";
-
-function withDocuments(
-  sentence: string,
-  documentSentence: string,
-  documents: number,
-): string {
-  return documents > 0 ? `${sentence} ${documentSentence}` : sentence;
-}
-
-function summarizeBackup(parsed: Awaited<ReturnType<typeof parseBackup>>) {
-  return {
-    scopes: parsed.manifest.scopes,
-    animals: Object.keys(parsed.data.animals ?? {}).length,
-    records: activityTables.reduce(
-      (count, table) => count + Object.keys(parsed.data[table] ?? {}).length,
-      0,
-    ),
-    documents: Object.keys(parsed.data.documents ?? {}).length,
-  };
-}
 
 export default function BackupRestoreScreen() {
   const { t } = useTranslation();
   const theme = useTheme();
   const navigation = useNavigation();
   const formModifiers = useFormModifiers();
-  const animals = Object.values(useValue(animals$));
-  const [exportAll, setExportAll] = useState(true);
-  const [animalIds, setAnimalIds] = useState<string[]>([]);
-  const [includePreferences, setIncludePreferences] = useState(false);
-  const [busy, setBusy] = useState(false);
-  const [progress, setProgress] = useState<"export" | "inspect" | "restore">();
-  const [success, setSuccess] = useState<RestoredBackup>();
-  const [error, setError] = useState<string>();
+  const {
+    animals,
+    exportAll,
+    setExportAll,
+    animalIds,
+    setAnimalIds,
+    includePreferences,
+    setIncludePreferences,
+    busy,
+    progress,
+    success,
+    error,
+    customSelection,
+    animalSelectionLabel,
+    successMessage,
+    exportBackup,
+    confirmRestore,
+    chooseBackup,
+    copy,
+  } = useBackupRestore();
   const [isAdvancedPresented, setIsAdvancedPresented] = useState(false);
   const [isResetPresented, setIsResetPresented] = useState(false);
-  const selectedAnimalIds = animalIds.filter((id) =>
-    animals.some((animal) => animal.id === id),
-  );
-  const customSelection = selectedAnimalIds.length > 0 || includePreferences;
-  const animalSelectionLabel =
-    selectedAnimalIds.length === 0
-      ? t("backup.animalsNone")
-      : selectedAnimalIds.length === 1
-        ? t("backup.animalsOne", {
-            animalName: animals.find(
-              (animal) => animal.id === selectedAnimalIds[0],
-            )!.name,
-          })
-        : t("backup.animalsSelected", { count: selectedAnimalIds.length });
-  const logBackupError = (operation: string, error: unknown) => {
-    if (__DEV__) console.error(`Backup ${operation} failed`, error);
-  };
-  const successMessage = (restored: RestoredBackup) =>
-    withDocuments(
-      t("backup.success", { ...restored, count: restored.animals }),
-      t("backup.documentsRestored", { count: restored.documents }),
-      restored.documents,
-    );
 
-  const exportBackup = async () => {
-    setBusy(true);
-    setError(undefined);
-    setSuccess(undefined);
-    setProgress("export");
-    AccessibilityInfo.announceForAccessibility(t("backup.exportingTitle"));
-    const options = exportAll
-      ? undefined
-      : { animalIds: selectedAnimalIds, includePreferences };
-    let archive: File | undefined;
-    try {
-      archive = await createBackup(options);
-      setProgress(undefined);
-      await shareBackup(archive);
-    } catch (error) {
-      logBackupError("export", error);
-      setError(t("backup.error"));
-    }
-    setProgress(undefined);
-    setBusy(false);
-    if (archive) cleanupBackupArchive(archive);
-  };
-  const chooseBackup = async () => {
-    setError(undefined);
-    setSuccess(undefined);
-    try {
-      setBusy(true);
-      const result = await DocumentPicker.getDocumentAsync({
-        multiple: false,
-        copyToCacheDirectory: true,
-        type: "application/zip",
-      });
-      if (!result.canceled) {
-        const file = new File(result.assets[0].uri);
-        setProgress("inspect");
-        AccessibilityInfo.announceForAccessibility(t("backup.inspectingTitle"));
-        const parsed = await parseBackup(file);
-        setProgress(undefined);
-        const summary = summarizeBackup(parsed);
-        Alert.alert(
-          t("backup.restoreTitle"),
-          withDocuments(
-            t("backup.restoreMessage", { ...summary, count: summary.animals }),
-            t("backup.documentsIncluded", { count: summary.documents }),
-            summary.documents,
-          ),
-          [
-            { text: t("settings.cancel"), style: "cancel" },
-            {
-              text: t("backup.restoreConfirm"),
-              style: "destructive",
-              onPress: () => confirmRestore(file),
-            },
-          ],
-        );
-      }
-    } catch {
-      setError(t("backup.error"));
-    }
-    setProgress(undefined);
-    setBusy(false);
-  };
-  const confirmRestore = async (candidate: File) => {
-    setBusy(true);
-    setError(undefined);
-    setProgress("restore");
-    AccessibilityInfo.announceForAccessibility(t("backup.restoringTitle"));
-    try {
-      const restored = await restoreBackup(candidate);
-      setSuccess(restored);
-      AccessibilityInfo.announceForAccessibility(successMessage(restored));
-    } catch (error) {
-      logBackupError("restore", error);
-      setError(t("backup.restoreError"));
-    }
-    setProgress(undefined);
-    setBusy(false);
-  };
+  const askRestore = (file: File, message: string) =>
+    Alert.alert(t("backup.restoreTitle"), message, [
+      { text: t("settings.cancel"), style: "cancel" },
+      {
+        text: t("backup.restoreConfirm"),
+        style: "destructive",
+        onPress: () => confirmRestore(file),
+      },
+    ]);
 
   const handleReset = () => {
     resetAppData();
@@ -206,13 +86,6 @@ export default function BackupRestoreScreen() {
       headerLeft: progress ? () => null : undefined,
     });
   }, [navigation, progress]);
-
-  const copy =
-    progress === "export"
-      ? "exporting"
-      : progress === "inspect"
-        ? "inspecting"
-        : "restoring";
 
   return (
     <>
@@ -317,7 +190,7 @@ export default function BackupRestoreScreen() {
             <Button
               label={busy ? t("backup.restoring") : t("backup.restore")}
               systemImage="square.and.arrow.down"
-              onPress={chooseBackup}
+              onPress={() => chooseBackup(askRestore)}
               modifiers={[
                 listRowBackground(theme.surface),
                 disabled(busy),
