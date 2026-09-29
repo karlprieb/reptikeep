@@ -88,18 +88,22 @@ export function useFoodTypeSuggestions({
 
   const [focused, setFocused] = useState(false);
   const [dismissed, setDismissed] = useState(false);
+  const [selectedValue, setSelectedValue] = useState<string | null>(null);
+  const [prevQuery, setPrevQuery] = useState(query);
   const blurTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
-  const selectedValueRef = useRef<string | null>(null);
 
   useEffect(() => () => clearTimeout(blurTimer.current), []);
 
-  useEffect(() => {
-    const selected = selectedValueRef.current;
-    if (selected === null) return;
-    if (query.trim().toLowerCase() === selected.trim().toLowerCase()) return;
-    selectedValueRef.current = null;
-    setDismissed(false);
-  }, [query]);
+  if (query !== prevQuery) {
+    setPrevQuery(query);
+    if (
+      selectedValue !== null &&
+      query.trim().toLowerCase() !== selectedValue.trim().toLowerCase()
+    ) {
+      setSelectedValue(null);
+      setDismissed(false);
+    }
+  }
 
   const handleFocusChange = (isFocused: boolean) => {
     clearTimeout(blurTimer.current);
@@ -116,7 +120,7 @@ export function useFoodTypeSuggestions({
 
   const dismiss = () => {
     clearTimeout(blurTimer.current);
-    selectedValueRef.current = null;
+    setSelectedValue(null);
     setDismissed(true);
   };
 
@@ -125,7 +129,7 @@ export function useFoodTypeSuggestions({
     text.set(option);
     selection.set({ start: option.length, end: option.length });
     onSelect(option);
-    selectedValueRef.current = option;
+    setSelectedValue(option);
     setDismissed(true);
   };
 

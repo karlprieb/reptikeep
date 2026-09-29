@@ -126,11 +126,10 @@ export default function BackupRestoreScreen() {
     } catch (error) {
       logBackupError("export", error);
       setError(t("backup.error"));
-    } finally {
-      setProgress(undefined);
-      setBusy(false);
-      if (archive) cleanupBackupArchive(archive);
     }
+    setProgress(undefined);
+    setBusy(false);
+    if (archive) cleanupBackupArchive(archive);
   };
 
   const confirmRestore = async (candidate: File) => {
@@ -145,10 +144,9 @@ export default function BackupRestoreScreen() {
     } catch (error) {
       logBackupError("restore", error);
       setError(t("backup.restoreError"));
-    } finally {
-      setProgress(undefined);
-      setBusy(false);
     }
+    setProgress(undefined);
+    setBusy(false);
   };
 
   const chooseBackup = async () => {
@@ -161,37 +159,36 @@ export default function BackupRestoreScreen() {
         copyToCacheDirectory: true,
         type: "application/zip",
       });
-      if (result.canceled) return;
-      const file = new File(result.assets[0].uri);
-      setProgress("inspect");
-      AccessibilityInfo.announceForAccessibility(t("backup.inspectingTitle"));
-      const parsed = await parseBackup(file);
-      setProgress(undefined);
-      const summary = {
-        scopes: parsed.manifest.scopes,
-        animals: Object.keys(parsed.data.animals ?? {}).length,
-        records: activityTables.reduce(
-          (count, table) =>
-            count + Object.keys(parsed.data[table] ?? {}).length,
-          0,
-        ),
-        documents: Object.keys(parsed.data.documents ?? {}).length,
-      };
-      setBusy(false);
-      setPendingRestore({
-        file,
-        summary: withDocuments(
-          t("backup.restoreMessage", { ...summary, count: summary.animals }),
-          t("backup.documentsIncluded", { count: summary.documents }),
-          summary.documents,
-        ),
-      });
+      if (!result.canceled) {
+        const file = new File(result.assets[0].uri);
+        setProgress("inspect");
+        AccessibilityInfo.announceForAccessibility(t("backup.inspectingTitle"));
+        const parsed = await parseBackup(file);
+        setProgress(undefined);
+        const summary = {
+          scopes: parsed.manifest.scopes,
+          animals: Object.keys(parsed.data.animals ?? {}).length,
+          records: activityTables.reduce(
+            (count, table) =>
+              count + Object.keys(parsed.data[table] ?? {}).length,
+            0,
+          ),
+          documents: Object.keys(parsed.data.documents ?? {}).length,
+        };
+        setPendingRestore({
+          file,
+          summary: withDocuments(
+            t("backup.restoreMessage", { ...summary, count: summary.animals }),
+            t("backup.documentsIncluded", { count: summary.documents }),
+            summary.documents,
+          ),
+        });
+      }
     } catch {
       setError(t("backup.error"));
-    } finally {
-      setProgress(undefined);
-      setBusy(false);
     }
+    setProgress(undefined);
+    setBusy(false);
   };
 
   const askReset = () => setShowReset(true);

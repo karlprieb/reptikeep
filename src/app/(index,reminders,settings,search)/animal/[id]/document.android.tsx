@@ -95,6 +95,15 @@ function stripExtension(name: string): string {
   return name.replace(/\.[^./]+$/, "");
 }
 
+function trySaveDocument(record: AnimalDocument): boolean {
+  try {
+    addDocument(record);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 type DocumentFormSheetProps = {
   animalId: string;
   animalName: string;
@@ -243,12 +252,10 @@ function DocumentFormSheet({ animalId, document }: DocumentFormSheetProps) {
         fileUri = imported.uri;
         size = imported.size;
         extension = pickedFile.extension;
-      } else if (document) {
-        fileUri = document.file;
-        size = document.size;
-        extension = document.extension;
       } else {
-        return;
+        fileUri = document!.file;
+        size = document!.size;
+        extension = document!.extension;
       }
 
       const record: AnimalDocument = {
@@ -265,26 +272,22 @@ function DocumentFormSheet({ animalId, document }: DocumentFormSheetProps) {
         activityId: document?.activityId,
       };
 
-      try {
-        addDocument(record);
-      } catch (error) {
+      if (trySaveDocument(record)) {
+        if (pickedFile && previousUri && previousUri !== fileUri) {
+          deleteManagedAnimalDocument(previousUri);
+        }
+        router.back();
+      } else {
         if (pickedFile && previousUri === fileUri && previousBytes)
           writeAnimalDocument(document!.id, document!.extension, previousBytes);
         else if (pickedFile) deleteManagedAnimalDocument(fileUri);
-        throw error;
+        setSaveError(t("documents.form.saveError"));
       }
-
-      if (pickedFile && previousUri && previousUri !== fileUri) {
-        deleteManagedAnimalDocument(previousUri);
-      }
-
-      router.back();
     } catch {
       setSaveError(t("documents.form.saveError"));
-    } finally {
-      savingRef.current = false;
-      setIsSaving(false);
     }
+    savingRef.current = false;
+    setIsSaving(false);
   };
 
   const wellLabel = fileDisplay

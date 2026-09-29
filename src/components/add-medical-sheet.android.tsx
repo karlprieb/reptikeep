@@ -144,10 +144,9 @@ export function AddMedicalSheet({
       router.back();
     } catch {
       setSaveError(t("medicalForm.saveError"));
-    } finally {
-      savingRef.current = false;
-      setSaving(false);
     }
+    savingRef.current = false;
+    setSaving(false);
   };
 
   const confirmRemoveLinkedDocument = (id: string, title: string) =>
@@ -275,7 +274,7 @@ export function AddMedicalSheet({
               ))}
               {pending.map((document, index) => (
                 <Row
-                  key={`${document.uri}-${index}`}
+                  key={document.uri}
                   verticalAlignment="center"
                   horizontalArrangement="spaceBetween"
                   modifiers={[fillMaxWidth()]}

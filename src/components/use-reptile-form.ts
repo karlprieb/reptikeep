@@ -115,27 +115,27 @@ export function useReptileForm(animal?: Animal) {
     Boolean(animal?.feedingSchedule),
   );
   const [feedingSelection, setFeedingSelection] = useState<ScheduleSelection>(
-    scheduleSelection(animal?.feedingSchedule, "weekly"),
+    () => scheduleSelection(animal?.feedingSchedule, "weekly"),
   );
-  const [feedingDays, setFeedingDays] = useState(
+  const [feedingDays, setFeedingDays] = useState(() =>
     scheduleCustomDays(animal?.feedingSchedule),
   );
   const [feedingReminder, setFeedingReminder] = useState(
     animal ? animal.reminders?.feed === true : true,
   );
-  const [waterSelection, setWaterSelection] = useState<ScheduleSelection>(
+  const [waterSelection, setWaterSelection] = useState<ScheduleSelection>(() =>
     scheduleSelection(animal?.waterSchedule, SCHEDULE_INHERIT),
   );
-  const [waterDays, setWaterDays] = useState(
+  const [waterDays, setWaterDays] = useState(() =>
     scheduleCustomDays(animal?.waterSchedule),
   );
   const [waterReminder, setWaterReminder] = useState(
     animal?.reminders?.water !== false,
   );
   const [cleaningSelection, setCleaningSelection] = useState<ScheduleSelection>(
-    scheduleSelection(animal?.cleaningSchedule, SCHEDULE_INHERIT),
+    () => scheduleSelection(animal?.cleaningSchedule, SCHEDULE_INHERIT),
   );
-  const [cleaningDays, setCleaningDays] = useState(
+  const [cleaningDays, setCleaningDays] = useState(() =>
     scheduleCustomDays(animal?.cleaningSchedule),
   );
   const [cleaningReminder, setCleaningReminder] = useState(
@@ -231,10 +231,9 @@ export function useReptileForm(animal?: Animal) {
       router.back();
     } catch {
       setSaveError(t("reptileForm.photoSaveError"));
-    } finally {
-      savingRef.current = false;
-      setIsSaving(false);
     }
+    savingRef.current = false;
+    setIsSaving(false);
   };
 
   const handlePickPhoto = async () => {

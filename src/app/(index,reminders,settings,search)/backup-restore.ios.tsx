@@ -122,11 +122,10 @@ export default function BackupRestoreScreen() {
     } catch (error) {
       logBackupError("export", error);
       setError(t("backup.error"));
-    } finally {
-      setProgress(undefined);
-      setBusy(false);
-      if (archive) cleanupBackupArchive(archive);
     }
+    setProgress(undefined);
+    setBusy(false);
+    if (archive) cleanupBackupArchive(archive);
   };
   const chooseBackup = async () => {
     setError(undefined);
@@ -138,45 +137,44 @@ export default function BackupRestoreScreen() {
         copyToCacheDirectory: true,
         type: "application/zip",
       });
-      if (result.canceled) return;
-      const file = new File(result.assets[0].uri);
-      setProgress("inspect");
-      AccessibilityInfo.announceForAccessibility(t("backup.inspectingTitle"));
-      const parsed = await parseBackup(file);
-      setProgress(undefined);
-      const summary = {
-        scopes: parsed.manifest.scopes,
-        animals: Object.keys(parsed.data.animals ?? {}).length,
-        records: activityTables.reduce(
-          (count, table) =>
-            count + Object.keys(parsed.data[table] ?? {}).length,
-          0,
-        ),
-        documents: Object.keys(parsed.data.documents ?? {}).length,
-      };
-      setBusy(false);
-      Alert.alert(
-        t("backup.restoreTitle"),
-        withDocuments(
-          t("backup.restoreMessage", { ...summary, count: summary.animals }),
-          t("backup.documentsIncluded", { count: summary.documents }),
-          summary.documents,
-        ),
-        [
-          { text: t("settings.cancel"), style: "cancel" },
-          {
-            text: t("backup.restoreConfirm"),
-            style: "destructive",
-            onPress: () => confirmRestore(file),
-          },
-        ],
-      );
+      if (!result.canceled) {
+        const file = new File(result.assets[0].uri);
+        setProgress("inspect");
+        AccessibilityInfo.announceForAccessibility(t("backup.inspectingTitle"));
+        const parsed = await parseBackup(file);
+        setProgress(undefined);
+        const summary = {
+          scopes: parsed.manifest.scopes,
+          animals: Object.keys(parsed.data.animals ?? {}).length,
+          records: activityTables.reduce(
+            (count, table) =>
+              count + Object.keys(parsed.data[table] ?? {}).length,
+            0,
+          ),
+          documents: Object.keys(parsed.data.documents ?? {}).length,
+        };
+        Alert.alert(
+          t("backup.restoreTitle"),
+          withDocuments(
+            t("backup.restoreMessage", { ...summary, count: summary.animals }),
+            t("backup.documentsIncluded", { count: summary.documents }),
+            summary.documents,
+          ),
+          [
+            { text: t("settings.cancel"), style: "cancel" },
+            {
+              text: t("backup.restoreConfirm"),
+              style: "destructive",
+              onPress: () => confirmRestore(file),
+            },
+          ],
+        );
+      }
     } catch {
       setError(t("backup.error"));
-    } finally {
-      setProgress(undefined);
-      setBusy(false);
     }
+    setProgress(undefined);
+    setBusy(false);
   };
   const confirmRestore = async (candidate: File) => {
     setBusy(true);
@@ -190,10 +188,9 @@ export default function BackupRestoreScreen() {
     } catch (error) {
       logBackupError("restore", error);
       setError(t("backup.restoreError"));
-    } finally {
-      setProgress(undefined);
-      setBusy(false);
     }
+    setProgress(undefined);
+    setBusy(false);
   };
 
   const handleReset = () => {
@@ -453,10 +450,7 @@ const styles = StyleSheet.create({
     gap: Spacing.sm,
     padding: Spacing.lg,
     borderRadius: Radius.xl,
-    shadowColor: "#1A140E",
-    shadowOpacity: 0.28,
-    shadowRadius: 12,
-    shadowOffset: { width: 0, height: 4 },
+    boxShadow: "0px 4px 12px rgba(26, 20, 14, 0.28)",
   },
   progressText: { textAlign: "center" },
 });
