@@ -3,8 +3,6 @@ import {
   Button,
   Column,
   DatePickerDialog,
-  DropdownMenuItem,
-  ExposedDropdownMenu,
   ExposedDropdownMenuBox,
   Host,
   Icon,
@@ -52,7 +50,7 @@ import {
   SCHEDULE_INHERIT,
   type ScheduleSelection,
 } from "@/utils/schedule";
-import { SwitchRow } from "@/components/form-sheet";
+import { MenuField, SwitchRow } from "@/components/form-sheet";
 import { FROZEN_TAGS, useReptileForm } from "@/components/use-reptile-form";
 import { Radius, Spacing, StackAboveFontScale } from "@/constants/theme";
 import { composeTextStyle } from "@/constants/type-font-compose";
@@ -69,9 +67,7 @@ import {
 import type { Animal } from "@/state/animal";
 import type { ReptileSpecies } from "@/constants/reptile-species";
 
-import DROPDOWN_ICON from "@/assets/images/icons/arrow-drop-down.xml";
 import CALENDAR_ICON from "@/assets/images/icons/calendar-month.xml";
-import CHECK_ICON from "@/assets/images/icons/check.xml";
 import CLOSE_ICON from "@/assets/images/icons/close.xml";
 import CAMERA_ICON from "@/assets/images/icons/photo-camera.xml";
 
@@ -803,95 +799,6 @@ function PhotoPicker({
         </TextButton>
       ) : null}
     </Column>
-  );
-}
-
-function MenuField<T extends string>({
-  label,
-  value,
-  theme,
-  iconSize,
-  items,
-  onSelect,
-  hint,
-}: {
-  label: string;
-  value: string;
-  theme: FormTheme;
-  iconSize: number;
-  items: { value: T; label: string; selected: boolean }[];
-  onSelect: (value: T) => void;
-  hint?: string;
-}) {
-  const [expanded, setExpanded] = useState(false);
-  const text = useNativeState(value);
-
-  useEffect(() => {
-    text.set(value);
-  }, [text, value]);
-
-  return (
-    <ExposedDropdownMenuBox
-      expanded={expanded}
-      onExpandedChange={setExpanded}
-      modifiers={[fillMaxWidth()]}
-    >
-      <OutlinedTextField
-        value={text}
-        readOnly
-        singleLine
-        colors={fieldColors(theme)}
-        modifiers={[
-          menuAnchor(),
-          fillMaxWidth(),
-          semantics({
-            contentDescription: [label, value, hint].filter(Boolean).join(", "),
-            mergeDescendants: true,
-          }),
-        ]}
-      >
-        <OutlinedTextField.Label>
-          <Text>{label}</Text>
-        </OutlinedTextField.Label>
-        <OutlinedTextField.TrailingIcon>
-          <Icon
-            source={DROPDOWN_ICON}
-            tint={theme.textSecondary}
-            size={iconSize}
-          />
-        </OutlinedTextField.TrailingIcon>
-      </OutlinedTextField>
-      <ExposedDropdownMenu
-        expanded={expanded}
-        onDismissRequest={() => setExpanded(false)}
-        containerColor={theme.surface}
-      >
-        {items.map((item) => (
-          <DropdownMenuItem
-            key={item.value}
-            onClick={() => {
-              onSelect(item.value);
-              setExpanded(false);
-            }}
-          >
-            <DropdownMenuItem.Text>
-              <Text style={composeTextStyle("body")} color={theme.text}>
-                {item.label}
-              </Text>
-            </DropdownMenuItem.Text>
-            {item.selected ? (
-              <DropdownMenuItem.TrailingIcon>
-                <Icon
-                  source={CHECK_ICON}
-                  tint={theme.primaryStrong}
-                  size={iconSize}
-                />
-              </DropdownMenuItem.TrailingIcon>
-            ) : null}
-          </DropdownMenuItem>
-        ))}
-      </ExposedDropdownMenu>
-    </ExposedDropdownMenuBox>
   );
 }
 

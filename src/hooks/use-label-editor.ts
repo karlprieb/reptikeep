@@ -138,9 +138,8 @@ export function useLabelEditor(
       await send(uri);
     } catch {
       reportError.current();
-    } finally {
-      outputBusy.current = false;
     }
+    outputBusy.current = false;
   };
 
   const setCustomWidth = (value: number) => {

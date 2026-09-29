@@ -3,9 +3,11 @@ import { router } from "expo-router";
 import { useMemo, useState } from "react";
 import { Animated } from "react-native";
 import { useTranslation } from "react-i18next";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { AddReptileFab, FAB_CLEARANCE } from "@/components/add-reptile-fab";
 import {
+  BAR_HEIGHT,
   MaterialAppBar,
   type AppBarMenuItem,
 } from "@/components/material-app-bar";
@@ -49,7 +51,8 @@ export default function ReptilesScreen() {
   const view = useValue(settings$.reptileView);
 
   const [scrollY] = useState(() => new Animated.Value(0));
-  const [appBarHeight, setAppBarHeight] = useState(0);
+  const insets = useSafeAreaInsets();
+  const appBarHeight = insets.top + BAR_HEIGHT;
 
   const { lastFed, lastWater, lastClean, lastActivity } = useMemo(
     () => summaryLookups(summaries),
@@ -113,7 +116,6 @@ export default function ReptilesScreen() {
       <MaterialAppBar
         title={t("reptiles.title")}
         scrollY={scrollY}
-        onHeightChange={setAppBarHeight}
         menu={{
           icon: MENU_ICON,
           accessibilityLabel: t("reptiles.options"),

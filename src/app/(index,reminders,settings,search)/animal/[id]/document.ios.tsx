@@ -46,24 +46,21 @@ import { Spacing, type SFSymbolName } from "@/constants/theme";
 import { typeFont } from "@/constants/type-font";
 import { useTheme } from "@/hooks/use-theme";
 import {
-  addDocument,
   DOCUMENT_KINDS,
   documents$,
-  newDocumentId,
   type AnimalDocument,
   type DocumentKind,
 } from "@/state/document";
 import {
-  deleteManagedAnimalDocument,
   DocumentTooLargeError,
-  getAnimalDocumentUri,
-  importAnimalDocument,
   inspectDocumentSource,
   MAX_DOCUMENT_BYTES,
-  readAnimalDocumentBytes,
-  writeAnimalDocument,
   type DocumentExtension,
 } from "@/utils/animal-document-storage";
+import {
+  saveAnimalDocument,
+  tryInspectDocumentSource,
+} from "@/utils/animal-document-save";
 import { fromCalendarDate, toCalendarDate } from "@/utils/format-date";
 import { formatFileSize } from "@/utils/format-number";
 
@@ -147,27 +144,29 @@ function DocumentFormSheet({
 
   const handlePicked = (uri: string, name?: string) => {
     setFileError(undefined);
-    try {
-      const { extension, size } = inspectDocumentSource(uri);
-      const displayName = name ?? uri.split("/").pop() ?? "";
-      setPickedFile({ uri, name: displayName, extension, size });
-      if (title.trim().length === 0) {
-        const derived = stripExtension(displayName);
-        if (derived) {
-          setTitle(derived);
-          titleText.set(derived);
-        }
-      }
-    } catch (error) {
-      if (error instanceof DocumentTooLargeError) {
+    const inspected = tryInspectDocumentSource(uri);
+    if ("error" in inspected) {
+      const failure = inspected.error;
+      if (failure instanceof DocumentTooLargeError) {
         setFileError(
           t("documents.form.tooLarge", {
             limit: formatFileSize(MAX_DOCUMENT_BYTES),
-            size: formatFileSize(error.size),
+            size: formatFileSize(failure.size),
           }),
         );
       } else {
         setFileError(t("documents.form.unsupportedType"));
+      }
+      return;
+    }
+    const { extension, size } = inspected.source;
+    const displayName = name ?? uri.split("/").pop() ?? "";
+    setPickedFile({ uri, name: displayName, extension, size });
+    if (title.trim().length === 0) {
+      const derived = stripExtension(displayName);
+      if (derived) {
+        setTitle(derived);
+        titleText.set(derived);
       }
     }
   };
@@ -215,70 +214,22 @@ function DocumentFormSheet({
     setIsSaving(true);
     setSaveError(undefined);
 
+    const saved = saveAnimalDocument({
+      animalId,
+      document,
+      pickedFile,
+      title: title.trim(),
+      kind: linkedToMedical ? "medical" : kind,
+      issuedDate: knownIssueDate ? toCalendarDate(issueDate) : undefined,
+    });
     try {
-      const id = document?.id ?? newDocumentId();
-      let fileUri: string;
-      let extension: DocumentExtension;
-      let size: number;
-
-      const previousUri = document
-        ? getAnimalDocumentUri(document.file)
-        : undefined;
-      const previousBytes =
-        pickedFile && document
-          ? await readAnimalDocumentBytes(document.file)
-          : undefined;
-      if (pickedFile) {
-        const imported = await importAnimalDocument(
-          pickedFile.uri,
-          id,
-          pickedFile.extension,
-        );
-        fileUri = imported.uri;
-        size = imported.size;
-        extension = pickedFile.extension;
-      } else if (document) {
-        fileUri = document.file;
-        size = document.size;
-        extension = document.extension;
-      } else {
-        return;
-      }
-
-      const record: AnimalDocument = {
-        id,
-        animalId,
-        createdAt: document?.createdAt ?? new Date().toISOString(),
-        title: title.trim(),
-        kind: linkedToMedical ? "medical" : kind,
-        issuedDate: knownIssueDate ? toCalendarDate(issueDate) : undefined,
-        file: fileUri,
-        extension,
-        size,
-        activityType: document?.activityType,
-        activityId: document?.activityId,
-      };
-
-      try {
-        addDocument(record);
-      } catch (error) {
-        if (pickedFile && previousUri === fileUri && previousBytes)
-          writeAnimalDocument(document!.id, document!.extension, previousBytes);
-        else if (pickedFile) deleteManagedAnimalDocument(fileUri);
-        throw error;
-      }
-
-      if (pickedFile && previousUri && previousUri !== fileUri) {
-        deleteManagedAnimalDocument(previousUri);
-      }
-
+      await saved;
       router.back();
     } catch {
       setSaveError(t("documents.form.saveError"));
-    } finally {
-      savingRef.current = false;
-      setIsSaving(false);
     }
+    savingRef.current = false;
+    setIsSaving(false);
   };
 
   const kindLabels: Record<DocumentKind, string> = Object.fromEntries(
@@ -489,7 +440,8 @@ export default function DocumentFormScreen() {
   const { documentId } = useLocalSearchParams<{ documentId?: string }>();
   const documents = useValue(documents$);
   const candidate = documentId ? documents[documentId] : undefined;
-  const document = candidate?.animalId === animal?.id ? candidate : undefined;
+  const sameAnimal = candidate?.animalId === animal?.id;
+  const document = sameAnimal ? candidate : undefined;
 
   if (!animal) return <AnimalNotFound />;
   if (documentId && !document)

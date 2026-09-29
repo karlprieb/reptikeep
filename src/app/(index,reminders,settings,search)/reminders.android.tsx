@@ -34,9 +34,10 @@ import {
 } from "react-native";
 import Swipeable from "react-native-gesture-handler/Swipeable";
 import { useTranslation } from "react-i18next";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { EmptyState } from "@/components/empty-state";
-import { MaterialAppBar } from "@/components/material-app-bar";
+import { BAR_HEIGHT, MaterialAppBar } from "@/components/material-app-bar";
 import { ThemedText } from "@/components/themed-text";
 import {
   CategoryColors,
@@ -568,7 +569,8 @@ export default function RemindersScreen() {
     useRemindersData();
 
   const [scrollY] = useState(() => new Animated.Value(0));
-  const [appBarHeight, setAppBarHeight] = useState(0);
+  const insets = useSafeAreaInsets();
+  const appBarHeight = insets.top + BAR_HEIGHT;
   const [limit, setLimit] = useState(REMINDERS_PAGE);
 
   type Section = (typeof sections)[number];
@@ -663,11 +665,7 @@ export default function RemindersScreen() {
         )}
       </Animated.ScrollView>
 
-      <MaterialAppBar
-        title={t("reminders.title")}
-        scrollY={scrollY}
-        onHeightChange={setAppBarHeight}
-      />
+      <MaterialAppBar title={t("reminders.title")} scrollY={scrollY} />
     </>
   );
 }

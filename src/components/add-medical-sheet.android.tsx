@@ -126,28 +126,28 @@ export function AddMedicalSheet({
 
   const handleSave = async () => {
     if (!canSave || savingRef.current) return;
+    const record = createMedicalActivity({
+      animalId,
+      occurredAt: draft.occurredAt.toISOString(),
+      summary: draft.summary,
+      notes: optionalText(draft.notes),
+    });
     savingRef.current = true;
     setSaving(true);
     setSaveError(undefined);
+    const saved = saveMedicalActivity(
+      activity ? asEditOf(record, activity) : record,
+      pending,
+      removedIds,
+    );
     try {
-      const record = createMedicalActivity({
-        animalId,
-        occurredAt: draft.occurredAt.toISOString(),
-        summary: draft.summary,
-        notes: optionalText(draft.notes),
-      });
-      await saveMedicalActivity(
-        activity ? asEditOf(record, activity) : record,
-        pending,
-        removedIds,
-      );
+      await saved;
       router.back();
     } catch {
       setSaveError(t("medicalForm.saveError"));
-    } finally {
-      savingRef.current = false;
-      setSaving(false);
     }
+    savingRef.current = false;
+    setSaving(false);
   };
 
   const confirmRemoveLinkedDocument = (id: string, title: string) =>
@@ -275,7 +275,7 @@ export function AddMedicalSheet({
               ))}
               {pending.map((document, index) => (
                 <Row
-                  key={`${document.uri}-${index}`}
+                  key={document.uri}
                   verticalAlignment="center"
                   horizontalArrangement="spaceBetween"
                   modifiers={[fillMaxWidth()]}

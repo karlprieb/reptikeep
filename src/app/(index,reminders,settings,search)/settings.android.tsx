@@ -25,8 +25,9 @@ import { router } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
 import { Animated, StyleSheet, View } from "react-native";
 import { useTranslation } from "react-i18next";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { MaterialAppBar } from "@/components/material-app-bar";
+import { BAR_HEIGHT, MaterialAppBar } from "@/components/material-app-bar";
 import { Spacing, type Theme } from "@/constants/theme";
 import { composeTextStyle, SECTION_LABEL } from "@/constants/type-font-compose";
 import { useCareScheduleEditor } from "@/hooks/use-care-schedule-editor";
@@ -61,7 +62,8 @@ export default function SettingsScreen() {
   const reminderTime = useValue(reminders$);
 
   const [scrollY] = useState(() => new Animated.Value(0));
-  const [appBarHeight, setAppBarHeight] = useState(0);
+  const insets = useSafeAreaInsets();
+  const appBarHeight = insets.top + BAR_HEIGHT;
   const [showTimePicker, setShowTimePicker] = useState(false);
 
   const reminderLabel = formatClockTime(reminderTime.hour, reminderTime.minute);
@@ -314,11 +316,7 @@ export default function SettingsScreen() {
         </View>
       ) : null}
 
-      <MaterialAppBar
-        title={t("settings.title")}
-        scrollY={scrollY}
-        onHeightChange={setAppBarHeight}
-      />
+      <MaterialAppBar title={t("settings.title")} scrollY={scrollY} />
     </>
   );
 }

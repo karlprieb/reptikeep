@@ -7,7 +7,7 @@ import {
   IconButton,
   Text as ComposeText,
 } from "@expo/ui/jetpack-compose";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import {
   Animated,
   StatusBar,
@@ -30,7 +30,7 @@ const TITLE_LARGE = {
   lineHeight: 28,
 } as const;
 
-const BAR_HEIGHT = 64;
+export const BAR_HEIGHT = 64;
 const LIFT_RANGE = 8;
 const EDGE_INSET = 4;
 const TOUCH_TARGET = 48;
@@ -49,7 +49,6 @@ export type AppBarMenuItem =
 export type MaterialAppBarProps = {
   title: string;
   scrollY: Animated.Value;
-  onHeightChange: (height: number) => void;
   menu?: {
     icon: ImageSourcePropType;
     accessibilityLabel: string;
@@ -57,21 +56,12 @@ export type MaterialAppBarProps = {
   };
 };
 
-export function MaterialAppBar({
-  title,
-  scrollY,
-  onHeightChange,
-  menu,
-}: MaterialAppBarProps) {
+export function MaterialAppBar({ title, scrollY, menu }: MaterialAppBarProps) {
   const theme = useTheme();
   const scheme = useColorScheme();
   const insets = useSafeAreaInsets();
 
   const barHeight = insets.top + BAR_HEIGHT;
-
-  useEffect(() => {
-    onHeightChange(barHeight);
-  }, [barHeight, onHeightChange]);
 
   const lifted = useMemo(
     () =>
