@@ -59,5 +59,5 @@ export function buildAnimalCardModel(
     .filter((part): part is string => Boolean(part))
     .join(", ");
 
-  return { sex, feeding, overdueTasks, label };
+  return { feeding, overdueTasks, label };
 }

@@ -239,7 +239,8 @@ export function buildActivityDetail(
       return habitatDetail(entry, t);
     case "medical":
       return medicalDetail(entry);
-    default:
+    case "shed":
+    case "poop":
       return observationDetail(entry, t);
   }
 }
