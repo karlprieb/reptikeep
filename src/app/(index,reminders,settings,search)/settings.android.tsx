@@ -79,7 +79,10 @@ export default function SettingsScreen() {
 
   return (
     <>
-      <KeyboardAvoidingView style={{ flex: 1 }} behavior="padding">
+      <KeyboardAvoidingView
+        style={[styles.root, { backgroundColor: theme.bg }]}
+        behavior="padding"
+      >
         <Animated.ScrollView
           style={[styles.scroll, { backgroundColor: theme.bg }]}
           contentContainerStyle={{
@@ -610,6 +613,9 @@ function DaysRow({
 }
 
 const styles = StyleSheet.create({
+  root: {
+    flex: 1,
+  },
   scroll: {
     flex: 1,
     width: "100%",
