@@ -14,7 +14,12 @@ import { fillMaxWidth, weight } from "@expo/ui/jetpack-compose/modifiers";
 import * as DocumentPicker from "expo-document-picker";
 import { router } from "expo-router";
 import { useRef, useState } from "react";
-import { Alert, Animated, useWindowDimensions, View } from "react-native";
+import {
+  KeyboardAvoidingView,
+  Alert,
+  Animated,
+  useWindowDimensions,
+} from "react-native";
 import { useTranslation } from "react-i18next";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -175,7 +180,10 @@ export function AddMedicalSheet({
   );
 
   return (
-    <View style={[styles.root, { backgroundColor: theme.bg }]}>
+    <KeyboardAvoidingView
+      style={[styles.root, { backgroundColor: theme.bg }]}
+      behavior="padding"
+    >
       <Animated.ScrollView
         style={styles.scroll}
         contentContainerStyle={{
@@ -348,6 +356,6 @@ export function AddMedicalSheet({
         insetsTop={insets.top}
         iconSize={iconSize}
       />
-    </View>
+    </KeyboardAvoidingView>
   );
 }

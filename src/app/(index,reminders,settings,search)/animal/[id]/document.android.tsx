@@ -20,7 +20,12 @@ import {
 import { useValue } from "@legendapp/state/react";
 import { router, useLocalSearchParams } from "expo-router";
 import { useState } from "react";
-import { Animated, useWindowDimensions, View } from "react-native";
+import {
+  Animated,
+  KeyboardAvoidingView,
+  useWindowDimensions,
+  View,
+} from "react-native";
 import { useTranslation } from "react-i18next";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -113,7 +118,10 @@ function DocumentFormSheet({ animalId, document }: DocumentFormSheetProps) {
   const horizontalInset = Spacing.md * Math.min(fontScale, StackAboveFontScale);
 
   return (
-    <View style={[styles.root, { backgroundColor: theme.bg }]}>
+    <KeyboardAvoidingView
+      style={[styles.root, { backgroundColor: theme.bg }]}
+      behavior="padding"
+    >
       <Animated.ScrollView
         style={styles.scroll}
         contentContainerStyle={{
@@ -325,7 +333,7 @@ function DocumentFormSheet({ animalId, document }: DocumentFormSheetProps) {
           </ThemedText>
         </View>
       ) : null}
-    </View>
+    </KeyboardAvoidingView>
   );
 }
 

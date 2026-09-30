@@ -7,7 +7,11 @@ import {
 } from "@expo/ui/jetpack-compose";
 import { fillMaxWidth } from "@expo/ui/jetpack-compose/modifiers";
 import { router } from "expo-router";
-import { Animated, useWindowDimensions, View } from "react-native";
+import {
+  Animated,
+  KeyboardAvoidingView,
+  useWindowDimensions,
+} from "react-native";
 import { useTranslation } from "react-i18next";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -98,7 +102,10 @@ export function AddHabitatSheet({
   const horizontalInset = Spacing.md * Math.min(fontScale, StackAboveFontScale);
 
   return (
-    <View style={[styles.root, { backgroundColor: theme.bg }]}>
+    <KeyboardAvoidingView
+      style={[styles.root, { backgroundColor: theme.bg }]}
+      behavior="padding"
+    >
       <Animated.ScrollView
         style={styles.scroll}
         contentContainerStyle={{
@@ -190,6 +197,6 @@ export function AddHabitatSheet({
         insetsTop={insets.top}
         iconSize={iconSize}
       />
-    </View>
+    </KeyboardAvoidingView>
   );
 }
