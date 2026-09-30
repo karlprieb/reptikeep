@@ -1,0 +1,1 @@
+Typing in Notes and other text fields on activity forms, Settings, documents and labels no longer hides your text behind the keyboard.
