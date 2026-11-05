@@ -35,7 +35,7 @@ Right now the app is fully local. Eventually I plan to offer an optional, paid s
 
 ## Running it locally
 
-ReptiKeep uses Expo SDK 57 and needs Node.js 22. Since it uses native SwiftUI components and MMKV storage, you'll need a local development build. No Expo Go here :)
+ReptiKeep uses Expo SDK 58 and needs Node.js 24 (at least 24.3). Since it uses native SwiftUI components and MMKV storage, you'll need a local development build. No Expo Go here :)
 
 ```sh
 npm install
@@ -74,7 +74,7 @@ Restore the generated ZIP from **Settings → Advanced settings → Backup & res
 
 - [Expo](https://expo.dev/) and React Native
 - [Expo Router](https://docs.expo.dev/router/introduction/)
-- [Expo UI](https://docs.expo.dev/versions/v57.0.0/sdk/ui/) for native SwiftUI views
+- [Expo UI](https://docs.expo.dev/versions/v58.0.0/sdk/ui/) for native SwiftUI views
 - [Legend State](https://legendapp.com/open-source/state/v3/) and MMKV for local state and persistence
 - [i18next](https://www.i18next.com/) for localization
 
