@@ -661,7 +661,9 @@ function validate(parsed: ParsedBackup): void {
         settings.reptileSort.field as string,
       ) ||
       !["asc", "desc"].includes(settings.reptileSort.direction as string) ||
-      !["single", "grid", "list"].includes(settings.reptileView as string) ||
+      !["cards", "single", "grid", "list"].includes(
+        settings.reptileView as string,
+      ) ||
       !exactKeys(defaults, [
         "mealMeasure",
         "frozen",
@@ -903,9 +905,9 @@ export function preferencesForBackup() {
           ? sort.direction
           : "asc",
       },
-      reptileView: ["single", "grid", "list"].includes(settings.reptileView)
+      reptileView: ["cards", "grid", "list"].includes(settings.reptileView)
         ? settings.reptileView
-        : "single",
+        : "cards",
     },
     loggingDefaults: {
       mealMeasure: ["amount", "weight"].includes(defaults.mealMeasure)
@@ -1212,7 +1214,13 @@ export async function restoreBackup(file: File): Promise<RestoredBackup> {
       if (manifest.scopes.husbandry !== "absent") resummarizeActivities();
 
       if (manifest.scopes.preferences === "present") {
-        settings$.set(data.settings as never);
+        settings$.set({
+          ...data.settings,
+          reptileView:
+            (data.settings?.reptileView as string) === "single"
+              ? "cards"
+              : data.settings?.reptileView,
+        } as never);
         defaults$.set(data.loggingDefaults as never);
         reminders$.set(data.reminders as never);
         careSchedules$.set(data.careSchedules as never);

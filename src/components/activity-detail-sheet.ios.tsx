@@ -107,14 +107,14 @@ export function ActivityDetailSheet({
             icon="square.and.pencil"
             onPress={handleEdit}
           >
-            {t("activityDetail.edit")}
+            {t("common.edit")}
           </Stack.Toolbar.MenuAction>
           <Stack.Toolbar.MenuAction
             icon="trash"
             destructive
             onPress={handleDelete}
           >
-            {t("activityDetail.delete")}
+            {t("common.delete")}
           </Stack.Toolbar.MenuAction>
         </Stack.Toolbar.Menu>
       </Stack.Toolbar>

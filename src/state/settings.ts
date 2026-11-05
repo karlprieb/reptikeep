@@ -9,7 +9,7 @@ import { persistPlugin } from "./persist";
 
 export type LanguageSetting = "system" | SupportedLanguage;
 
-export type ReptileViewMode = "single" | "grid" | "list";
+export type ReptileViewMode = "cards" | "grid" | "list";
 
 export interface LabelDefaults {
   size: LabelSize;
@@ -30,7 +30,7 @@ export const DEFAULT_LABEL_DEFAULTS: LabelDefaults = {
 export const settings$ = observable({
   language: "system" as LanguageSetting,
   reptileSort: DEFAULT_REPTILE_SORT,
-  reptileView: "single" as ReptileViewMode,
+  reptileView: "cards" as ReptileViewMode,
   labelDefaults: DEFAULT_LABEL_DEFAULTS,
 });
 

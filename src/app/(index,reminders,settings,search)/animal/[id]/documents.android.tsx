@@ -130,7 +130,7 @@ function DocumentRow({
                 source={MORE_VERT_ICON}
                 tint={theme.textMuted}
                 size={iconSize}
-                contentDescription={t("documents.row.actions")}
+                contentDescription={t("documents.actions")}
               />
             </IconButton>
           </DropdownMenu.Trigger>

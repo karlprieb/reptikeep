@@ -77,14 +77,14 @@ export default function AnimalDetailScreen() {
             icon="square.and.pencil"
             onPress={() => router.push(`/animal/${id}/edit`)}
           >
-            {t("animal.edit")}
+            {t("common.edit")}
           </Stack.Toolbar.MenuAction>
           <Stack.Toolbar.MenuAction
             icon="trash"
             destructive
             onPress={confirmDelete}
           >
-            {t("animal.delete")}
+            {t("common.delete")}
           </Stack.Toolbar.MenuAction>
         </Stack.Toolbar.Menu>
       </Stack.Toolbar>

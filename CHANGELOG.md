@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- The reptile list's single-column view is now called Cards, to match Grid and
+  List. Nothing moves; it is the same large photo card, just a clearer name.
+- Menu items now say Edit and Delete, with no repeated noun. The screen reader
+  still names what is being edited or deleted.
 - Upgraded the engine the app runs on (Expo SDK 58 with React Native 0.88).
   Nothing about how ReptiKeep looks or works has changed; this keeps the app
   current with the underlying platform so future fixes and features stay easy

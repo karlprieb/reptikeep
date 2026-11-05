@@ -83,7 +83,7 @@ export function ReptileList({
   lastFed,
   lastWaterChange,
   lastClean,
-  viewMode = "single",
+  viewMode = "cards",
   onAddPress,
   scrollY,
   contentInsetTop,

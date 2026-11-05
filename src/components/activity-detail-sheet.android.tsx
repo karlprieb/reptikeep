@@ -338,7 +338,7 @@ export function ActivityDetailSheet({
                 <DropdownMenuItem onClick={handleEdit}>
                   <DropdownMenuItem.Text>
                     <Text style={composeTextStyle("body")} color={theme.text}>
-                      {t("activityDetail.edit")}
+                      {t("common.edit")}
                     </Text>
                   </DropdownMenuItem.Text>
                   <DropdownMenuItem.LeadingIcon>
@@ -358,7 +358,7 @@ export function ActivityDetailSheet({
                 >
                   <DropdownMenuItem.Text>
                     <Text style={composeTextStyle("body")} color={theme.danger}>
-                      {t("activityDetail.delete")}
+                      {t("common.delete")}
                     </Text>
                   </DropdownMenuItem.Text>
                   <DropdownMenuItem.LeadingIcon>
