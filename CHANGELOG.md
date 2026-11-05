@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Upgraded the engine the app runs on (Expo SDK 58 with React Native 0.88).
+  Nothing about how ReptiKeep looks or works has changed; this keeps the app
+  current with the underlying platform so future fixes and features stay easy
+  to ship.
+
 ## [0.7.1] - 2026-09-30
 
 ### Fixed
