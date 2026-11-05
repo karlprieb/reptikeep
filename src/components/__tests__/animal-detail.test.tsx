@@ -25,8 +25,10 @@ function makeAnimal(
   };
 }
 
-function renderDetail(animal: Animal) {
-  return render(<AnimalDetail animal={animal} onAddActivity={() => {}} />);
+async function renderDetail(animal: Animal) {
+  return await render(
+    <AnimalDetail animal={animal} onAddActivity={() => {}} />,
+  );
 }
 
 function daysAgo(days: number): string {
@@ -35,8 +37,8 @@ function daysAgo(days: number): string {
   return date.toISOString();
 }
 
-beforeEach(() => {
-  act(() => {
+beforeEach(async () => {
+  await act(() => {
     feedingStore.clear();
     weightStore.clear();
     shedStore.clear();
@@ -47,8 +49,8 @@ beforeEach(() => {
 });
 
 describe("AnimalDetail identity", () => {
-  it("renders identity as plain text when the animal has no photo", () => {
-    const { getByText, queryByTestId, queryByText } = renderDetail(
+  it("renders identity as plain text when the animal has no photo", async () => {
+    const { getByText, queryByTestId, queryByText } = await renderDetail(
       makeAnimal({
         id: ANIMAL_ID,
         name: "Iggy",
@@ -66,8 +68,8 @@ describe("AnimalDetail identity", () => {
     expect(queryByText("♀")).toBeNull();
   });
 
-  it("renders identity over the photo when the animal has one", () => {
-    const { getByTestId, getByText } = renderDetail(
+  it("renders identity over the photo when the animal has one", async () => {
+    const { getByTestId, getByText } = await renderDetail(
       makeAnimal({
         id: ANIMAL_ID,
         name: "Iggy",
@@ -81,8 +83,8 @@ describe("AnimalDetail identity", () => {
     expect(getByText("Green iguana")).toBeTruthy();
   });
 
-  it("omits the sex label when sex is unknown", () => {
-    const { queryByText } = renderDetail(
+  it("omits the sex label when sex is unknown", async () => {
+    const { queryByText } = await renderDetail(
       makeAnimal({ id: ANIMAL_ID, name: "Rex", sex: "unknown" }),
     );
 
@@ -92,8 +94,8 @@ describe("AnimalDetail identity", () => {
 });
 
 describe("AnimalDetail stat boxes", () => {
-  it("hides both date boxes when neither date is known", () => {
-    const { queryByText } = renderDetail(
+  it("hides both date boxes when neither date is known", async () => {
+    const { queryByText } = await renderDetail(
       makeAnimal({ id: ANIMAL_ID, name: "Iggy" }),
     );
 
@@ -101,8 +103,8 @@ describe("AnimalDetail stat boxes", () => {
     expect(queryByText("ACQUIRED")).toBeNull();
   });
 
-  it("shows only the box that has a date when just one is known", () => {
-    const { getByText, queryByText } = renderDetail(
+  it("shows only the box that has a date when just one is known", async () => {
+    const { getByText, queryByText } = await renderDetail(
       makeAnimal({ id: ANIMAL_ID, name: "Iggy", acquiredDate: "2020-02-01" }),
     );
 
@@ -111,8 +113,8 @@ describe("AnimalDetail stat boxes", () => {
     expect(queryByText("BIRTH DATE")).toBeNull();
   });
 
-  it("shows an explicit unknown state instead of a fabricated weight or feed", () => {
-    const { getByText, getAllByText } = renderDetail(
+  it("shows an explicit unknown state instead of a fabricated weight or feed", async () => {
+    const { getByText, getAllByText } = await renderDetail(
       makeAnimal({ id: ANIMAL_ID, name: "Iggy" }),
     );
 
@@ -123,9 +125,9 @@ describe("AnimalDetail stat boxes", () => {
     expect(getByText("No feeding logged")).toBeTruthy();
   });
 
-  it("uses the latest accepted feeding and shows overdue days", () => {
+  it("uses the latest accepted feeding and shows overdue days", async () => {
     jest.useFakeTimers().setSystemTime(new Date("2026-03-10T12:00:00.000Z"));
-    act(() => {
+    await act(() => {
       feedingStore.$.set({
         accepted: {
           id: "accepted",
@@ -146,7 +148,7 @@ describe("AnimalDetail stat boxes", () => {
       });
     });
 
-    const screen = renderDetail(
+    const screen = await renderDetail(
       makeAnimal({
         id: ANIMAL_ID,
         name: "Iggy",
@@ -162,8 +164,8 @@ describe("AnimalDetail stat boxes", () => {
     jest.useRealTimers();
   });
 
-  it("treats refused-only history as no feeding logged", () => {
-    act(() => {
+  it("treats refused-only history as no feeding logged", async () => {
+    await act(() => {
       feedingStore.$.set({
         refused: {
           id: "refused",
@@ -176,7 +178,7 @@ describe("AnimalDetail stat boxes", () => {
       });
     });
 
-    const screen = renderDetail(
+    const screen = await renderDetail(
       makeAnimal({
         id: ANIMAL_ID,
         name: "Iggy",
@@ -188,21 +190,21 @@ describe("AnimalDetail stat boxes", () => {
     expect(screen.queryByText(/overdue/)).toBeNull();
   });
 
-  it("hides the water box for an animal with no cadence and no record", () => {
-    const { queryByText } = renderDetail(
+  it("hides the water box for an animal with no cadence and no record", async () => {
+    const { queryByText } = await renderDetail(
       makeAnimal({ id: ANIMAL_ID, name: "Iggy" }),
     );
 
     expect(queryByText("LAST WATER CHANGE")).toBeNull();
   });
 
-  it("shows the water box once the collection has a cadence", () => {
+  it("shows the water box once the collection has a cadence", async () => {
     jest.useFakeTimers().setSystemTime(new Date("2026-03-10T12:00:00.000Z"));
-    act(() => {
+    await act(() => {
       careSchedules$.water.set({ frequency: "weekly" });
     });
 
-    const { getByText } = renderDetail(
+    const { getByText } = await renderDetail(
       makeAnimal({
         id: ANIMAL_ID,
         name: "Iggy",
@@ -214,13 +216,13 @@ describe("AnimalDetail stat boxes", () => {
     expect(getByText("No water change logged")).toBeTruthy();
   });
 
-  it("counts a never-logged routine overdue from the day the animal was added", () => {
+  it("counts a never-logged routine overdue from the day the animal was added", async () => {
     jest.useFakeTimers().setSystemTime(new Date("2026-03-10T12:00:00.000Z"));
-    act(() => {
+    await act(() => {
       careSchedules$.water.set({ frequency: "weekly" });
     });
 
-    const { getByText, queryByText } = renderDetail(
+    const { getByText, queryByText } = await renderDetail(
       makeAnimal({
         id: ANIMAL_ID,
         name: "Iggy",
@@ -232,9 +234,9 @@ describe("AnimalDetail stat boxes", () => {
     expect(queryByText("No water change logged")).toBeNull();
   });
 
-  it("counts water overdue from the last record that changed water", () => {
+  it("counts water overdue from the last record that changed water", async () => {
     jest.useFakeTimers().setSystemTime(new Date("2026-03-10T12:00:00.000Z"));
-    act(() => {
+    await act(() => {
       careSchedules$.water.set({ frequency: "weekly" });
       habitatStore.$.set({
         changed: {
@@ -254,7 +256,9 @@ describe("AnimalDetail stat boxes", () => {
       });
     });
 
-    const screen = renderDetail(makeAnimal({ id: ANIMAL_ID, name: "Iggy" }));
+    const screen = await renderDetail(
+      makeAnimal({ id: ANIMAL_ID, name: "Iggy" }),
+    );
 
     expect(
       screen.getByLabelText(/Last water change, Mar 1, 2026, 2 days overdue/),
@@ -262,12 +266,12 @@ describe("AnimalDetail stat boxes", () => {
     jest.useRealTimers();
   });
 
-  it("lets an animal opt out of the collection cadence", () => {
-    act(() => {
+  it("lets an animal opt out of the collection cadence", async () => {
+    await act(() => {
       careSchedules$.water.set({ frequency: "weekly" });
     });
 
-    const { queryByText } = renderDetail(
+    const { queryByText } = await renderDetail(
       makeAnimal({
         id: ANIMAL_ID,
         name: "Iggy",
@@ -278,8 +282,8 @@ describe("AnimalDetail stat boxes", () => {
     expect(queryByText("LAST WATER CHANGE")).toBeNull();
   });
 
-  it("surfaces the most recent weight, not the oldest", () => {
-    act(() => {
+  it("surfaces the most recent weight, not the oldest", async () => {
+    await act(() => {
       weightStore.$.set({
         old: {
           id: "old",
@@ -298,7 +302,7 @@ describe("AnimalDetail stat boxes", () => {
       });
     });
 
-    const { getByText, getAllByText } = renderDetail(
+    const { getByText, getAllByText } = await renderDetail(
       makeAnimal({ id: ANIMAL_ID, name: "Iggy" }),
     );
 
@@ -309,8 +313,8 @@ describe("AnimalDetail stat boxes", () => {
 });
 
 describe("AnimalDetail activity timeline", () => {
-  it("invites the first record when the animal has no history", () => {
-    const { getByText } = renderDetail(
+  it("invites the first record when the animal has no history", async () => {
+    const { getByText } = await renderDetail(
       makeAnimal({ id: ANIMAL_ID, name: "Iggy" }),
     );
 
@@ -321,8 +325,8 @@ describe("AnimalDetail activity timeline", () => {
     ).toBeTruthy();
   });
 
-  it("renders records from every store with their worded detail line", () => {
-    act(() => {
+  it("renders records from every store with their worded detail line", async () => {
+    await act(() => {
       feedingStore.$.set({
         f1: {
           id: "f1",
@@ -366,7 +370,7 @@ describe("AnimalDetail activity timeline", () => {
       });
     });
 
-    const { getByText, queryByText } = renderDetail(
+    const { getByText, queryByText } = await renderDetail(
       makeAnimal({ id: ANIMAL_ID, name: "Iggy" }),
     );
 
@@ -377,10 +381,10 @@ describe("AnimalDetail activity timeline", () => {
     expect(getByText("Jul 14, 2026")).toBeTruthy();
   });
 
-  it("caps the list and offers the whole history from its last row", () => {
+  it("caps the list and offers the whole history from its last row", async () => {
     const total = VISIBLE_LIMIT + 3;
 
-    act(() => {
+    await act(() => {
       shedStore.$.set(
         Object.fromEntries(
           Array.from({ length: total }, (_, index) => [
@@ -397,21 +401,21 @@ describe("AnimalDetail activity timeline", () => {
       );
     });
 
-    const { getByText, getAllByText } = renderDetail(
+    const { getByText, getAllByText } = await renderDetail(
       makeAnimal({ id: ANIMAL_ID, name: "Iggy" }),
     );
 
     expect(getAllByText("Shed")).toHaveLength(VISIBLE_LIMIT);
 
-    fireEvent.press(getByText(`See all ${total} records`));
+    await fireEvent.press(getByText(`See all ${total} records`));
 
     expect(router.push).toHaveBeenCalledWith(`/animal/${ANIMAL_ID}/history`);
   });
 
-  it("narrows the list to one type and keeps a path to that type's history", () => {
+  it("narrows the list to one type and keeps a path to that type's history", async () => {
     const sheds = VISIBLE_LIMIT + 3;
 
-    act(() => {
+    await act(() => {
       feedingStore.$.set({
         f1: {
           id: "f1",
@@ -439,26 +443,26 @@ describe("AnimalDetail activity timeline", () => {
       );
     });
 
-    const { getByLabelText, getByText, queryByText } = renderDetail(
+    const { getByLabelText, getByText, queryByText } = await renderDetail(
       makeAnimal({ id: ANIMAL_ID, name: "Iggy" }),
     );
 
     expect(queryByText("Mouse")).toBeTruthy();
     expect(queryByText(`See all ${sheds + 1} records`)).toBeTruthy();
 
-    fireEvent.press(getByLabelText("Shed"));
+    await fireEvent.press(getByLabelText("Shed"));
 
     expect(queryByText("Mouse")).toBeNull();
 
-    fireEvent.press(getByText(`See all ${sheds} records`));
+    await fireEvent.press(getByText(`See all ${sheds} records`));
 
     expect(router.push).toHaveBeenCalledWith(
       `/animal/${ANIMAL_ID}/history?type=shed`,
     );
   });
 
-  it("clears a filter whose last record disappears", () => {
-    act(() => {
+  it("clears a filter whose last record disappears", async () => {
+    await act(() => {
       feedingStore.$.set({
         f1: {
           id: "f1",
@@ -481,14 +485,13 @@ describe("AnimalDetail activity timeline", () => {
       });
     });
 
-    const { getByLabelText, queryByLabelText, queryByText } = renderDetail(
-      makeAnimal({ id: ANIMAL_ID, name: "Iggy" }),
-    );
+    const { getByLabelText, queryByLabelText, queryByText } =
+      await renderDetail(makeAnimal({ id: ANIMAL_ID, name: "Iggy" }));
 
-    fireEvent.press(getByLabelText("Shed"));
+    await fireEvent.press(getByLabelText("Shed"));
     expect(queryByText("Mouse")).toBeNull();
 
-    act(() => {
+    await act(() => {
       shedStore.$.set({});
     });
 
@@ -496,7 +499,7 @@ describe("AnimalDetail activity timeline", () => {
     expect(queryByText("Mouse")).toBeTruthy();
     expect(queryByText("Nothing logged yet")).toBeNull();
 
-    act(() => {
+    await act(() => {
       shedStore.$.set({
         s2: {
           id: "s2",
@@ -512,8 +515,8 @@ describe("AnimalDetail activity timeline", () => {
     expect(queryByText("Mouse")).toBeTruthy();
   });
 
-  it("hides the type filter when every record shares one type", () => {
-    act(() => {
+  it("hides the type filter when every record shares one type", async () => {
+    await act(() => {
       shedStore.$.set({
         s1: {
           id: "s1",
@@ -525,7 +528,7 @@ describe("AnimalDetail activity timeline", () => {
       });
     });
 
-    const { queryByLabelText } = renderDetail(
+    const { queryByLabelText } = await renderDetail(
       makeAnimal({ id: ANIMAL_ID, name: "Iggy" }),
     );
 
@@ -534,8 +537,8 @@ describe("AnimalDetail activity timeline", () => {
 });
 
 describe("AnimalDetail accessibility", () => {
-  it("labels each stat box with field name, value, and supporting line", () => {
-    act(() => {
+  it("labels each stat box with field name, value, and supporting line", async () => {
+    await act(() => {
       weightStore.$.set({
         w1: {
           id: "w1",
@@ -547,7 +550,7 @@ describe("AnimalDetail accessibility", () => {
       });
     });
 
-    const { getByLabelText } = renderDetail(
+    const { getByLabelText } = await renderDetail(
       makeAnimal({
         id: ANIMAL_ID,
         name: "Iggy",
@@ -564,8 +567,8 @@ describe("AnimalDetail accessibility", () => {
     expect(getByLabelText(/Last fed, —, No feeding logged/)).toBeTruthy();
   });
 
-  it("labels each timeline row with type, date, and detail together", () => {
-    act(() => {
+  it("labels each timeline row with type, date, and detail together", async () => {
+    await act(() => {
       feedingStore.$.set({
         f1: {
           id: "f1",
@@ -579,7 +582,7 @@ describe("AnimalDetail accessibility", () => {
       });
     });
 
-    const { getByLabelText } = renderDetail(
+    const { getByLabelText } = await renderDetail(
       makeAnimal({ id: ANIMAL_ID, name: "Iggy" }),
     );
 
@@ -590,7 +593,7 @@ describe("AnimalDetail accessibility", () => {
 describe("AnimalDetail localization", () => {
   it("localizes overdue wording in pt-BR", async () => {
     jest.useFakeTimers().setSystemTime(new Date("2026-03-10T12:00:00.000Z"));
-    act(() => {
+    await act(() => {
       feedingStore.$.set({
         accepted: {
           id: "accepted",
@@ -606,7 +609,7 @@ describe("AnimalDetail localization", () => {
       await i18n.changeLanguage("pt-BR");
     });
 
-    const screen = renderDetail(
+    const screen = await renderDetail(
       makeAnimal({
         id: ANIMAL_ID,
         name: "Iggy",
@@ -628,7 +631,7 @@ describe("AnimalDetail localization", () => {
       await i18n.changeLanguage("pt-BR");
     });
 
-    const { getByText, queryByText } = renderDetail(
+    const { getByText, queryByText } = await renderDetail(
       makeAnimal({ id: ANIMAL_ID, name: "Iggy", birthDate: "2019-04-12" }),
     );
 
@@ -655,7 +658,7 @@ describe("AnimalDetail localization", () => {
       await i18n.changeLanguage("pt-BR");
     });
 
-    const { getByText } = renderDetail(
+    const { getByText } = await renderDetail(
       makeAnimal({ id: ANIMAL_ID, name: "Iggy", birthDate: "2019-04-12" }),
     );
 
@@ -671,8 +674,10 @@ describe("AnimalDetail localization", () => {
 });
 
 describe("AnimalDetail weight trend", () => {
-  function logWeights(entries: { id: string; days: number; weight: number }[]) {
-    act(() => {
+  async function logWeights(
+    entries: { id: string; days: number; weight: number }[],
+  ) {
+    await act(async () => {
       weightStore.$.set(
         Object.fromEntries(
           entries.map(({ id, days, weight }) => [
@@ -690,24 +695,24 @@ describe("AnimalDetail weight trend", () => {
     });
   }
 
-  it("hides the chart until there are two weigh-ins to compare", () => {
-    logWeights([{ id: "only", days: 5, weight: 400 }]);
+  it("hides the chart until there are two weigh-ins to compare", async () => {
+    await logWeights([{ id: "only", days: 5, weight: 400 }]);
 
-    const { queryByText } = renderDetail(
+    const { queryByText } = await renderDetail(
       makeAnimal({ id: ANIMAL_ID, name: "Iggy" }),
     );
 
     expect(queryByText("WEIGHT TREND")).toBeNull();
   });
 
-  it("charts every weigh-in and states the change since the first", () => {
-    logWeights([
+  it("charts every weigh-in and states the change since the first", async () => {
+    await logWeights([
       { id: "a", days: 60, weight: 400 },
       { id: "b", days: 30, weight: 430 },
       { id: "c", days: 2, weight: 460 },
     ]);
 
-    const { getByLabelText, getByText } = renderDetail(
+    const { getByLabelText, getByText } = await renderDetail(
       makeAnimal({ id: ANIMAL_ID, name: "Iggy" }),
     );
 
@@ -720,8 +725,8 @@ describe("AnimalDetail weight trend", () => {
     ).toBeTruthy();
   });
 
-  it("says how many weigh-ins the chart is showing when history is longer", () => {
-    logWeights(
+  it("says how many weigh-ins the chart is showing when history is longer", async () => {
+    await logWeights(
       Array.from({ length: 12 }, (_, index) => ({
         id: `w${index}`,
         days: 100 - index * 5,
@@ -729,7 +734,7 @@ describe("AnimalDetail weight trend", () => {
       })),
     );
 
-    const { getByText } = renderDetail(
+    const { getByText } = await renderDetail(
       makeAnimal({ id: ANIMAL_ID, name: "Iggy" }),
     );
 
@@ -737,12 +742,12 @@ describe("AnimalDetail weight trend", () => {
   });
 
   it("relabels the axis when the language changes while it is on screen", async () => {
-    logWeights([
+    await logWeights([
       { id: "a", days: 60, weight: 400 },
       { id: "b", days: 30, weight: 430 },
     ]);
 
-    const { getByText, queryByText } = renderDetail(
+    const { getByText, queryByText } = await renderDetail(
       makeAnimal({ id: ANIMAL_ID, name: "Iggy" }),
     );
 

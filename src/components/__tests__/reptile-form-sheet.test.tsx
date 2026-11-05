@@ -46,8 +46,10 @@ const REPLACEMENT_PHOTO = {
 };
 const MANAGED_PHOTO = "file:///documents/animal-photos/test-uuid-1.webp";
 
-async function pickPhoto(screen: ReturnType<typeof render>): Promise<void> {
-  fireEvent.press(screen.getByLabelText("Add photo"));
+async function pickPhoto(
+  screen: Awaited<ReturnType<typeof render>>,
+): Promise<void> {
+  await fireEvent.press(screen.getByLabelText("Add photo"));
   await waitFor(() => {
     expect(screen.getByLabelText("Change photo")).toBeTruthy();
   });
@@ -77,12 +79,15 @@ afterEach(() => {
 
 describe("ReptileFormSheet species autocomplete", () => {
   it("suggests a common-name match while typing and fills both fields on tap", async () => {
-    const screen = render(<ReptileFormSheet />);
+    const screen = await render(<ReptileFormSheet />);
 
-    fireEvent.changeText(screen.getByPlaceholderText("Common name"), "ba");
+    await fireEvent.changeText(
+      screen.getByPlaceholderText("Common name"),
+      "ba",
+    );
     const suggestion = await screen.findByText("Ball Python · Python regius");
 
-    fireEvent.press(suggestion);
+    await fireEvent.press(suggestion);
 
     expect(screen.getByDisplayValue("Ball Python")).toBeTruthy();
     expect(screen.getByDisplayValue("Python regius")).toBeTruthy();
@@ -90,23 +95,23 @@ describe("ReptileFormSheet species autocomplete", () => {
   });
 
   it("suggests a scientific-name match while typing and fills both fields on tap", async () => {
-    const screen = render(<ReptileFormSheet />);
+    const screen = await render(<ReptileFormSheet />);
 
-    fireEvent.changeText(
+    await fireEvent.changeText(
       screen.getByPlaceholderText("Scientific name"),
       "Python reg",
     );
     const suggestion = await screen.findByText("Python regius · Ball Python");
 
-    fireEvent.press(suggestion);
+    await fireEvent.press(suggestion);
 
     expect(screen.getByDisplayValue("Ball Python")).toBeTruthy();
     expect(screen.getByDisplayValue("Python regius")).toBeTruthy();
     expect(screen.queryByText(/Python regius ·/)).toBeNull();
   });
 
-  it("does not open a suggestion list for a prefilled edit before the keeper types", () => {
-    const screen = renderEdit(existingAnimal());
+  it("does not open a suggestion list for a prefilled edit before the keeper types", async () => {
+    const screen = await renderEdit(existingAnimal());
 
     expect(screen.queryByText(/Green tree python ·/)).toBeNull();
     expect(screen.queryByText(/Morelia viridis ·/)).toBeNull();
@@ -115,13 +120,13 @@ describe("ReptileFormSheet species autocomplete", () => {
 
 describe("ReptileFormSheet feeding schedule", () => {
   it("defaults a newly enabled schedule to weekly", async () => {
-    const screen = render(<ReptileFormSheet />);
-    fireEvent.changeText(screen.getByPlaceholderText("Name"), "Willow");
+    const screen = await render(<ReptileFormSheet />);
+    await fireEvent.changeText(screen.getByPlaceholderText("Name"), "Willow");
 
     expect(screen.queryByLabelText("Feeding schedule: Frequency")).toBeNull();
-    fireEvent.press(screen.getByLabelText("Use feeding schedule"));
+    await fireEvent.press(screen.getByLabelText("Use feeding schedule"));
     expect(screen.getByLabelText("Feeding schedule: Frequency")).toBeTruthy();
-    fireEvent.press(screen.getByLabelText("Save"));
+    await fireEvent.press(screen.getByLabelText("Save"));
 
     await waitFor(() => {
       expect(Object.values(animalState.animals$.peek())).toHaveLength(1);
@@ -132,10 +137,10 @@ describe("ReptileFormSheet feeding schedule", () => {
   });
 
   it("requires a positive whole number for a custom schedule", async () => {
-    const screen = render(<ReptileFormSheet />);
-    fireEvent.changeText(screen.getByPlaceholderText("Name"), "Willow");
-    fireEvent.press(screen.getByLabelText("Use feeding schedule"));
-    fireEvent(
+    const screen = await render(<ReptileFormSheet />);
+    await fireEvent.changeText(screen.getByPlaceholderText("Name"), "Willow");
+    await fireEvent.press(screen.getByLabelText("Use feeding schedule"));
+    await fireEvent(
       screen.getByLabelText("Feeding schedule: Frequency"),
       "selectionChange",
       "custom",
@@ -146,16 +151,16 @@ describe("ReptileFormSheet feeding schedule", () => {
       screen.getByLabelText("Save").props.accessibilityState.disabled,
     ).toBe(true);
 
-    fireEvent.changeText(screen.getByPlaceholderText("Days"), "2.5");
+    await fireEvent.changeText(screen.getByPlaceholderText("Days"), "2.5");
     expect(
       screen.getByLabelText("Save").props.accessibilityState.disabled,
     ).toBe(true);
 
-    fireEvent.changeText(screen.getByPlaceholderText("Days"), "9");
+    await fireEvent.changeText(screen.getByPlaceholderText("Days"), "9");
     expect(
       screen.getByLabelText("Save").props.accessibilityState.disabled,
     ).toBe(false);
-    fireEvent.press(screen.getByLabelText("Save"));
+    await fireEvent.press(screen.getByLabelText("Save"));
 
     await waitFor(() => {
       expect(Object.values(animalState.animals$.peek())).toHaveLength(1);
@@ -169,9 +174,12 @@ describe("ReptileFormSheet feeding schedule", () => {
 describe("ReptileFormSheet water schedule", () => {
   const WATER = "Water change schedule: Frequency";
 
-  async function saveNamed(screen: ReturnType<typeof render>, name: string) {
-    fireEvent.changeText(screen.getByPlaceholderText("Name"), name);
-    fireEvent.press(screen.getByLabelText("Save"));
+  async function saveNamed(
+    screen: Awaited<ReturnType<typeof render>>,
+    name: string,
+  ) {
+    await fireEvent.changeText(screen.getByPlaceholderText("Name"), name);
+    await fireEvent.press(screen.getByLabelText("Save"));
     await waitFor(() => {
       expect(Object.values(animalState.animals$.peek())).toHaveLength(1);
     });
@@ -179,29 +187,29 @@ describe("ReptileFormSheet water schedule", () => {
   }
 
   it("stores nothing while the row is left following the collection", async () => {
-    const screen = render(<ReptileFormSheet />);
+    const screen = await render(<ReptileFormSheet />);
     const animal = await saveNamed(screen, "Willow");
 
     expect(animal.waterSchedule).toBeUndefined();
   });
 
-  it("names the collection cadence in the row that defers to it", () => {
+  it("names the collection cadence in the row that defers to it", async () => {
     careSchedules$.water.set({ frequency: "custom", days: 4 });
-    const screen = render(<ReptileFormSheet />);
+    const screen = await render(<ReptileFormSheet />);
 
     expect(screen.getByText("Follow global · Every 4 days")).toBeTruthy();
   });
 
-  it("says the collection has none when no cadence is set", () => {
-    const screen = render(<ReptileFormSheet />);
+  it("says the collection has none when no cadence is set", async () => {
+    const screen = await render(<ReptileFormSheet />);
 
     expect(screen.getAllByText("Follow global · Off")).toHaveLength(2);
   });
 
   it("stores an explicit opt-out, which absence could not express", async () => {
     careSchedules$.water.set({ frequency: "weekly" });
-    const screen = render(<ReptileFormSheet />);
-    fireEvent(screen.getByLabelText(WATER), "selectionChange", "off");
+    const screen = await render(<ReptileFormSheet />);
+    await fireEvent(screen.getByLabelText(WATER), "selectionChange", "off");
 
     const animal = await saveNamed(screen, "Willow");
 
@@ -209,43 +217,47 @@ describe("ReptileFormSheet water schedule", () => {
   });
 
   it("stores a cadence of the animal's own", async () => {
-    const screen = render(<ReptileFormSheet />);
-    fireEvent(screen.getByLabelText(WATER), "selectionChange", "everyOtherDay");
+    const screen = await render(<ReptileFormSheet />);
+    await fireEvent(
+      screen.getByLabelText(WATER),
+      "selectionChange",
+      "everyOtherDay",
+    );
 
     const animal = await saveNamed(screen, "Willow");
 
     expect(animal.waterSchedule).toEqual({ frequency: "everyOtherDay" });
   });
 
-  it("blocks the save on a custom cadence that is not a whole day count", () => {
-    const screen = render(<ReptileFormSheet />);
-    fireEvent.changeText(screen.getByPlaceholderText("Name"), "Willow");
-    fireEvent(screen.getByLabelText(WATER), "selectionChange", "custom");
+  it("blocks the save on a custom cadence that is not a whole day count", async () => {
+    const screen = await render(<ReptileFormSheet />);
+    await fireEvent.changeText(screen.getByPlaceholderText("Name"), "Willow");
+    await fireEvent(screen.getByLabelText(WATER), "selectionChange", "custom");
 
     expect(screen.getByText(/whole number of days/)).toBeTruthy();
     expect(
       screen.getByLabelText("Save").props.accessibilityState.disabled,
     ).toBe(true);
 
-    fireEvent.changeText(screen.getByPlaceholderText("Days"), "0");
+    await fireEvent.changeText(screen.getByPlaceholderText("Days"), "0");
     expect(
       screen.getByLabelText("Save").props.accessibilityState.disabled,
     ).toBe(true);
 
-    fireEvent.changeText(screen.getByPlaceholderText("Days"), "5");
+    await fireEvent.changeText(screen.getByPlaceholderText("Days"), "5");
     expect(
       screen.getByLabelText("Save").props.accessibilityState.disabled,
     ).toBe(false);
   });
 
   it("prefills an existing cadence and can hand the animal back to the collection", async () => {
-    const screen = renderEdit(
+    const screen = await renderEdit(
       existingAnimal({ waterSchedule: { frequency: "custom", days: 12 } }),
     );
 
     expect(screen.getByDisplayValue("12")).toBeTruthy();
-    fireEvent(screen.getByLabelText(WATER), "selectionChange", "inherit");
-    fireEvent.press(screen.getByLabelText("Save"));
+    await fireEvent(screen.getByLabelText(WATER), "selectionChange", "inherit");
+    await fireEvent.press(screen.getByLabelText("Save"));
 
     await waitFor(() => {
       expect(animalState.animals$.peek().willow.waterSchedule).toBeUndefined();
@@ -258,15 +270,15 @@ describe("ReptileFormSheet photo persistence", () => {
     mockLaunchImageLibraryAsync
       .mockResolvedValueOnce({ canceled: false, assets: [PICKED_PHOTO] })
       .mockResolvedValueOnce({ canceled: false, assets: [REPLACEMENT_PHOTO] });
-    const screen = render(<ReptileFormSheet />);
-    fireEvent.changeText(screen.getByPlaceholderText("Name"), "Willow");
+    const screen = await render(<ReptileFormSheet />);
+    await fireEvent.changeText(screen.getByPlaceholderText("Name"), "Willow");
     await pickPhoto(screen);
-    fireEvent.press(screen.getByLabelText("Change photo"));
+    await fireEvent.press(screen.getByLabelText("Change photo"));
     await waitFor(() => {
       expect(mockLaunchImageLibraryAsync).toHaveBeenCalledTimes(2);
     });
 
-    fireEvent.press(screen.getByLabelText("Save"));
+    await fireEvent.press(screen.getByLabelText("Save"));
 
     await waitFor(() => {
       expect(Object.values(animalState.animals$.peek())).toHaveLength(1);
@@ -281,10 +293,10 @@ describe("ReptileFormSheet photo persistence", () => {
   });
 
   it("still saves an animal when no photo is selected", async () => {
-    const screen = render(<ReptileFormSheet />);
-    fireEvent.changeText(screen.getByPlaceholderText("Name"), "Noel");
+    const screen = await render(<ReptileFormSheet />);
+    await fireEvent.changeText(screen.getByPlaceholderText("Name"), "Noel");
 
-    fireEvent.press(screen.getByLabelText("Save"));
+    await fireEvent.press(screen.getByLabelText("Save"));
 
     await waitFor(() => {
       expect(Object.values(animalState.animals$.peek())).toHaveLength(1);
@@ -296,11 +308,11 @@ describe("ReptileFormSheet photo persistence", () => {
 
   it("retains the form and preview after import failure, then saves without the photo", async () => {
     mockImportAnimalPhoto.mockRejectedValueOnce(new Error("disk full"));
-    const screen = render(<ReptileFormSheet />);
-    fireEvent.changeText(screen.getByPlaceholderText("Name"), "Willow");
+    const screen = await render(<ReptileFormSheet />);
+    await fireEvent.changeText(screen.getByPlaceholderText("Name"), "Willow");
     await pickPhoto(screen);
 
-    fireEvent.press(screen.getByLabelText("Save"));
+    await fireEvent.press(screen.getByLabelText("Save"));
 
     const error = await screen.findByText(
       "We couldn't save this photo. Try again or remove it to save without a photo.",
@@ -311,11 +323,11 @@ describe("ReptileFormSheet photo persistence", () => {
     expect(animalState.animals$.peek()).toEqual({});
     expect(router.back).not.toHaveBeenCalled();
 
-    fireEvent.press(screen.getByLabelText("Remove photo"));
+    await fireEvent.press(screen.getByLabelText("Remove photo"));
     expect(screen.getByLabelText("Add photo")).toBeTruthy();
     expect(screen.queryByText(/couldn't save this photo/)).toBeNull();
 
-    fireEvent.press(screen.getByLabelText("Save"));
+    await fireEvent.press(screen.getByLabelText("Save"));
     await waitFor(() => {
       expect(Object.values(animalState.animals$.peek())).toHaveLength(1);
     });
@@ -329,13 +341,15 @@ describe("ReptileFormSheet photo persistence", () => {
         resolveImport = resolve;
       }),
     );
-    const screen = render(<ReptileFormSheet />);
-    fireEvent.changeText(screen.getByPlaceholderText("Name"), "Willow");
+    const screen = await render(<ReptileFormSheet />);
+    await fireEvent.changeText(screen.getByPlaceholderText("Name"), "Willow");
     await pickPhoto(screen);
 
     const save = screen.getByLabelText("Save");
-    fireEvent.press(save);
-    fireEvent.press(save);
+    const beginImport = (save.props.onClick ??
+      save.props.onPress) as () => Promise<void>;
+    void beginImport();
+    void beginImport();
 
     expect(mockImportAnimalPhoto).toHaveBeenCalledTimes(1);
     await act(async () => {
@@ -351,11 +365,11 @@ describe("ReptileFormSheet photo persistence", () => {
     jest.spyOn(animalState, "addAnimal").mockImplementationOnce(() => {
       throw new Error("persistence failed");
     });
-    const screen = render(<ReptileFormSheet />);
-    fireEvent.changeText(screen.getByPlaceholderText("Name"), "Willow");
+    const screen = await render(<ReptileFormSheet />);
+    await fireEvent.changeText(screen.getByPlaceholderText("Name"), "Willow");
     await pickPhoto(screen);
 
-    fireEvent.press(screen.getByLabelText("Save"));
+    await fireEvent.press(screen.getByLabelText("Save"));
 
     await screen.findByText(/couldn't save this photo/);
     expect(mockDeleteManagedAnimalPhoto).toHaveBeenCalledWith(MANAGED_PHOTO);
@@ -371,14 +385,14 @@ describe("ReptileFormSheet photo persistence", () => {
       canAskAgain: true,
       accessPrivileges: "none",
     });
-    const screen = render(<ReptileFormSheet />);
-    fireEvent.changeText(screen.getByPlaceholderText("Name"), "Willow");
+    const screen = await render(<ReptileFormSheet />);
+    await fireEvent.changeText(screen.getByPlaceholderText("Name"), "Willow");
 
     await pickPhoto(screen);
 
     expect(mockRequestMediaLibraryPermissionsAsync).not.toHaveBeenCalled();
 
-    fireEvent.press(screen.getByLabelText("Save"));
+    await fireEvent.press(screen.getByLabelText("Save"));
     await waitFor(() => {
       expect(Object.values(animalState.animals$.peek())).toHaveLength(1);
     });
@@ -391,10 +405,10 @@ describe("ReptileFormSheet photo persistence", () => {
     mockLaunchImageLibraryAsync.mockRejectedValueOnce(
       new Error("picker unavailable"),
     );
-    const screen = render(<ReptileFormSheet />);
-    fireEvent.changeText(screen.getByPlaceholderText("Name"), "Willow");
+    const screen = await render(<ReptileFormSheet />);
+    await fireEvent.changeText(screen.getByPlaceholderText("Name"), "Willow");
 
-    fireEvent.press(screen.getByLabelText("Add photo"));
+    await fireEvent.press(screen.getByLabelText("Add photo"));
 
     await screen.findByText("We couldn't open your photo library. Try again.");
     expect(screen.getByLabelText("Add photo")).toBeTruthy();
@@ -408,10 +422,10 @@ describe("ReptileFormSheet photo persistence", () => {
       canceled: true,
       assets: null,
     });
-    const screen = render(<ReptileFormSheet />);
-    fireEvent.changeText(screen.getByPlaceholderText("Name"), "Willow");
+    const screen = await render(<ReptileFormSheet />);
+    await fireEvent.changeText(screen.getByPlaceholderText("Name"), "Willow");
 
-    fireEvent.press(screen.getByLabelText("Add photo"));
+    await fireEvent.press(screen.getByLabelText("Add photo"));
 
     await waitFor(() => {
       expect(mockLaunchImageLibraryAsync).toHaveBeenCalled();
@@ -439,20 +453,23 @@ function existingAnimal(
   };
 }
 
-function renderEdit(animal: animalState.Animal) {
+async function renderEdit(animal: animalState.Animal) {
   animalState.animals$.set({ [animal.id]: animal });
-  return render(<ReptileFormSheet animal={animal} />);
+  return await render(<ReptileFormSheet animal={animal} />);
 }
 
 describe("ReptileFormSheet edit mode", () => {
   it("prefills the reptile and saves changes in place", async () => {
-    const screen = renderEdit(existingAnimal());
+    const screen = await renderEdit(existingAnimal());
     expect(screen.getByDisplayValue("Willow")).toBeTruthy();
     expect(screen.getByDisplayValue("Green tree python")).toBeTruthy();
     expect(screen.getByDisplayValue("Morelia viridis")).toBeTruthy();
 
-    fireEvent.changeText(screen.getByPlaceholderText("Name"), "Willow Jr");
-    fireEvent.press(screen.getByLabelText("Save"));
+    await fireEvent.changeText(
+      screen.getByPlaceholderText("Name"),
+      "Willow Jr",
+    );
+    await fireEvent.press(screen.getByLabelText("Save"));
 
     await waitFor(() => {
       expect(animalState.animals$.peek().willow.name).toBe("Willow Jr");
@@ -466,16 +483,16 @@ describe("ReptileFormSheet edit mode", () => {
   });
 
   it("prefills and removes an existing feeding schedule", async () => {
-    const screen = renderEdit(
+    const screen = await renderEdit(
       existingAnimal({
         feedingSchedule: { frequency: "custom", days: 12 },
       }),
     );
 
     expect(screen.getByDisplayValue("12")).toBeTruthy();
-    fireEvent.press(screen.getByLabelText("Use feeding schedule"));
+    await fireEvent.press(screen.getByLabelText("Use feeding schedule"));
     expect(screen.queryByLabelText("Feeding schedule: Frequency")).toBeNull();
-    fireEvent.press(screen.getByLabelText("Save"));
+    await fireEvent.press(screen.getByLabelText("Save"));
 
     await waitFor(() => {
       expect(
@@ -485,10 +502,10 @@ describe("ReptileFormSheet edit mode", () => {
   });
 
   it("clears the birth date when the keeper turns it off", async () => {
-    const screen = renderEdit(existingAnimal());
+    const screen = await renderEdit(existingAnimal());
 
-    fireEvent.press(screen.getByLabelText("Known birth date"));
-    fireEvent.press(screen.getByLabelText("Save"));
+    await fireEvent.press(screen.getByLabelText("Known birth date"));
+    await fireEvent.press(screen.getByLabelText("Save"));
 
     await waitFor(() => {
       expect(animalState.animals$.peek().willow.birthDate).toBeUndefined();
@@ -496,12 +513,15 @@ describe("ReptileFormSheet edit mode", () => {
   });
 
   it("leaves a missing acquired date missing rather than stamping today", async () => {
-    const screen = renderEdit(
+    const screen = await renderEdit(
       existingAnimal({ acquiredDate: undefined, birthDate: undefined }),
     );
 
-    fireEvent.changeText(screen.getByPlaceholderText("Name"), "Willow Jr");
-    fireEvent.press(screen.getByLabelText("Save"));
+    await fireEvent.changeText(
+      screen.getByPlaceholderText("Name"),
+      "Willow Jr",
+    );
+    await fireEvent.press(screen.getByLabelText("Save"));
 
     await waitFor(() => {
       expect(animalState.animals$.peek().willow.name).toBe("Willow Jr");
@@ -510,13 +530,13 @@ describe("ReptileFormSheet edit mode", () => {
   });
 
   it("removes an existing photo and deletes the managed file", async () => {
-    const screen = renderEdit(existingAnimal({ photo: EXISTING_PHOTO }));
+    const screen = await renderEdit(existingAnimal({ photo: EXISTING_PHOTO }));
     expect(screen.getByLabelText("Change photo")).toBeTruthy();
 
-    fireEvent.press(screen.getByLabelText("Remove photo"));
+    await fireEvent.press(screen.getByLabelText("Remove photo"));
     expect(screen.getByLabelText("Add photo")).toBeTruthy();
 
-    fireEvent.press(screen.getByLabelText("Save"));
+    await fireEvent.press(screen.getByLabelText("Save"));
 
     await waitFor(() => {
       expect(animalState.animals$.peek().willow.photo).toBeUndefined();
@@ -526,9 +546,9 @@ describe("ReptileFormSheet edit mode", () => {
   });
 
   it("keeps an untouched photo without reimporting or deleting it", async () => {
-    const screen = renderEdit(existingAnimal({ photo: EXISTING_PHOTO }));
+    const screen = await renderEdit(existingAnimal({ photo: EXISTING_PHOTO }));
 
-    fireEvent.press(screen.getByLabelText("Save"));
+    await fireEvent.press(screen.getByLabelText("Save"));
 
     await waitFor(() => {
       expect(router.back).toHaveBeenCalledTimes(1);
@@ -539,14 +559,14 @@ describe("ReptileFormSheet edit mode", () => {
   });
 
   it("imports a replacement photo and deletes the one it replaced", async () => {
-    const screen = renderEdit(existingAnimal({ photo: EXISTING_PHOTO }));
+    const screen = await renderEdit(existingAnimal({ photo: EXISTING_PHOTO }));
 
-    fireEvent.press(screen.getByLabelText("Change photo"));
+    await fireEvent.press(screen.getByLabelText("Change photo"));
     await waitFor(() => {
       expect(mockLaunchImageLibraryAsync).toHaveBeenCalledTimes(1);
     });
 
-    fireEvent.press(screen.getByLabelText("Save"));
+    await fireEvent.press(screen.getByLabelText("Save"));
 
     await waitFor(() => {
       expect(animalState.animals$.peek().willow.photo).toBe(MANAGED_PHOTO);

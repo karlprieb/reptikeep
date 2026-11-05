@@ -147,7 +147,8 @@ export function WeightTrendChart({
               pointSize: SYMBOL_AREA,
             }}
             modifiers={[
-              frame({ maxWidth: Infinity, height: PLOT_HEIGHT }),
+              frame({ height: PLOT_HEIGHT }),
+              frame({ maxWidth: Infinity }),
               padding({ vertical: Spacing.xs }),
               dynamicTypeSize({ max: AXIS_TYPE_CEILING }),
               accessibilityElement("ignore"),

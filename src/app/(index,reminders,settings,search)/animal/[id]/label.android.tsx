@@ -253,8 +253,6 @@ export default function AnimalLabelScreen() {
         onLayout={(event) => setTopBarHeight(event.nativeEvent.layout.height)}
       >
         <StatusBar
-          translucent
-          backgroundColor="transparent"
           barStyle={scheme === "dark" ? "light-content" : "dark-content"}
         />
         <Animated.View

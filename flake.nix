@@ -17,14 +17,15 @@
 
         isDarwin = pkgs.stdenv.isDarwin;
 
+        node = pkgs.nodejs_24;
         androidAbi = if pkgs.stdenv.hostPlatform.isAarch64 then "arm64-v8a" else "x86_64";
         androidApiLevel = "35";
         avdName = "ReptiKeep_API_${androidApiLevel}";
         avdDevice = "pixel_6";
 
         androidComposition = pkgs.androidenv.composeAndroidPackages {
-          platformVersions = [ "35" "36" ];
-          buildToolsVersions = [ "35.0.0" "36.0.0" ];
+          platformVersions = [ "35" "36" "37" ];
+          buildToolsVersions = [ "35.0.0" "36.0.0" "37.0.0" ];
           includeEmulator = true;
           includeNDK = true;
           ndkVersions = [ "27.1.12297006" ];
@@ -37,8 +38,8 @@
         androidSdk = androidComposition.androidsdk;
 
         androidSdkCi = (pkgs.androidenv.composeAndroidPackages {
-          platformVersions = [ "35" "36" ];
-          buildToolsVersions = [ "35.0.0" "36.0.0" ];
+          platformVersions = [ "35" "36" "37" ];
+          buildToolsVersions = [ "35.0.0" "36.0.0" "37.0.0" ];
           includeNDK = true;
           ndkVersions = [ "27.1.12297006" ];
           cmakeVersions = [ "3.22.1" ];
@@ -78,7 +79,7 @@
       {
         devShells.js-ci = pkgs.mkShellNoCC {
           buildInputs = with pkgs; [
-            nodejs_22
+            node
           ];
 
           DO_NOT_TRACK = "1";
@@ -86,7 +87,7 @@
 
         devShells.ios-ci = pkgs.mkShellNoCC {
           buildInputs = with pkgs; [
-            nodejs_22
+            node
             cocoapods
             fastlane
           ];
@@ -96,7 +97,7 @@
 
         devShells.android-ci = pkgs.mkShellNoCC {
           buildInputs = with pkgs; [
-            nodejs_22
+            node
             jdk17
             androidSdkCi
             fastlane
@@ -111,12 +112,15 @@
 
         devShells.default = pkgs.mkShellNoCC {
           buildInputs = with pkgs; [
-            nodejs_22
+            node
             watchman
             jdk17
             androidSdk
             androidAvd
+            vtsls
             typescript-language-server
+            vscode-langservers-extracted
+            yaml-language-server
             maestro
             fastlane
           ]

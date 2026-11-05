@@ -73,8 +73,8 @@
           "cameraPermission": "Take a picture of a document to attach it to a reptile."
         }
       ],
-      "./plugins/with-ios-scene-delegate",
       "./plugins/with-no-push-entitlement",
+      "./plugins/with-android-back-dispatch",
       "./plugins/with-dev-launcher-script-always-run",
       "./plugins/with-android-release-signing",
       [

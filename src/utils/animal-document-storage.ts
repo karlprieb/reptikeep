@@ -121,7 +121,7 @@ function measureSource(uri: string): number {
 function readHead(uri: string): Uint8Array {
   const handle = new File(uri).open(FileMode.ReadOnly);
   try {
-    return handle.readBytes(HEAD_BYTES);
+    return handle.readBytesSync(HEAD_BYTES);
   } finally {
     handle.close();
   }

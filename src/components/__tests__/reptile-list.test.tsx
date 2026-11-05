@@ -29,8 +29,8 @@ beforeEach(() => {
 });
 
 describe("ReptileList", () => {
-  it("renders the empty state when there are no animals", () => {
-    const { getByLabelText, queryByText } = render(
+  it("renders the empty state when there are no animals", async () => {
+    const { getByLabelText, queryByText } = await render(
       <ReptileList animals={[]} onAddPress={jest.fn()} />,
     );
 
@@ -38,14 +38,14 @@ describe("ReptileList", () => {
     expect(queryByText("Buddy")).toBeNull();
   });
 
-  it("renders exactly one name entry per animal", () => {
+  it("renders exactly one name entry per animal", async () => {
     const animals: Animal[] = [
       makeAnimal({ id: "1", name: "Buddy" }),
       makeAnimal({ id: "2", name: "Iggy" }),
       makeAnimal({ id: "3", name: "Rex" }),
     ];
 
-    const { getByText, getAllByText } = render(
+    const { getByText, getAllByText } = await render(
       <ReptileList animals={animals} onAddPress={jest.fn()} />,
     );
 
@@ -55,10 +55,10 @@ describe("ReptileList", () => {
     expect(getAllByText(/^(Buddy|Iggy|Rex)$/)).toHaveLength(3);
   });
 
-  it("renders the dense row list instead of cards when viewMode is list", () => {
+  it("renders the dense row list instead of cards when viewMode is list", async () => {
     const animals: Animal[] = [makeAnimal({ id: "1", name: "Rex" })];
 
-    const { getByText, queryByText } = render(
+    const { getByText, queryByText } = await render(
       <ReptileList animals={animals} viewMode="list" onAddPress={jest.fn()} />,
     );
 
@@ -67,27 +67,27 @@ describe("ReptileList", () => {
     expect(queryByText("Leopard gecko")).toBeNull();
   });
 
-  it("invokes onAddPress from the empty-list branch", () => {
+  it("invokes onAddPress from the empty-list branch", async () => {
     const onAddPress = jest.fn();
-    const { getByLabelText } = render(
+    const { getByLabelText } = await render(
       <ReptileList animals={[]} onAddPress={onAddPress} />,
     );
 
-    fireEvent.press(getByLabelText("Add reptile"));
+    await fireEvent.press(getByLabelText("Add reptile"));
     expect(onAddPress).toHaveBeenCalledTimes(1);
   });
 
-  it("invokes onAddPress directly on ReptileEmptyState", () => {
+  it("invokes onAddPress directly on ReptileEmptyState", async () => {
     const onAddPress = jest.fn();
-    const { getByLabelText } = render(
+    const { getByLabelText } = await render(
       <ReptileEmptyState onAddPress={onAddPress} />,
     );
 
-    fireEvent.press(getByLabelText("Add reptile"));
+    await fireEvent.press(getByLabelText("Add reptile"));
     expect(onAddPress).toHaveBeenCalledTimes(1);
   });
 
-  it("renders each animal's card with name, common name, and sex symbol", () => {
+  it("renders each animal's card with name, common name, and sex symbol", async () => {
     const animals: Animal[] = [
       makeAnimal({
         id: "1",
@@ -104,7 +104,7 @@ describe("ReptileList", () => {
       }),
     ];
 
-    const { getByText, queryByText } = render(
+    const { getByText, queryByText } = await render(
       <ReptileList animals={animals} onAddPress={jest.fn()} />,
     );
 
@@ -119,12 +119,12 @@ describe("ReptileList", () => {
     expect(queryByText("Iguana iguana")).toBeNull();
   });
 
-  it("renders no sex symbol when sex is unknown", () => {
+  it("renders no sex symbol when sex is unknown", async () => {
     const animals: Animal[] = [
       makeAnimal({ id: "1", name: "Rex", sex: "unknown" }),
     ];
 
-    const { queryByText } = render(
+    const { queryByText } = await render(
       <ReptileList animals={animals} onAddPress={jest.fn()} />,
     );
 
@@ -132,21 +132,21 @@ describe("ReptileList", () => {
     expect(queryByText("♀")).toBeNull();
   });
 
-  it("says so on the card when an animal has never been fed", () => {
+  it("says so on the card when an animal has never been fed", async () => {
     const animals: Animal[] = [makeAnimal({ id: "1", name: "Rex" })];
 
-    const { getByText } = render(
+    const { getByText } = await render(
       <ReptileList animals={animals} onAddPress={jest.fn()} />,
     );
 
     expect(getByText("Never fed")).toBeTruthy();
   });
 
-  it("dates the last feeding on the card when one is known", () => {
+  it("dates the last feeding on the card when one is known", async () => {
     jest.useFakeTimers().setSystemTime(new Date("2026-03-10T12:00:00.000Z"));
     const animals: Animal[] = [makeAnimal({ id: "1", name: "Rex" })];
 
-    const { getByText } = render(
+    const { getByText } = await render(
       <ReptileList
         animals={animals}
         lastFed={{ "1": "2026-03-07T12:00:00.000Z" }}
@@ -158,7 +158,7 @@ describe("ReptileList", () => {
     jest.useRealTimers();
   });
 
-  it("shows how many days a scheduled animal is overdue", () => {
+  it("shows how many days a scheduled animal is overdue", async () => {
     jest.useFakeTimers().setSystemTime(new Date("2026-03-10T12:00:00.000Z"));
     const animals: Animal[] = [
       makeAnimal({
@@ -168,7 +168,7 @@ describe("ReptileList", () => {
       }),
     ];
 
-    const screen = render(
+    const screen = await render(
       <ReptileList
         animals={animals}
         lastFed={{ "1": "2026-03-01T12:00:00.000Z" }}
@@ -186,12 +186,12 @@ describe("ReptileList", () => {
     jest.useRealTimers();
   });
 
-  it("stays at one status line while the collection water cadence is met", () => {
+  it("stays at one status line while the collection water cadence is met", async () => {
     jest.useFakeTimers().setSystemTime(new Date("2026-03-10T12:00:00.000Z"));
     careSchedules$.water.set({ frequency: "weekly" });
     const animals: Animal[] = [makeAnimal({ id: "1", name: "Rex" })];
 
-    const screen = render(
+    const screen = await render(
       <ReptileList
         animals={animals}
         lastWaterChange={{ "1": "2026-03-08T12:00:00.000Z" }}
@@ -203,12 +203,12 @@ describe("ReptileList", () => {
     jest.useRealTimers();
   });
 
-  it("shows one overdue warning once the collection water cadence is missed", () => {
+  it("shows one overdue warning once the collection water cadence is missed", async () => {
     jest.useFakeTimers().setSystemTime(new Date("2026-03-10T12:00:00.000Z"));
     careSchedules$.water.set({ frequency: "weekly" });
     const animals: Animal[] = [makeAnimal({ id: "1", name: "Rex" })];
 
-    const screen = render(
+    const screen = await render(
       <ReptileList
         animals={animals}
         lastWaterChange={{ "1": "2026-03-01T12:00:00.000Z" }}
@@ -226,7 +226,7 @@ describe("ReptileList", () => {
     jest.useRealTimers();
   });
 
-  it("combines feed and water into one overdue warning", () => {
+  it("combines feed and water into one overdue warning", async () => {
     jest.useFakeTimers().setSystemTime(new Date("2026-03-10T12:00:00.000Z"));
     careSchedules$.water.set({ frequency: "weekly" });
     const animals: Animal[] = [
@@ -237,7 +237,7 @@ describe("ReptileList", () => {
       }),
     ];
 
-    const screen = render(
+    const screen = await render(
       <ReptileList
         animals={animals}
         lastFed={{ "1": "2026-03-01T12:00:00.000Z" }}
@@ -263,7 +263,7 @@ describe("ReptileList", () => {
     jest.useRealTimers();
   });
 
-  it("honors an animal's own water cadence over the collection's", () => {
+  it("honors an animal's own water cadence over the collection's", async () => {
     jest.useFakeTimers().setSystemTime(new Date("2026-03-10T12:00:00.000Z"));
     careSchedules$.water.set({ frequency: "monthly" });
     const animals: Animal[] = [
@@ -279,7 +279,7 @@ describe("ReptileList", () => {
       }),
     ];
 
-    const screen = render(
+    const screen = await render(
       <ReptileList
         animals={animals}
         lastWaterChange={{
@@ -296,22 +296,22 @@ describe("ReptileList", () => {
     jest.useRealTimers();
   });
 
-  it("navigates to the animal detail route when a card is tapped", () => {
+  it("navigates to the animal detail route when a card is tapped", async () => {
     const animals: Animal[] = [makeAnimal({ id: "abc", name: "Buddy" })];
 
-    const { getByRole } = render(
+    const { getByRole } = await render(
       <ReptileList animals={animals} onAddPress={jest.fn()} />,
     );
 
-    fireEvent.press(getByRole("button"));
+    await fireEvent.press(getByRole("button"));
     expect(router.push).toHaveBeenCalledWith("/animal/abc");
   });
 });
 
 describe("AnimalCard", () => {
-  it("invokes onPress when tapped", () => {
+  it("invokes onPress when tapped", async () => {
     const onPress = jest.fn();
-    const { getByRole } = render(
+    const { getByRole } = await render(
       <AnimalCard
         animal={makeAnimal({ id: "1", name: "Buddy" })}
         width={200}
@@ -321,12 +321,12 @@ describe("AnimalCard", () => {
       />,
     );
 
-    fireEvent.press(getByRole("button"));
+    await fireEvent.press(getByRole("button"));
     expect(onPress).toHaveBeenCalledTimes(1);
   });
 
-  it("exposes the card as a button labelled with the animal's details", () => {
-    const { getByRole } = render(
+  it("exposes the card as a button labelled with the animal's details", async () => {
+    const { getByRole } = await render(
       <AnimalCard
         animal={makeAnimal({
           id: "1",

@@ -206,7 +206,10 @@ function ReminderRow({
     >
       <VStack
         spacing={0}
-        modifiers={[frame({ maxWidth: Infinity, height: rowHeight })]}
+        modifiers={[
+          frame({ height: rowHeight }),
+          frame({ maxWidth: Infinity }),
+        ]}
       >
         {divided ? (
           <Divider modifiers={[padding({ leading: textInset })]} />

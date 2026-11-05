@@ -38,18 +38,18 @@ afterEach(() => {
 });
 
 describe("AnimalDetailScreen actions menu", () => {
-  it("opens the edit sheet for this animal", () => {
-    const screen = render(<AnimalDetailScreen />);
+  it("opens the edit sheet for this animal", async () => {
+    const screen = await render(<AnimalDetailScreen />);
 
-    fireEvent.press(screen.getByLabelText("Edit reptile"));
+    await fireEvent.press(screen.getByLabelText("Edit reptile"));
 
     expect(router.push).toHaveBeenCalledWith("/animal/willow/edit");
   });
 
-  it("warns that deletion cannot be undone, and changes nothing unless confirmed", () => {
-    const screen = render(<AnimalDetailScreen />);
+  it("warns that deletion cannot be undone, and changes nothing unless confirmed", async () => {
+    const screen = await render(<AnimalDetailScreen />);
 
-    fireEvent.press(screen.getByLabelText("Delete reptile"));
+    await fireEvent.press(screen.getByLabelText("Delete reptile"));
 
     expect(Alert.alert).toHaveBeenCalledWith(
       "Delete Willow?",
@@ -58,22 +58,22 @@ describe("AnimalDetailScreen actions menu", () => {
     );
 
     pressAlertButton("Cancel");
-    screen.unmount();
+    await screen.unmount();
 
     expect(animals$.peek().willow).toBeDefined();
     expect(router.back).not.toHaveBeenCalled();
   });
 
   it("deletes only once the screen has left, so the pop never shows not-found", async () => {
-    const screen = render(<AnimalDetailScreen />);
-    fireEvent.press(screen.getByLabelText("Delete reptile"));
+    const screen = await render(<AnimalDetailScreen />);
+    await fireEvent.press(screen.getByLabelText("Delete reptile"));
 
     pressAlertButton("Delete");
 
     expect(router.back).toHaveBeenCalledTimes(1);
     expect(animals$.peek().willow).toBeDefined();
 
-    screen.unmount();
+    await screen.unmount();
 
     await waitFor(() => {
       expect(animals$.peek().willow).toBeUndefined();

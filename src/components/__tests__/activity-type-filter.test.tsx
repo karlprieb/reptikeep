@@ -24,10 +24,10 @@ describe("presentTypes", () => {
 });
 
 describe("ActivityTypeFilter", () => {
-  it("selects a type and clears it by pressing the selected chip again", () => {
+  it("selects a type and clears it by pressing the selected chip again", async () => {
     const onSelect = jest.fn();
 
-    const { rerender } = render(
+    const { rerender } = await render(
       <ActivityTypeFilter
         types={["feed", "shed"]}
         selected={null}
@@ -35,10 +35,10 @@ describe("ActivityTypeFilter", () => {
       />,
     );
 
-    fireEvent.press(screen.getByLabelText("Feed"));
+    await fireEvent.press(screen.getByLabelText("Feed"));
     expect(onSelect).toHaveBeenCalledWith("feed");
 
-    rerender(
+    await rerender(
       <ActivityTypeFilter
         types={["feed", "shed"]}
         selected="feed"
@@ -46,14 +46,14 @@ describe("ActivityTypeFilter", () => {
       />,
     );
 
-    fireEvent.press(screen.getByLabelText("Feed"));
+    await fireEvent.press(screen.getByLabelText("Feed"));
     expect(onSelect).toHaveBeenLastCalledWith(null);
   });
 
-  it("offers an All chip that clears the filter", () => {
+  it("offers an All chip that clears the filter", async () => {
     const onSelect = jest.fn();
 
-    render(
+    await render(
       <ActivityTypeFilter
         types={["feed", "shed"]}
         selected="shed"
@@ -61,7 +61,7 @@ describe("ActivityTypeFilter", () => {
       />,
     );
 
-    fireEvent.press(screen.getByLabelText("All"));
+    await fireEvent.press(screen.getByLabelText("All"));
     expect(onSelect).toHaveBeenCalledWith(null);
   });
 });

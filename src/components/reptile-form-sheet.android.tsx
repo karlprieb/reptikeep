@@ -629,8 +629,6 @@ export function ReptileFormSheet({ animal }: ReptileFormSheetProps) {
       behavior="padding"
     >
       <StatusBar
-        translucent
-        backgroundColor="transparent"
         barStyle={scheme === "dark" ? "light-content" : "dark-content"}
       />
 

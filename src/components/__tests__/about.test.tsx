@@ -19,16 +19,16 @@ beforeEach(() => {
 });
 
 describe("About", () => {
-  it("opens from Settings", () => {
-    const screen = render(<SettingsScreen />);
+  it("opens from Settings", async () => {
+    const screen = await render(<SettingsScreen />);
 
-    fireEvent.press(screen.getByLabelText("About"));
+    await fireEvent.press(screen.getByLabelText("About"));
 
     expect(router.push).toHaveBeenCalledWith("/about");
   });
 
-  it("shows the app identity and configured version", () => {
-    const screen = render(<AboutScreen />);
+  it("shows the app identity and configured version", async () => {
+    const screen = await render(<AboutScreen />);
 
     expect(screen.getByText("ReptiKeep")).toBeTruthy();
     expect(screen.getByText("Feed. Shed. Repeat.")).toBeTruthy();
@@ -36,10 +36,10 @@ describe("About", () => {
     expect(screen.getByLabelText("ReptiKeep app logo")).toBeTruthy();
   });
 
-  it("opens the repository with the system URL handler", () => {
-    const screen = render(<AboutScreen />);
+  it("opens the repository with the system URL handler", async () => {
+    const screen = await render(<AboutScreen />);
 
-    fireEvent.press(screen.getByLabelText("GitHub repository"));
+    await fireEvent.press(screen.getByLabelText("GitHub repository"));
 
     expect(Linking.openURL).toHaveBeenCalledWith(
       "https://github.com/karlprieb/reptikeep",

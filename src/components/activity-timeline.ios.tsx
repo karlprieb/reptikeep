@@ -205,7 +205,10 @@ function ActivityRow({
     >
       <VStack
         spacing={0}
-        modifiers={[frame({ maxWidth: Infinity, height: rowHeight })]}
+        modifiers={[
+          frame({ height: rowHeight }),
+          frame({ maxWidth: Infinity }),
+        ]}
       >
         {divided ? (
           <Divider modifiers={[padding({ leading: textInset })]} />
@@ -327,7 +330,8 @@ function SeeAllRow({
     <VStack
       spacing={0}
       modifiers={[
-        frame({ maxWidth: Infinity, height: rowHeight }),
+        frame({ height: rowHeight }),
+        frame({ maxWidth: Infinity }),
         listRowInsets({ top: 0, leading: 0, bottom: 0, trailing: 0 }),
         listRowBackground(theme.surface),
         listRowSeparator("hidden"),

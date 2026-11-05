@@ -7,16 +7,16 @@ import { defaults$ } from "@/state/logging-defaults";
 
 const ANIMAL_ID = "animal-1";
 
-beforeEach(() => {
-  act(() => {
+beforeEach(async () => {
+  await act(() => {
     defecationStore.clear();
     defaults$.poopType.set("poop");
   });
 });
 
 describe("AddDefecationSheet", () => {
-  it("renders the default fields", () => {
-    const screen = render(
+  it("renders the default fields", async () => {
+    const screen = await render(
       <AddDefecationSheet animalId={ANIMAL_ID} animalName="Willow" />,
     );
 
@@ -27,12 +27,12 @@ describe("AddDefecationSheet", () => {
     expect(screen.getByPlaceholderText("Add an observation")).toBeTruthy();
   });
 
-  it("saves an untouched defecation with the default type and no note", () => {
-    const screen = render(
+  it("saves an untouched defecation with the default type and no note", async () => {
+    const screen = await render(
       <AddDefecationSheet animalId={ANIMAL_ID} animalName="Willow" />,
     );
 
-    fireEvent.press(screen.getByLabelText("Save"));
+    await fireEvent.press(screen.getByLabelText("Save"));
 
     const [defecation] = Object.values(defecationStore.$.peek());
     expect(defecation).toMatchObject({
@@ -44,18 +44,22 @@ describe("AddDefecationSheet", () => {
     expect(router.back).toHaveBeenCalledTimes(1);
   });
 
-  it("saves the selected urate type, issues, and omits a whitespace-only note", () => {
-    const screen = render(
+  it("saves the selected urate type, issues, and omits a whitespace-only note", async () => {
+    const screen = await render(
       <AddDefecationSheet animalId={ANIMAL_ID} animalName="Willow" />,
     );
 
-    fireEvent(screen.getByTestId("expo-ui-picker"), "selectionChange", "urate");
-    fireEvent.press(screen.getByLabelText("Issues noticed"));
-    fireEvent.changeText(
+    await fireEvent(
+      screen.getByTestId("expo-ui-picker"),
+      "selectionChange",
+      "urate",
+    );
+    await fireEvent.press(screen.getByLabelText("Issues noticed"));
+    await fireEvent.changeText(
       screen.getByPlaceholderText("Add an observation"),
       "   ",
     );
-    fireEvent.press(screen.getByLabelText("Save"));
+    await fireEvent.press(screen.getByLabelText("Save"));
 
     const [defecation] = Object.values(defecationStore.$.peek());
     expect(defecation).toMatchObject({

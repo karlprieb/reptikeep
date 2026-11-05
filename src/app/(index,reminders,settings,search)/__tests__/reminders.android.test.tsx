@@ -24,13 +24,12 @@ function makeAnimal(
 }
 
 async function renderScreen() {
-  const screen = render(<RemindersScreen />);
-  await act(async () => undefined);
+  const screen = await render(<RemindersScreen />);
   return screen;
 }
 
-beforeEach(() => {
-  act(() => {
+beforeEach(async () => {
+  await act(async () => {
     clearAnimals();
     habitatStore.clear();
     feedingStore.clear();
@@ -42,11 +41,13 @@ beforeEach(() => {
 
 describe("RemindersScreen row navigation", () => {
   it("opens the habitat log when a row is tapped", async () => {
-    act(() => addAnimal(makeAnimal({ id: ANIMAL_ID, name: "Buddy" })));
+    await act(async () =>
+      addAnimal(makeAnimal({ id: ANIMAL_ID, name: "Buddy" })),
+    );
 
     const { getByLabelText } = await renderScreen();
 
-    fireEvent.press(getByLabelText(/^Buddy,/));
+    await fireEvent.press(getByLabelText(/^Buddy,/));
 
     expect(router.push).toHaveBeenCalledWith(
       `/animal/${ANIMAL_ID}/habitat?routine=water`,
@@ -54,11 +55,13 @@ describe("RemindersScreen row navigation", () => {
   });
 
   it("opens the reptile's edit screen from the leading swipe action", async () => {
-    act(() => addAnimal(makeAnimal({ id: ANIMAL_ID, name: "Buddy" })));
+    await act(async () =>
+      addAnimal(makeAnimal({ id: ANIMAL_ID, name: "Buddy" })),
+    );
 
     const { getByText } = await renderScreen();
 
-    fireEvent.press(getByText("Schedule"));
+    await fireEvent.press(getByText("Schedule"));
 
     expect(router.push).toHaveBeenCalledWith(`/animal/${ANIMAL_ID}/edit`);
   });
@@ -66,13 +69,13 @@ describe("RemindersScreen row navigation", () => {
 
 describe("RemindersScreen mark done", () => {
   it("logs a water change for the animal", async () => {
-    act(() => addAnimal(makeAnimal({ id: ANIMAL_ID, name: "Buddy" })));
+    await act(async () =>
+      addAnimal(makeAnimal({ id: ANIMAL_ID, name: "Buddy" })),
+    );
 
     const { getByLabelText } = await renderScreen();
 
-    act(() => {
-      fireEvent.press(getByLabelText(/Water changed for Buddy/));
-    });
+    await fireEvent.press(getByLabelText(/Water changed for Buddy/));
 
     const logged = Object.values(habitatStore.$.peek());
     expect(logged).toHaveLength(1);
@@ -80,7 +83,7 @@ describe("RemindersScreen mark done", () => {
   });
 
   it("logs a feeding for the animal", async () => {
-    act(() =>
+    await act(() =>
       addAnimal(
         makeAnimal({
           id: ANIMAL_ID,
@@ -93,9 +96,7 @@ describe("RemindersScreen mark done", () => {
 
     const { getByLabelText } = await renderScreen();
 
-    act(() => {
-      fireEvent.press(getByLabelText(/Fed Buddy/));
-    });
+    await fireEvent.press(getByLabelText(/Fed Buddy/));
 
     const logged = Object.values(feedingStore.$.peek());
     expect(logged).toHaveLength(1);
@@ -103,16 +104,14 @@ describe("RemindersScreen mark done", () => {
   });
 
   it("shows an alert instead of logging again the same day", async () => {
-    act(() => addAnimal(makeAnimal({ id: ANIMAL_ID, name: "Buddy" })));
+    await act(async () =>
+      addAnimal(makeAnimal({ id: ANIMAL_ID, name: "Buddy" })),
+    );
 
     const { getByLabelText, getByText } = await renderScreen();
 
-    act(() => {
-      fireEvent.press(getByLabelText(/Water changed for Buddy/));
-    });
-    act(() => {
-      fireEvent.press(getByLabelText(/Water changed for Buddy/));
-    });
+    await fireEvent.press(getByLabelText(/Water changed for Buddy/));
+    await fireEvent.press(getByLabelText(/Water changed for Buddy/));
 
     expect(getByText("Already done today")).toBeTruthy();
     expect(
@@ -120,9 +119,7 @@ describe("RemindersScreen mark done", () => {
     ).toBeTruthy();
     expect(Object.values(habitatStore.$.peek())).toHaveLength(1);
 
-    act(() => {
-      fireEvent.press(getByText("Got it"));
-    });
+    await fireEvent.press(getByText("Got it"));
 
     expect(() => getByText("Already done today")).toThrow();
   });
@@ -130,13 +127,13 @@ describe("RemindersScreen mark done", () => {
 
 describe("RemindersScreen mute", () => {
   it("turns off the routine reminder from the trailing swipe action", async () => {
-    act(() => addAnimal(makeAnimal({ id: ANIMAL_ID, name: "Buddy" })));
+    await act(async () =>
+      addAnimal(makeAnimal({ id: ANIMAL_ID, name: "Buddy" })),
+    );
 
     const { getByText } = await renderScreen();
 
-    act(() => {
-      fireEvent.press(getByText("Turn off"));
-    });
+    await fireEvent.press(getByText("Turn off"));
 
     expect(animals$.peek()[ANIMAL_ID]?.reminders?.water).toBe(false);
   });
@@ -144,7 +141,9 @@ describe("RemindersScreen mute", () => {
 
 describe("RemindersScreen permission grant", () => {
   it("rebuilds the notification schedule once permission is granted", async () => {
-    act(() => addAnimal(makeAnimal({ id: ANIMAL_ID, name: "Buddy" })));
+    await act(async () =>
+      addAnimal(makeAnimal({ id: ANIMAL_ID, name: "Buddy" })),
+    );
 
     jest
       .spyOn(Notifications, "getPermissionsAsync")
@@ -158,7 +157,7 @@ describe("RemindersScreen permission grant", () => {
 
     const { getByLabelText } = await renderScreen();
 
-    fireEvent.press(getByLabelText(/Turn on notifications/));
+    await fireEvent.press(getByLabelText(/Turn on notifications/));
 
     await waitFor(() => expect(rescheduleSpy).toHaveBeenCalled());
   });

@@ -6,13 +6,13 @@ import { habitatStore, type HabitatActivity } from "@/state/habitat";
 
 const ANIMAL_ID = "animal-1";
 
-beforeEach(() => {
-  act(() => habitatStore.clear());
+beforeEach(async () => {
+  await act(() => habitatStore.clear());
 });
 
 describe("AddHabitatSheet", () => {
-  it("renders the default fields", () => {
-    const screen = render(
+  it("renders the default fields", async () => {
+    const screen = await render(
       <AddHabitatSheet animalId={ANIMAL_ID} animalName="Willow" />,
     );
 
@@ -22,12 +22,12 @@ describe("AddHabitatSheet", () => {
     expect(screen.getByPlaceholderText("Add an observation")).toBeTruthy();
   });
 
-  it("saves an untouched record as a water change only", () => {
-    const screen = render(
+  it("saves an untouched record as a water change only", async () => {
+    const screen = await render(
       <AddHabitatSheet animalId={ANIMAL_ID} animalName="Willow" />,
     );
 
-    fireEvent.press(screen.getByLabelText("Save"));
+    await fireEvent.press(screen.getByLabelText("Save"));
 
     const [habitat] = Object.values(habitatStore.$.peek());
     expect(habitat).toMatchObject({
@@ -39,8 +39,8 @@ describe("AddHabitatSheet", () => {
     expect(router.back).toHaveBeenCalledTimes(1);
   });
 
-  it("opens on the cleaning routine when a reminder sent it there", () => {
-    const screen = render(
+  it("opens on the cleaning routine when a reminder sent it there", async () => {
+    const screen = await render(
       <AddHabitatSheet
         animalId={ANIMAL_ID}
         animalName="Willow"
@@ -48,7 +48,7 @@ describe("AddHabitatSheet", () => {
       />,
     );
 
-    fireEvent.press(screen.getByLabelText("Save"));
+    await fireEvent.press(screen.getByLabelText("Save"));
 
     expect(Object.values(habitatStore.$.peek())[0]).toMatchObject({
       water: false,
@@ -56,8 +56,8 @@ describe("AddHabitatSheet", () => {
     });
   });
 
-  it("opens on the water routine when a reminder sent it there", () => {
-    const screen = render(
+  it("opens on the water routine when a reminder sent it there", async () => {
+    const screen = await render(
       <AddHabitatSheet
         animalId={ANIMAL_ID}
         animalName="Willow"
@@ -65,7 +65,7 @@ describe("AddHabitatSheet", () => {
       />,
     );
 
-    fireEvent.press(screen.getByLabelText("Save"));
+    await fireEvent.press(screen.getByLabelText("Save"));
 
     expect(Object.values(habitatStore.$.peek())[0]).toMatchObject({
       water: true,
@@ -73,13 +73,13 @@ describe("AddHabitatSheet", () => {
     });
   });
 
-  it("saves both toggles on together as one record", () => {
-    const screen = render(
+  it("saves both toggles on together as one record", async () => {
+    const screen = await render(
       <AddHabitatSheet animalId={ANIMAL_ID} animalName="Willow" />,
     );
 
-    fireEvent.press(screen.getByLabelText("Enclosure cleaned"));
-    fireEvent.press(screen.getByLabelText("Save"));
+    await fireEvent.press(screen.getByLabelText("Enclosure cleaned"));
+    await fireEvent.press(screen.getByLabelText("Save"));
 
     const [habitat] = Object.values(habitatStore.$.peek());
     expect(habitat).toMatchObject({
@@ -89,15 +89,15 @@ describe("AddHabitatSheet", () => {
     });
   });
 
-  it("saves cleaning alone with water turned off, and says each switch counts", () => {
-    const screen = render(
+  it("saves cleaning alone with water turned off, and says each switch counts", async () => {
+    const screen = await render(
       <AddHabitatSheet animalId={ANIMAL_ID} animalName="Willow" />,
     );
 
-    fireEvent.press(screen.getByLabelText("Water changed"));
-    fireEvent.press(screen.getByLabelText("Enclosure cleaned"));
+    await fireEvent.press(screen.getByLabelText("Water changed"));
+    await fireEvent.press(screen.getByLabelText("Enclosure cleaned"));
     expect(screen.getByText(/counts toward its own schedule/)).toBeTruthy();
-    fireEvent.press(screen.getByLabelText("Save"));
+    await fireEvent.press(screen.getByLabelText("Save"));
 
     const [habitat] = Object.values(habitatStore.$.peek());
     expect(habitat).toMatchObject({
@@ -107,19 +107,19 @@ describe("AddHabitatSheet", () => {
     });
   });
 
-  it("saves both toggles off as a note-only record", () => {
-    const screen = render(
+  it("saves both toggles off as a note-only record", async () => {
+    const screen = await render(
       <AddHabitatSheet animalId={ANIMAL_ID} animalName="Willow" />,
     );
 
-    fireEvent.press(screen.getByLabelText("Water changed"));
+    await fireEvent.press(screen.getByLabelText("Water changed"));
     expect(screen.getByText(/no schedule counts this/)).toBeTruthy();
 
-    fireEvent.changeText(
+    await fireEvent.changeText(
       screen.getByPlaceholderText("Add an observation"),
       " Replaced the substrate ",
     );
-    fireEvent.press(screen.getByLabelText("Save"));
+    await fireEvent.press(screen.getByLabelText("Save"));
 
     const [habitat] = Object.values(habitatStore.$.peek());
     expect(habitat).toMatchObject({
@@ -142,8 +142,8 @@ describe("AddHabitatSheet editing an existing record", () => {
     notes: "Scrubbed the glass",
   };
 
-  it("opens on the record's own values, under an editing title", () => {
-    const screen = render(
+  it("opens on the record's own values, under an editing title", async () => {
+    const screen = await render(
       <AddHabitatSheet
         animalId={ANIMAL_ID}
         animalName="Willow"
@@ -161,18 +161,18 @@ describe("AddHabitatSheet editing an existing record", () => {
     ).toEqual({ checked: true });
   });
 
-  it("writes over the record rather than logging a second one", () => {
-    act(() => habitatStore.$.set({ [EXISTING.id]: EXISTING }));
+  it("writes over the record rather than logging a second one", async () => {
+    await act(() => habitatStore.$.set({ [EXISTING.id]: EXISTING }));
 
-    const screen = render(
+    const screen = await render(
       <AddHabitatSheet
         animalId={ANIMAL_ID}
         animalName="Willow"
         activity={EXISTING}
       />,
     );
-    fireEvent.press(screen.getByLabelText("Water changed"));
-    fireEvent.press(screen.getByLabelText("Save"));
+    await fireEvent.press(screen.getByLabelText("Water changed"));
+    await fireEvent.press(screen.getByLabelText("Save"));
 
     const records = Object.values(habitatStore.$.peek());
     expect(records).toHaveLength(1);

@@ -24,7 +24,9 @@ import {
   type StyleProp,
   type ViewStyle,
 } from "react-native";
-import Swipeable from "react-native-gesture-handler/Swipeable";
+import Swipeable, {
+  type SwipeableMethods,
+} from "react-native-gesture-handler/ReanimatedSwipeable";
 import { useTranslation } from "react-i18next";
 
 import { EmptyStateContent } from "@/components/empty-state";
@@ -143,7 +145,7 @@ function ActivityRow({
   edgeToEdge = false,
 }: ActivityRowProps) {
   const { t } = useTranslation();
-  const swipeableRef = useRef<InstanceType<typeof Swipeable>>(null);
+  const swipeableRef = useRef<SwipeableMethods>(null);
   const typeName = t(`activity.type.${entry.type}`);
   const date = formatAbsoluteDate(entry.occurredAt);
   const { detail, flagged } = describeActivity(entry, t, unit);

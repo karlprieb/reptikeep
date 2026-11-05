@@ -32,7 +32,9 @@ import {
   type NativeScrollEvent,
   type NativeSyntheticEvent,
 } from "react-native";
-import Swipeable from "react-native-gesture-handler/Swipeable";
+import Swipeable, {
+  type SwipeableMethods,
+} from "react-native-gesture-handler/ReanimatedSwipeable";
 import { useTranslation } from "react-i18next";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -160,7 +162,7 @@ function ReminderRow({
   onStopReminding,
 }: ReminderRowProps) {
   const { t } = useTranslation();
-  const swipeableRef = useRef<InstanceType<typeof Swipeable>>(null);
+  const swipeableRef = useRef<SwipeableMethods>(null);
   const routine = t(`reminders.routine.${reminder.routine}`);
   const due = formatAbsoluteDate(reminder.dueOn);
   const [alreadyDone, setAlreadyDone] = useState(false);
