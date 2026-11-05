@@ -49,9 +49,9 @@ export default function TabLayout() {
   useNotificationRouting();
   useEffect(startReminderScheduler, []);
   useEffect(() => {
-    const handle = requestIdleCallback(backfillSummaries);
+    const cancel = scheduleIdle(backfillSummaries);
 
-    return () => cancelIdleCallback(handle);
+    return cancel;
   }, []);
 
   return (

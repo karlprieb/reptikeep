@@ -1,5 +1,6 @@
 import { observe } from "@legendapp/state";
 import * as Notifications from "expo-notifications";
+import { AndroidImportance } from "expo-notifications";
 import { AppState } from "react-native";
 
 import i18n from "@/i18n";
@@ -22,7 +23,7 @@ const CARE_CHANNEL_ID = "care-reminders";
 async function ensureCareChannel(): Promise<void> {
   await Notifications.setNotificationChannelAsync(CARE_CHANNEL_ID, {
     name: i18n.t("reminders.channel.name"),
-    importance: Notifications.AndroidImportance.HIGH,
+    importance: AndroidImportance.HIGH,
   });
 }
 
