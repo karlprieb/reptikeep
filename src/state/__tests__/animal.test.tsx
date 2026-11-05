@@ -96,11 +96,11 @@ describe("adding a new key to a Record observable", () => {
     return <Text testID="count">{count}</Text>;
   }
 
-  it("bracket .set() on a new key does NOT notify useSelector subscribers", () => {
+  it("bracket .set() on a new key does NOT notify useSelector subscribers", async () => {
     const items$ = observable<Record<string, Item>>({});
-    const { getByTestId } = render(<Probe source$={items$} />);
+    const { getByTestId } = await render(<Probe source$={items$} />);
 
-    act(() => {
+    await act(() => {
       items$["a1"].set({ id: "a1", name: "Buddy" });
     });
 
@@ -108,11 +108,11 @@ describe("adding a new key to a Record observable", () => {
     expect(items$.peek()).toEqual({ a1: { id: "a1", name: "Buddy" } });
   });
 
-  it("whole-object .set() with a merged copy DOES notify useSelector subscribers", () => {
+  it("whole-object .set() with a merged copy DOES notify useSelector subscribers", async () => {
     const items$ = observable<Record<string, Item>>({});
-    const { getByTestId } = render(<Probe source$={items$} />);
+    const { getByTestId } = await render(<Probe source$={items$} />);
 
-    act(() => {
+    await act(() => {
       items$.set({ ...items$.peek(), a1: { id: "a1", name: "Buddy" } });
     });
 

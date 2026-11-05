@@ -6,13 +6,13 @@ import { shedStore, type ShedActivity } from "@/state/shed";
 
 const ANIMAL_ID = "animal-1";
 
-beforeEach(() => {
-  act(() => shedStore.clear());
+beforeEach(async () => {
+  await act(() => shedStore.clear());
 });
 
 describe("AddShedSheet", () => {
-  it("renders the default fields", () => {
-    const screen = render(
+  it("renders the default fields", async () => {
+    const screen = await render(
       <AddShedSheet animalId={ANIMAL_ID} animalName="Willow" />,
     );
 
@@ -21,12 +21,12 @@ describe("AddShedSheet", () => {
     expect(screen.getByPlaceholderText("Add an observation")).toBeTruthy();
   });
 
-  it("saves an untouched shed with no notes", () => {
-    const screen = render(
+  it("saves an untouched shed with no notes", async () => {
+    const screen = await render(
       <AddShedSheet animalId={ANIMAL_ID} animalName="Willow" />,
     );
 
-    fireEvent.press(screen.getByLabelText("Save"));
+    await fireEvent.press(screen.getByLabelText("Save"));
 
     const [shed] = Object.values(shedStore.$.peek());
     expect(shed).toMatchObject({ animalId: ANIMAL_ID, issues: false });
@@ -34,17 +34,17 @@ describe("AddShedSheet", () => {
     expect(router.back).toHaveBeenCalledTimes(1);
   });
 
-  it("saves issues and notes", () => {
-    const screen = render(
+  it("saves issues and notes", async () => {
+    const screen = await render(
       <AddShedSheet animalId={ANIMAL_ID} animalName="Willow" />,
     );
 
-    fireEvent.press(screen.getByLabelText("Issues noticed"));
-    fireEvent.changeText(
+    await fireEvent.press(screen.getByLabelText("Issues noticed"));
+    await fireEvent.changeText(
       screen.getByPlaceholderText("Add an observation"),
       " Retained eye cap ",
     );
-    fireEvent.press(screen.getByLabelText("Save"));
+    await fireEvent.press(screen.getByLabelText("Save"));
 
     const [shed] = Object.values(shedStore.$.peek());
     expect(shed).toMatchObject({
@@ -65,8 +65,8 @@ describe("AddShedSheet editing an existing record", () => {
     notes: "Retained eye cap",
   };
 
-  it("opens on the record's own values, under an editing title", () => {
-    const screen = render(
+  it("opens on the record's own values, under an editing title", async () => {
+    const screen = await render(
       <AddShedSheet
         animalId={ANIMAL_ID}
         animalName="Willow"
@@ -81,21 +81,21 @@ describe("AddShedSheet editing an existing record", () => {
     ).toEqual({ checked: true });
   });
 
-  it("writes over the record rather than logging a second one", () => {
-    act(() => shedStore.$.set({ [EXISTING.id]: EXISTING }));
+  it("writes over the record rather than logging a second one", async () => {
+    await act(() => shedStore.$.set({ [EXISTING.id]: EXISTING }));
 
-    const screen = render(
+    const screen = await render(
       <AddShedSheet
         animalId={ANIMAL_ID}
         animalName="Willow"
         activity={EXISTING}
       />,
     );
-    fireEvent.changeText(
+    await fireEvent.changeText(
       screen.getByPlaceholderText("Add an observation"),
       "Came off whole",
     );
-    fireEvent.press(screen.getByLabelText("Save"));
+    await fireEvent.press(screen.getByLabelText("Save"));
 
     const records = Object.values(shedStore.$.peek());
     expect(records).toHaveLength(1);

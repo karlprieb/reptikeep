@@ -15,13 +15,13 @@ function makeAnimal(
 }
 
 describe("ReptileRows", () => {
-  it("renders one row per animal with its name and feeding status", () => {
+  it("renders one row per animal with its name and feeding status", async () => {
     const animals: Animal[] = [
       makeAnimal({ id: "1", name: "Rex" }),
       makeAnimal({ id: "2", name: "Iggy" }),
     ];
 
-    const { getByText, getAllByText } = render(
+    const { getByText, getAllByText } = await render(
       <ReptileRows animals={animals} />,
     );
 
@@ -30,11 +30,11 @@ describe("ReptileRows", () => {
     expect(getAllByText("Never fed")).toHaveLength(2);
   });
 
-  it("shows a relative feeding line when a last-fed date is known", () => {
+  it("shows a relative feeding line when a last-fed date is known", async () => {
     jest.useFakeTimers().setSystemTime(new Date("2026-03-10T12:00:00.000Z"));
     const animals: Animal[] = [makeAnimal({ id: "1", name: "Rex" })];
 
-    const { getByText } = render(
+    const { getByText } = await render(
       <ReptileRows
         animals={animals}
         lastFed={{ "1": "2026-03-07T12:00:00.000Z" }}
@@ -45,12 +45,12 @@ describe("ReptileRows", () => {
     jest.useRealTimers();
   });
 
-  it("navigates to the animal detail route when a row is tapped", () => {
+  it("navigates to the animal detail route when a row is tapped", async () => {
     const animals: Animal[] = [makeAnimal({ id: "abc", name: "Buddy" })];
 
-    const { getByLabelText } = render(<ReptileRows animals={animals} />);
+    const { getByLabelText } = await render(<ReptileRows animals={animals} />);
 
-    fireEvent.press(getByLabelText("Buddy, Never fed"));
+    await fireEvent.press(getByLabelText("Buddy, Never fed"));
     expect(router.push).toHaveBeenCalledWith("/animal/abc");
   });
 });

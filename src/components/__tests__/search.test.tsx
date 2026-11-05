@@ -30,19 +30,19 @@ afterEach(() => {
 });
 
 describe("SearchScreen", () => {
-  it("shows the localized page title", () => {
-    const screen = render(<SearchScreen />);
+  it("shows the localized page title", async () => {
+    const screen = await render(<SearchScreen />);
 
     expect(screen.getByTestId("stack-title").props.children).toBe("Search");
   });
 
-  it("shows all animals in name order before typing and filters live", () => {
-    const screen = render(<SearchScreen />);
+  it("shows all animals in name order before typing and filters live", async () => {
+    const screen = await render(<SearchScreen />);
 
     expect(screen.getAllByText("Ágata")).toHaveLength(1);
     expect(screen.getAllByText("Rex")).toHaveLength(1);
 
-    fireEvent.changeText(
+    await fireEvent.changeText(
       screen.getByPlaceholderText("Search reptiles"),
       "agata",
     );
@@ -51,10 +51,10 @@ describe("SearchScreen", () => {
     expect(screen.queryByText("Rex")).toBeNull();
   });
 
-  it("shows a no-results state for a nonmatching query", () => {
-    const screen = render(<SearchScreen />);
+  it("shows a no-results state for a nonmatching query", async () => {
+    const screen = await render(<SearchScreen />);
 
-    fireEvent.changeText(
+    await fireEvent.changeText(
       screen.getByPlaceholderText("Search reptiles"),
       "python",
     );
@@ -63,30 +63,33 @@ describe("SearchScreen", () => {
     expect(screen.getByText("No reptiles match “python”.")).toBeTruthy();
   });
 
-  it("resets the query when Cancel is pressed", () => {
-    const screen = render(<SearchScreen />);
-    fireEvent.changeText(screen.getByPlaceholderText("Search reptiles"), "rex");
+  it("resets the query when Cancel is pressed", async () => {
+    const screen = await render(<SearchScreen />);
+    await fireEvent.changeText(
+      screen.getByPlaceholderText("Search reptiles"),
+      "rex",
+    );
 
-    fireEvent.press(screen.getByTestId("stack-search-cancel"));
+    await fireEvent.press(screen.getByTestId("stack-search-cancel"));
 
     expect(screen.getByText("Ágata")).toBeTruthy();
     expect(screen.getByText("Rex")).toBeTruthy();
   });
 
-  it("opens the selected animal detail", () => {
-    const screen = render(<SearchScreen />);
+  it("opens the selected animal detail", async () => {
+    const screen = await render(<SearchScreen />);
 
-    fireEvent.press(screen.getByLabelText("Rex, Never fed"));
+    await fireEvent.press(screen.getByLabelText("Rex, Never fed"));
 
     expect(router.push).toHaveBeenCalledWith("/animal/rex");
   });
 
-  it("shows the shared empty state and routes its action to Add reptile", () => {
+  it("shows the shared empty state and routes its action to Add reptile", async () => {
     animals$.set({});
-    const screen = render(<SearchScreen />);
+    const screen = await render(<SearchScreen />);
 
     expect(screen.getByText("No reptiles yet")).toBeTruthy();
-    fireEvent.press(screen.getByLabelText("Add reptile"));
+    await fireEvent.press(screen.getByLabelText("Add reptile"));
     expect(router.push).toHaveBeenCalledWith("/add-reptile");
   });
 });

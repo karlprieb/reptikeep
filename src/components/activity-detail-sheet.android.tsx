@@ -268,8 +268,6 @@ export function ActivityDetailSheet({
         pointerEvents="box-none"
       >
         <StatusBar
-          translucent
-          backgroundColor="transparent"
           barStyle={scheme === "dark" ? "light-content" : "dark-content"}
         />
         <Animated.View

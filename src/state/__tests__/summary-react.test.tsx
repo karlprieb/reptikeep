@@ -12,26 +12,26 @@ function Probe() {
 }
 
 describe("summary reactivity", () => {
-  beforeEach(() => {
-    act(() => {
+  beforeEach(async () => {
+    await act(() => {
       habitatStore.clear();
       summaries$.set({});
     });
   });
 
-  afterEach(() => {
-    act(() => {
+  afterEach(async () => {
+    await act(() => {
       habitatStore.clear();
       summaries$.set({});
     });
   });
 
-  it("re-renders useValue(summaries$) subscribers when a summary changes", () => {
-    const { getByTestId } = render(<Probe />);
+  it("re-renders useValue(summaries$) subscribers when a summary changes", async () => {
+    const { getByTestId } = await render(<Probe />);
 
     expect(getByTestId("water").props.children).toBe("none");
 
-    act(() => {
+    await act(() => {
       habitatStore.add(createHabitatActivity({ animalId: "a1", water: true }));
     });
 
@@ -39,7 +39,7 @@ describe("summary reactivity", () => {
     expect(getByTestId("water").props.children).toBe(record.occurredAt);
   });
 
-  it("a cleaning-only record advances lastCleanAt without touching lastWaterAt", () => {
+  it("a cleaning-only record advances lastCleanAt without touching lastWaterAt", async () => {
     habitatStore.add(
       createHabitatActivity({
         animalId: "a1",
@@ -48,7 +48,7 @@ describe("summary reactivity", () => {
       }),
     );
 
-    act(() => {
+    await act(() => {
       habitatStore.add(
         createHabitatActivity({
           animalId: "a1",

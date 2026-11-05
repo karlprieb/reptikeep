@@ -26,8 +26,8 @@ beforeEach(() => {
 });
 
 describe("ThemedText Dynamic Type scaling", () => {
-  it("caps a display alias at its mapped multiplier", () => {
-    render(<ThemedText type="displayXl">Willow</ThemedText>);
+  it("caps a display alias at its mapped multiplier", async () => {
+    await render(<ThemedText type="displayXl">Willow</ThemedText>);
 
     expect(screen.getByText("Willow").props.maxFontSizeMultiplier).toBe(
       TypeScale.displayXl.maxMultiplier,
@@ -35,8 +35,8 @@ describe("ThemedText Dynamic Type scaling", () => {
     expect(TypeScale.displayXl.maxMultiplier).toBeLessThan(2);
   });
 
-  it("lets a small alias keep its full multiplier", () => {
-    render(<ThemedText type="label">LAST FED</ThemedText>);
+  it("lets a small alias keep its full multiplier", async () => {
+    await render(<ThemedText type="label">LAST FED</ThemedText>);
 
     expect(screen.getByText("LAST FED").props.maxFontSizeMultiplier).toBe(
       TypeScale.label.maxMultiplier,
@@ -44,16 +44,16 @@ describe("ThemedText Dynamic Type scaling", () => {
     expect(TypeScale.label.maxMultiplier).toBeGreaterThan(3);
   });
 
-  it("applies the body multiplier when no type is given", () => {
-    render(<ThemedText>Fed 4 days ago</ThemedText>);
+  it("applies the body multiplier when no type is given", async () => {
+    await render(<ThemedText>Fed 4 days ago</ThemedText>);
 
     expect(screen.getByText("Fed 4 days ago").props.maxFontSizeMultiplier).toBe(
       TypeScale.body.maxMultiplier,
     );
   });
 
-  it("lets a caller override the alias default", () => {
-    render(
+  it("lets a caller override the alias default", async () => {
+    await render(
       <ThemedText type="displayXl" maxFontSizeMultiplier={1.2}>
         Willow
       </ThemedText>,
@@ -62,52 +62,52 @@ describe("ThemedText Dynamic Type scaling", () => {
     expect(screen.getByText("Willow").props.maxFontSizeMultiplier).toBe(1.2);
   });
 
-  it("never disables font scaling by default", () => {
-    render(<ThemedText type="body">Fed 4 days ago</ThemedText>);
+  it("never disables font scaling by default", async () => {
+    await render(<ThemedText type="body">Fed 4 days ago</ThemedText>);
 
     expect(screen.getByText("Fed 4 days ago").props.allowFontScaling).not.toBe(
       false,
     );
   });
 
-  it("leaves the authored line height alone at the default text size", () => {
-    render(<ThemedText type="label">LAST FED</ThemedText>);
+  it("leaves the authored line height alone at the default text size", async () => {
+    await render(<ThemedText type="label">LAST FED</ThemedText>);
 
     expect(flatStyleOf("LAST FED").lineHeight).toBeCloseTo(
       Typography.label.lineHeight,
     );
   });
 
-  it("scales line height with the text size so glyphs keep their line box", () => {
+  it("scales line height with the text size so glyphs keep their line box", async () => {
     setFontScale(2.5);
-    render(<ThemedText type="body">Fed 4 days ago</ThemedText>);
+    await render(<ThemedText type="body">Fed 4 days ago</ThemedText>);
 
     expect(flatStyleOf("Fed 4 days ago").lineHeight).toBeCloseTo(
       Typography.body.lineHeight * 2.5,
     );
   });
 
-  it("caps line height at the same multiplier that caps font size", () => {
+  it("caps line height at the same multiplier that caps font size", async () => {
     setFontScale(5);
-    render(<ThemedText type="displayXl">Willow</ThemedText>);
+    await render(<ThemedText type="displayXl">Willow</ThemedText>);
 
     expect(flatStyleOf("Willow").lineHeight).toBeCloseTo(
       Typography.displayXl.lineHeight * TypeScale.displayXl.maxMultiplier,
     );
   });
 
-  it("shrinks line height alongside a below-default text size", () => {
+  it("shrinks line height alongside a below-default text size", async () => {
     setFontScale(0.8);
-    render(<ThemedText type="body">Fed 4 days ago</ThemedText>);
+    await render(<ThemedText type="body">Fed 4 days ago</ThemedText>);
 
     expect(flatStyleOf("Fed 4 days ago").lineHeight).toBeCloseTo(
       Typography.body.lineHeight * 0.8,
     );
   });
 
-  it("holds the line height still when a caller opts out of scaling", () => {
+  it("holds the line height still when a caller opts out of scaling", async () => {
     setFontScale(3);
-    render(
+    await render(
       <ThemedText type="body" allowFontScaling={false}>
         Fed 4 days ago
       </ThemedText>,

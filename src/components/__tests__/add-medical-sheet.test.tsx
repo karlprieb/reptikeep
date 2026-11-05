@@ -43,10 +43,10 @@ describe("AddMedicalSheet documents", () => {
       throw new storage.DocumentTooLargeError(11 * 1024 * 1024);
     });
 
-    const screen = render(
+    const screen = await render(
       <AddMedicalSheet animalId={ANIMAL_ID} animalName="Juno" />,
     );
-    await act(() => fireEvent.press(screen.getByLabelText("Add document")));
+    await fireEvent.press(screen.getByLabelText("Add document"));
 
     expect(screen.getByText(/This document is 11 MB/)).toBeTruthy();
   });
@@ -60,10 +60,10 @@ describe("AddMedicalSheet documents", () => {
       throw new Error("unsupported");
     });
 
-    const screen = render(
+    const screen = await render(
       <AddMedicalSheet animalId={ANIMAL_ID} animalName="Juno" />,
     );
-    await act(() => fireEvent.press(screen.getByLabelText("Add document")));
+    await fireEvent.press(screen.getByLabelText("Add document"));
 
     expect(
       screen.getByText(
@@ -81,18 +81,21 @@ describe("AddMedicalSheet documents", () => {
       .spyOn(medical, "saveMedicalActivity")
       .mockRejectedValueOnce(new Error("copy failed"));
 
-    const screen = render(
+    const screen = await render(
       <AddMedicalSheet animalId={ANIMAL_ID} animalName="Juno" />,
     );
-    fireEvent.changeText(screen.getByPlaceholderText("What happened?"), "Exam");
-    await act(() => fireEvent.press(screen.getByLabelText("Save")));
+    await fireEvent.changeText(
+      screen.getByPlaceholderText("What happened?"),
+      "Exam",
+    );
+    await fireEvent.press(screen.getByLabelText("Save"));
 
     expect(
       screen.getByText("We couldn't save this medical record. Try again."),
     ).toBeTruthy();
   });
 
-  it("confirms persisted document removal before marking it for deletion", () => {
+  it("confirms persisted document removal before marking it for deletion", async () => {
     const record = createMedicalActivity({
       animalId: ANIMAL_ID,
       summary: "Exam",
@@ -111,7 +114,7 @@ describe("AddMedicalSheet documents", () => {
       activityId: record.id,
     });
     const alert = jest.spyOn(Alert, "alert").mockImplementation();
-    const screen = render(
+    const screen = await render(
       <AddMedicalSheet
         animalId={ANIMAL_ID}
         animalName="Juno"
@@ -119,7 +122,9 @@ describe("AddMedicalSheet documents", () => {
       />,
     );
 
-    fireEvent.press(screen.getByLabelText("Vet invoice, Remove document"));
+    await fireEvent.press(
+      screen.getByLabelText("Vet invoice, Remove document"),
+    );
 
     expect(alert).toHaveBeenCalledWith(
       "Remove Vet invoice?",
@@ -128,7 +133,9 @@ describe("AddMedicalSheet documents", () => {
     );
     expect(screen.getByText("Vet invoice")).toBeTruthy();
     const buttons = alert.mock.calls[0][2]!;
-    act(() => buttons.find((button) => button.text === "Remove")?.onPress?.());
+    await act(() =>
+      buttons.find((button) => button.text === "Remove")?.onPress?.(),
+    );
 
     expect(screen.queryByText("Vet invoice")).toBeNull();
   });

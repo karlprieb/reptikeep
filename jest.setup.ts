@@ -13,6 +13,42 @@ jest.mock(
   () => require("react-native-safe-area-context/jest/mock").default,
 );
 
+jest.mock("react-native-gesture-handler/ReanimatedSwipeable", () => {
+  const React = require("react");
+  const { View } = require("react-native");
+
+  const ReanimatedSwipeable = React.forwardRef(function ReanimatedSwipeable(
+    props: {
+      children?: React.ReactNode;
+      renderLeftActions?: () => React.ReactNode;
+      renderRightActions?: () => React.ReactNode;
+    },
+    ref: React.ForwardedRef<{
+      close: () => void;
+      openLeft: () => void;
+      openRight: () => void;
+      reset: () => void;
+    }>,
+  ) {
+    React.useImperativeHandle(ref, () => ({
+      close: jest.fn(),
+      openLeft: jest.fn(),
+      openRight: jest.fn(),
+      reset: jest.fn(),
+    }));
+
+    return React.createElement(
+      View,
+      { testID: "swipeable-row" },
+      props.renderLeftActions?.(),
+      props.renderRightActions?.(),
+      props.children,
+    );
+  });
+
+  return { __esModule: true, default: ReanimatedSwipeable };
+});
+
 jest.mock("expo-crypto", () => {
   let counter = 0;
   return { randomUUID: () => `test-uuid-${++counter}` };

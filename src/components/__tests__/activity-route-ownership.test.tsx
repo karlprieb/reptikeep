@@ -29,7 +29,7 @@ describe("activity route ownership", () => {
     medicalStore.clear();
   });
 
-  it("rejects a detail route whose activity belongs to another animal", () => {
+  it("rejects a detail route whose activity belongs to another animal", async () => {
     const activity = createMedicalActivity({
       animalId: "second",
       summary: "Exam",
@@ -41,13 +41,13 @@ describe("activity route ownership", () => {
       activityId: activity.id,
     });
 
-    const screen = render(<ActivityDetailScreen />);
+    const screen = await render(<ActivityDetailScreen />);
 
     expect(screen.getByText("Animal not found")).toBeTruthy();
     expect(screen.queryByText("Exam")).toBeNull();
   });
 
-  it("rejects an edit route whose activity belongs to another animal", () => {
+  it("rejects an edit route whose activity belongs to another animal", async () => {
     const activity = createMedicalActivity({
       animalId: "second",
       summary: "Exam",
@@ -58,7 +58,7 @@ describe("activity route ownership", () => {
       activityId: activity.id,
     });
 
-    const screen = render(<AddMedicalScreen />);
+    const screen = await render(<AddMedicalScreen />);
 
     expect(screen.getByText("Animal not found")).toBeTruthy();
     expect(screen.queryByText("Edit medical record")).toBeNull();

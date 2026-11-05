@@ -76,8 +76,6 @@ export function MaterialAppBar({ title, scrollY, menu }: MaterialAppBarProps) {
   return (
     <View style={[styles.bar, { height: barHeight, paddingTop: insets.top }]}>
       <StatusBar
-        translucent
-        backgroundColor="transparent"
         barStyle={scheme === "dark" ? "light-content" : "dark-content"}
       />
 

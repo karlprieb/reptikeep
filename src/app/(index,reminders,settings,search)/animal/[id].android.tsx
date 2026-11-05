@@ -104,8 +104,6 @@ export default function AnimalDetailScreen() {
         pointerEvents="box-none"
       >
         <StatusBar
-          translucent
-          backgroundColor="transparent"
           barStyle={
             animal.photo || scheme === "dark" ? "light-content" : "dark-content"
           }

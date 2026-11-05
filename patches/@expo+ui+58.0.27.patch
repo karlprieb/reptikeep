@@ -1,0 +1,164 @@
+diff --git a/node_modules/@expo/ui/android/src/main/java/expo/modules/ui/ModifierRegistry.kt b/node_modules/@expo/ui/android/src/main/java/expo/modules/ui/ModifierRegistry.kt
+index b1431d5..09cf113 100644
+--- a/node_modules/@expo/ui/android/src/main/java/expo/modules/ui/ModifierRegistry.kt
++++ b/node_modules/@expo/ui/android/src/main/java/expo/modules/ui/ModifierRegistry.kt
+@@ -70,6 +70,7 @@ import androidx.compose.ui.platform.LocalDensity
+ import androidx.compose.ui.semantics.Role
+ import androidx.compose.ui.semantics.contentDescription
+ import androidx.compose.ui.semantics.contentType
++import androidx.compose.ui.semantics.role
+ import androidx.compose.ui.semantics.semantics
+ import androidx.compose.ui.unit.DpOffset
+ import androidx.compose.ui.unit.dp
+@@ -738,12 +739,15 @@ object ModifierRegistry {
+       val params = recordFromMap<SemanticsParams>(map, appContext)
+       val type = params.contentType.toContentType()
+       val description = params.contentDescription
+-      if (type == null && description == null) {
++      val resolvedRole = params.role.toSemanticsRole()
++
++      if (type == null && description == null && resolvedRole == null && !params.mergeDescendants) {
+         Modifier
+       } else {
+-        Modifier.semantics {
++        Modifier.semantics(mergeDescendants = params.mergeDescendants) {
+           type?.let { contentType = it }
+           description?.let { contentDescription = it }
++          resolvedRole?.let { role = it }
+         }
+       }
+     }
+diff --git a/node_modules/@expo/ui/android/src/main/java/expo/modules/ui/SemanticsModifier.kt b/node_modules/@expo/ui/android/src/main/java/expo/modules/ui/SemanticsModifier.kt
+index 6c36d1f..dfce3b6 100644
+--- a/node_modules/@expo/ui/android/src/main/java/expo/modules/ui/SemanticsModifier.kt
++++ b/node_modules/@expo/ui/android/src/main/java/expo/modules/ui/SemanticsModifier.kt
+@@ -1,6 +1,7 @@
+ package expo.modules.ui
+ 
+ import androidx.compose.ui.autofill.ContentType
++import androidx.compose.ui.semantics.Role
+ import expo.modules.kotlin.records.Field
+ import expo.modules.kotlin.records.Record
+ import expo.modules.kotlin.types.OptimizedRecord
+@@ -8,9 +9,21 @@ import expo.modules.kotlin.types.OptimizedRecord
+ @OptimizedRecord
+ internal data class SemanticsParams(
+   @Field val contentType: String? = null,
+-  @Field val contentDescription: String? = null
++  @Field val contentDescription: String? = null,
++  @Field val role: String? = null,
++  @Field val mergeDescendants: Boolean = false
+ ) : Record
+ 
++internal fun String?.toSemanticsRole(): Role? = when (this) {
++  "button" -> Role.Button
++  "checkbox" -> Role.Checkbox
++  "switch" -> Role.Switch
++  "radioButton" -> Role.RadioButton
++  "tab" -> Role.Tab
++  "image" -> Role.Image
++  "dropdownList" -> Role.DropdownList
++  else -> null
++}
+ internal fun String?.toContentType(): ContentType? = when (this) {
+   "email" -> ContentType.EmailAddress
+   "username" -> ContentType.Username
+diff --git a/node_modules/@expo/ui/build/jetpack-compose/modifiers/index.d.ts b/node_modules/@expo/ui/build/jetpack-compose/modifiers/index.d.ts
+index 7326d9b..19755ec 100644
+--- a/node_modules/@expo/ui/build/jetpack-compose/modifiers/index.d.ts
++++ b/node_modules/@expo/ui/build/jetpack-compose/modifiers/index.d.ts
+@@ -344,6 +344,14 @@ export type SemanticsConfig = {
+      * content does not read well aloud, as with an abbreviation or a glyph.
+      */
+     contentDescription?: string;
++    /**
++     * Semantic role: 'button', 'checkbox', 'switch', 'radioButton', 'tab', 'image', or 'dropdownList'.
++     */
++    role?: 'button' | 'checkbox' | 'switch' | 'radioButton' | 'tab' | 'image' | 'dropdownList';
++    /**
++     * Merge child semantics into this node so it is announced as one element.
++     */
++    mergeDescendants?: boolean;
+ };
+ /**
+  * Applies semantic properties. Wraps `Modifier.semantics { ... }`.
+diff --git a/node_modules/@expo/ui/ios/ImageView.swift b/node_modules/@expo/ui/ios/ImageView.swift
+index 170de73..1e67acf 100644
+--- a/node_modules/@expo/ui/ios/ImageView.swift
++++ b/node_modules/@expo/ui/ios/ImageView.swift
+@@ -12,6 +12,37 @@ public final class ImageViewProps: UIBaseViewProps {
+   var onTap = EventDispatcher()
+ }
+ 
++private enum DecodedImageCache {
++  static let shared: NSCache<NSString, UIImage> = {
++    let cache = NSCache<NSString, UIImage>()
++    cache.totalCostLimit = 64 * 1024 * 1024
++    return cache
++  }()
++
++  static func image(for source: String?) -> UIImage? {
++    guard let source, let url = URL(string: source) else {
++      return nil
++    }
++
++    let attributes = try? FileManager.default.attributesOfItem(atPath: url.path)
++    let size = (attributes?[.size] as? NSNumber)?.int64Value ?? 0
++    let modified = (attributes?[.modificationDate] as? Date)?.timeIntervalSinceReferenceDate ?? 0
++    let key = "\(url.absoluteString)@\(size):\(String(format: "%.6f", modified))" as NSString
++
++    if let cached = shared.object(forKey: key) {
++      return cached
++    }
++
++    guard let data = try? Data(contentsOf: url), let image = UIImage(data: data) else {
++      return nil
++    }
++
++    let pixels = image.size.width * image.scale * image.size.height * image.scale
++    shared.setObject(image, forKey: key, cost: Int(pixels) * 4)
++    return image
++  }
++}
++
+ public struct ImageView: ExpoSwiftUI.View {
+   @ObservedObject public var props: ImageViewProps
+ 
+@@ -41,10 +72,7 @@ public struct ImageView: ExpoSwiftUI.View {
+       symbolImage
+         .applyImageModifiers(props.modifiers, appContext: props.appContext)
+         .applyOnTapGesture(useTapGesture: props.useTapGesture, eventDispatcher: props.onTap)
+-    } else if let url = props.uiImage,
+-              let url = URL(string: url),
+-              let data = try? Data(contentsOf: url),
+-              let uiImage = UIImage(data: data) {
++    } else if let uiImage = DecodedImageCache.image(for: props.uiImage) {
+       Image(uiImage: uiImage)
+         .applyImageModifiers(props.modifiers, appContext: props.appContext)
+         .applyOnTapGesture(useTapGesture: props.useTapGesture, eventDispatcher: props.onTap)
+diff --git a/node_modules/@expo/ui/src/jetpack-compose/modifiers/index.ts b/node_modules/@expo/ui/src/jetpack-compose/modifiers/index.ts
+index 08143ae..fb3e49a 100644
+--- a/node_modules/@expo/ui/src/jetpack-compose/modifiers/index.ts
++++ b/node_modules/@expo/ui/src/jetpack-compose/modifiers/index.ts
+@@ -488,6 +488,21 @@ export type SemanticsConfig = {
+    * content does not read well aloud, as with an abbreviation or a glyph.
+    */
+   contentDescription?: string;
++  /**
++   * Semantic role: 'button', 'checkbox', 'switch', 'radioButton', 'tab', 'image', or 'dropdownList'.
++   */
++  role?:
++    | 'button'
++    | 'checkbox'
++    | 'switch'
++    | 'radioButton'
++    | 'tab'
++    | 'image'
++    | 'dropdownList';
++  /**
++   * Merge child semantics into this node so it is announced as one element.
++   */
++  mergeDescendants?: boolean;
+ };
+ 
+ /**

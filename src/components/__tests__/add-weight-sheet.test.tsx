@@ -19,8 +19,8 @@ function saved(): WeightActivity {
   return Object.values(weightStore.$.peek())[0];
 }
 
-beforeEach(() => {
-  act(() => {
+beforeEach(async () => {
+  await act(() => {
     weightStore.clear();
     animals$.set({});
     defaults$.weightUnit.set("g");
@@ -32,36 +32,36 @@ beforeEach(() => {
 });
 
 describe("AddWeightSheet weight unit", () => {
-  it("opens a new weigh-in in the animal's unit", () => {
-    act(() => defaults$.weightUnit.set("lb"));
+  it("opens a new weigh-in in the animal's unit", async () => {
+    await act(() => defaults$.weightUnit.set("lb"));
 
-    const screen = render(
+    const screen = await render(
       <AddWeightSheet animalId={ANIMAL_ID} animalName="Juno" />,
     );
 
     expect(screen.getByPlaceholderText("Weight in lb")).toBeTruthy();
   });
 
-  it("lets an animal override the global unit", () => {
-    act(() => {
+  it("lets an animal override the global unit", async () => {
+    await act(() => {
       defaults$.weightUnit.set("lb");
       animals$[ANIMAL_ID].defaults.set({ weightUnit: "kg" });
     });
 
-    const screen = render(
+    const screen = await render(
       <AddWeightSheet animalId={ANIMAL_ID} animalName="Juno" />,
     );
 
     expect(screen.getByPlaceholderText("Weight in kg")).toBeTruthy();
   });
 
-  it("keeps the stored grams when an edit saves an untouched field", () => {
-    act(() => {
+  it("keeps the stored grams when an edit saves an untouched field", async () => {
+    await act(() => {
       weightStore.add(EXISTING);
       defaults$.weightUnit.set("lb");
     });
 
-    const screen = render(
+    const screen = await render(
       <AddWeightSheet
         animalId={ANIMAL_ID}
         animalName="Juno"
@@ -69,18 +69,18 @@ describe("AddWeightSheet weight unit", () => {
       />,
     );
 
-    fireEvent.press(screen.getByLabelText("Save"));
+    await fireEvent.press(screen.getByLabelText("Save"));
 
     expect(saved().weight).toBe(450);
   });
 
-  it("converts a retyped weight from the unit it was entered in", () => {
-    act(() => {
+  it("converts a retyped weight from the unit it was entered in", async () => {
+    await act(() => {
       weightStore.add(EXISTING);
       defaults$.weightUnit.set("lb");
     });
 
-    const screen = render(
+    const screen = await render(
       <AddWeightSheet
         animalId={ANIMAL_ID}
         animalName="Juno"
@@ -88,21 +88,27 @@ describe("AddWeightSheet weight unit", () => {
       />,
     );
 
-    fireEvent.changeText(screen.getByPlaceholderText("Weight in lb"), "2");
-    fireEvent.press(screen.getByLabelText("Save"));
+    await fireEvent.changeText(
+      screen.getByPlaceholderText("Weight in lb"),
+      "2",
+    );
+    await fireEvent.press(screen.getByLabelText("Save"));
 
     expect(saved().weight).toBe(907);
   });
 
-  it("stores a new weigh-in as grams whatever unit it was typed in", () => {
-    act(() => defaults$.weightUnit.set("kg"));
+  it("stores a new weigh-in as grams whatever unit it was typed in", async () => {
+    await act(() => defaults$.weightUnit.set("kg"));
 
-    const screen = render(
+    const screen = await render(
       <AddWeightSheet animalId={ANIMAL_ID} animalName="Juno" />,
     );
 
-    fireEvent.changeText(screen.getByPlaceholderText("Weight in kg"), "1.2");
-    fireEvent.press(screen.getByLabelText("Save"));
+    await fireEvent.changeText(
+      screen.getByPlaceholderText("Weight in kg"),
+      "1.2",
+    );
+    await fireEvent.press(screen.getByLabelText("Save"));
 
     expect(saved().weight).toBe(1200);
   });

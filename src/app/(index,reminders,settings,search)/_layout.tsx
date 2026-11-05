@@ -5,7 +5,7 @@ import { useTranslation } from "react-i18next";
 import { useTheme } from "@/hooks/use-theme";
 
 export const unstable_settings = {
-  initialRouteName: "index",
+  anchor: "index",
   index: { anchor: "index" },
   reminders: { anchor: "reminders" },
   settings: { anchor: "settings" },

@@ -274,8 +274,8 @@ describe("useAnimalPhotoUri", () => {
 
   it("only re-renders consumers of the photo that was bumped", async () => {
     let secondRenderCount = 0;
-    const firstHook = renderHook(() => useAnimalPhotoUri(first));
-    const secondHook = renderHook(() => {
+    const firstHook = await renderHook(() => useAnimalPhotoUri(first));
+    const secondHook = await renderHook(() => {
       secondRenderCount += 1;
       return useAnimalPhotoUri(second);
     });
@@ -311,8 +311,8 @@ describe("useAnimalPhotoUri", () => {
     expect(secondHook.result.current).toBe(second);
     expect(secondRenderCount).toBe(1);
 
-    firstHook.unmount();
-    secondHook.unmount();
+    await firstHook.unmount();
+    await secondHook.unmount();
   });
 });
 

@@ -120,7 +120,7 @@ jest.mock("expo-file-system", () => {
     open() {
       const bytes = mockFiles.get(this.uri)?.bytes ?? new Uint8Array();
       return {
-        readBytes: (length: number) => bytes.subarray(0, length),
+        readBytesSync: (length: number) => bytes.subarray(0, length),
         close: () => {},
       };
     }

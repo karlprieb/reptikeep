@@ -39,7 +39,7 @@ export default function AboutScreen() {
     colorScheme === "dark"
       ? require("../../../assets/splash-icon-dark.png")
       : require("../../../assets/splash-icon-light.png"),
-  ).uri;
+  )?.uri;
 
   const openRepository = () => {
     void Linking.openURL(REPOSITORY_URL).catch(() => undefined);

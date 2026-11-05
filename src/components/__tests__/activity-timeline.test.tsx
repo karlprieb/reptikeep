@@ -23,8 +23,8 @@ const ENTRY: AnimalActivity = {
   record: SHED,
 };
 
-function renderTimeline() {
-  return render(
+async function renderTimeline() {
+  return await render(
     <ActivityPanel
       entries={[ENTRY]}
       animalId={ANIMAL_ID}
@@ -36,28 +36,28 @@ function renderTimeline() {
   );
 }
 
-beforeEach(() => {
-  act(() => {
+beforeEach(async () => {
+  await act(() => {
     shedStore.clear();
     shedStore.$.set({ [SHED.id]: SHED });
   });
 });
 
 describe("ActivityPanel row navigation", () => {
-  it("opens the record's detail sheet when the row is tapped", () => {
-    const screen = renderTimeline();
+  it("opens the record's detail sheet when the row is tapped", async () => {
+    const screen = await renderTimeline();
 
-    fireEvent.press(screen.getByLabelText("Shed, Jul 21, 2026"));
+    await fireEvent.press(screen.getByLabelText("Shed, Jul 21, 2026"));
 
     expect(router.push).toHaveBeenCalledWith(
       `/animal/${ANIMAL_ID}/activity?type=shed&activityId=${SHED.id}`,
     );
   });
 
-  it("opens the record's own form sheet from the leading swipe action", () => {
-    const screen = renderTimeline();
+  it("opens the record's own form sheet from the leading swipe action", async () => {
+    const screen = await renderTimeline();
 
-    fireEvent.press(screen.getByLabelText("Edit"));
+    await fireEvent.press(screen.getByLabelText("Edit"));
 
     expect(router.push).toHaveBeenCalledWith(
       `/animal/${ANIMAL_ID}/shed?activityId=${SHED.id}`,
@@ -66,11 +66,11 @@ describe("ActivityPanel row navigation", () => {
 });
 
 describe("ActivityPanel delete", () => {
-  it("confirms before the trailing swipe action deletes anything", () => {
+  it("confirms before the trailing swipe action deletes anything", async () => {
     const alert = jest.spyOn(Alert, "alert").mockImplementation(() => {});
-    const screen = renderTimeline();
+    const screen = await renderTimeline();
 
-    fireEvent.press(screen.getByLabelText("Delete"));
+    await fireEvent.press(screen.getByLabelText("Delete"));
 
     expect(alert).toHaveBeenCalledWith(
       "Delete this Shed record?",
@@ -80,16 +80,16 @@ describe("ActivityPanel delete", () => {
     expect(shedStore.$.peek()[SHED.id]).toBeDefined();
   });
 
-  it("deletes only once the confirmation is accepted", () => {
+  it("deletes only once the confirmation is accepted", async () => {
     jest
       .spyOn(Alert, "alert")
       .mockImplementation((_title, _message, buttons) => {
         const confirm = buttons?.find((button) => button.text === "Delete");
-        act(() => confirm?.onPress?.());
+        confirm?.onPress?.();
       });
-    const screen = renderTimeline();
+    const screen = await renderTimeline();
 
-    fireEvent.press(screen.getByLabelText("Delete"));
+    await fireEvent.press(screen.getByLabelText("Delete"));
 
     expect(shedStore.$.peek()[SHED.id]).toBeUndefined();
   });
@@ -127,8 +127,8 @@ function weightEntry(id: string, grams: number, day: string): AnimalActivity {
   };
 }
 
-function renderEntries(entries: AnimalActivity[]) {
-  return render(
+async function renderEntries(entries: AnimalActivity[]) {
+  return await render(
     <ActivityPanel
       entries={entries}
       animalId={ANIMAL_ID}
@@ -141,20 +141,20 @@ function renderEntries(entries: AnimalActivity[]) {
 }
 
 describe("ActivityPanel change since the previous record", () => {
-  it("dates a shed by the interval that closed since the last one", () => {
-    const screen = renderEntries([ENTRY, EARLIER_ENTRY]);
+  it("dates a shed by the interval that closed since the last one", async () => {
+    const screen = await renderEntries([ENTRY, EARLIER_ENTRY]);
 
     expect(screen.getByText("12 days since last")).toBeTruthy();
   });
 
-  it("leaves the oldest record of a type without an interval", () => {
-    const screen = renderEntries([ENTRY, EARLIER_ENTRY]);
+  it("leaves the oldest record of a type without an interval", async () => {
+    const screen = await renderEntries([ENTRY, EARLIER_ENTRY]);
 
     expect(screen.queryAllByText(/days since last$/)).toHaveLength(1);
   });
 
-  it("states a weight gain unsigned, and speaks it signed", () => {
-    const screen = renderEntries([
+  it("states a weight gain unsigned, and speaks it signed", async () => {
+    const screen = await renderEntries([
       weightEntry("w2", 145, "21"),
       weightEntry("w1", 123, "09"),
     ]);
@@ -163,8 +163,8 @@ describe("ActivityPanel change since the previous record", () => {
     expect(screen.getByLabelText(/Change: \+22 g \(\+17\.9%\)/)).toBeTruthy();
   });
 
-  it("states a weight loss the same way", () => {
-    const screen = renderEntries([
+  it("states a weight loss the same way", async () => {
+    const screen = await renderEntries([
       weightEntry("w2", 131, "21"),
       weightEntry("w1", 145, "09"),
     ]);

@@ -28,14 +28,14 @@ const FEEDING: FeedingActivity = {
   notes: "Took it head-first.",
 };
 
-function renderDetail(
+async function renderDetail(
   entry: Parameters<typeof ActivityDetailSheet>[0]["entry"],
 ) {
-  return render(<ActivityDetailSheet entry={entry} animalName="Juno" />);
+  return await render(<ActivityDetailSheet entry={entry} animalName="Juno" />);
 }
 
-beforeEach(() => {
-  act(() => {
+beforeEach(async () => {
+  await act(() => {
     feedingStore.clear();
     weightStore.clear();
     defecationStore.clear();
@@ -43,10 +43,10 @@ beforeEach(() => {
 });
 
 describe("ActivityDetailSheet content", () => {
-  it("shows a feeding's own fields, its flags, and its notes", () => {
-    act(() => feedingStore.$.set({ [FEEDING.id]: FEEDING }));
+  it("shows a feeding's own fields, its flags, and its notes", async () => {
+    await act(() => feedingStore.$.set({ [FEEDING.id]: FEEDING }));
 
-    const screen = renderDetail(toActivity("feed", FEEDING));
+    const screen = await renderDetail(toActivity("feed", FEEDING));
 
     expect(screen.getByText("Jul 21, 2026")).toBeTruthy();
     expect(screen.getByText("Small rat")).toBeTruthy();
@@ -56,7 +56,7 @@ describe("ActivityDetailSheet content", () => {
     expect(screen.getByText("Took it head-first.")).toBeTruthy();
   });
 
-  it("states the interval since the previous feeding", () => {
+  it("states the interval since the previous feeding", async () => {
     const previous: FeedingActivity = {
       ...FEEDING,
       id: "feed-0",
@@ -69,25 +69,25 @@ describe("ActivityDetailSheet content", () => {
       createdAt: daysAgo(7),
       occurredAt: daysAgo(7),
     };
-    act(() =>
+    await act(() =>
       feedingStore.$.set({ [previous.id]: previous, [latest.id]: latest }),
     );
 
-    const screen = renderDetail(toActivity("feed", latest));
+    const screen = await renderDetail(toActivity("feed", latest));
 
     expect(screen.getByText("Since previous")).toBeTruthy();
     expect(screen.getByText("14 days")).toBeTruthy();
   });
 
-  it("omits the interval on the first record of its kind", () => {
-    act(() => feedingStore.$.set({ [FEEDING.id]: FEEDING }));
+  it("omits the interval on the first record of its kind", async () => {
+    await act(() => feedingStore.$.set({ [FEEDING.id]: FEEDING }));
 
-    const screen = renderDetail(toActivity("feed", FEEDING));
+    const screen = await renderDetail(toActivity("feed", FEEDING));
 
     expect(screen.queryByText("Since previous")).toBeNull();
   });
 
-  it("compares a weigh-in against the one before it", () => {
+  it("compares a weigh-in against the one before it", async () => {
     const previous: WeightActivity = {
       id: "w0",
       animalId: ANIMAL_ID,
@@ -102,17 +102,17 @@ describe("ActivityDetailSheet content", () => {
       occurredAt: daysAgo(2),
       weight: 1100,
     };
-    act(() =>
+    await act(() =>
       weightStore.$.set({ [previous.id]: previous, [latest.id]: latest }),
     );
 
-    const screen = renderDetail(toActivity("weight", latest));
+    const screen = await renderDetail(toActivity("weight", latest));
 
     expect(screen.getByText("1,100 g")).toBeTruthy();
     expect(screen.getByText("+100 g (+10%)")).toBeTruthy();
   });
 
-  it("says a backdated record was written down later", () => {
+  it("says a backdated record was written down later", async () => {
     const backdated: DefecationActivity = {
       id: "d1",
       animalId: ANIMAL_ID,
@@ -122,7 +122,7 @@ describe("ActivityDetailSheet content", () => {
       issues: true,
     };
 
-    const screen = renderDetail(toActivity("poop", backdated));
+    const screen = await renderDetail(toActivity("poop", backdated));
 
     expect(screen.getByText("Feces & urate")).toBeTruthy();
     expect(
@@ -132,7 +132,7 @@ describe("ActivityDetailSheet content", () => {
 });
 
 describe("ActivityDetailSheet actions", () => {
-  it("warns that linked documents are deleted with medical records", () => {
+  it("warns that linked documents are deleted with medical records", async () => {
     const alert = jest.spyOn(Alert, "alert").mockImplementation();
     const record = {
       id: "medical-1",
@@ -142,8 +142,8 @@ describe("ActivityDetailSheet actions", () => {
       summary: "Annual exam",
     };
 
-    const screen = renderDetail(toActivity("medical", record));
-    fireEvent.press(screen.getByLabelText("Delete record"));
+    const screen = await renderDetail(toActivity("medical", record));
+    await fireEvent.press(screen.getByLabelText("Delete record"));
 
     expect(alert).toHaveBeenCalledWith(
       expect.any(String),
@@ -152,28 +152,28 @@ describe("ActivityDetailSheet actions", () => {
     );
   });
 
-  it("replaces itself with the record's own form sheet on edit", () => {
-    act(() => feedingStore.$.set({ [FEEDING.id]: FEEDING }));
+  it("replaces itself with the record's own form sheet on edit", async () => {
+    await act(() => feedingStore.$.set({ [FEEDING.id]: FEEDING }));
 
-    const screen = renderDetail(toActivity("feed", FEEDING));
-    fireEvent.press(screen.getByLabelText("Edit record"));
+    const screen = await renderDetail(toActivity("feed", FEEDING));
+    await fireEvent.press(screen.getByLabelText("Edit record"));
 
     expect(router.replace).toHaveBeenCalledWith(
       `/animal/${ANIMAL_ID}/feed?activityId=${FEEDING.id}`,
     );
   });
 
-  it("confirms, deletes, then dismisses on delete", () => {
-    act(() => feedingStore.$.set({ [FEEDING.id]: FEEDING }));
+  it("confirms, deletes, then dismisses on delete", async () => {
+    await act(() => feedingStore.$.set({ [FEEDING.id]: FEEDING }));
     jest
       .spyOn(Alert, "alert")
       .mockImplementation((_title, _message, buttons) => {
         const confirm = buttons?.find((button) => button.text === "Delete");
-        act(() => confirm?.onPress?.());
+        confirm?.onPress?.();
       });
 
-    const screen = renderDetail(toActivity("feed", FEEDING));
-    fireEvent.press(screen.getByLabelText("Delete record"));
+    const screen = await renderDetail(toActivity("feed", FEEDING));
+    await fireEvent.press(screen.getByLabelText("Delete record"));
 
     expect(feedingStore.$.peek()[FEEDING.id]).toBeUndefined();
     expect(router.back).toHaveBeenCalled();
