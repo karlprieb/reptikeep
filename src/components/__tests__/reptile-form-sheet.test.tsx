@@ -348,8 +348,10 @@ describe("ReptileFormSheet photo persistence", () => {
     const save = screen.getByLabelText("Save");
     const beginImport = (save.props.onClick ??
       save.props.onPress) as () => Promise<void>;
-    void beginImport();
-    void beginImport();
+    await act(async () => {
+      void beginImport();
+      void beginImport();
+    });
 
     expect(mockImportAnimalPhoto).toHaveBeenCalledTimes(1);
     await act(async () => {
