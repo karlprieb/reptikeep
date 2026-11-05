@@ -143,7 +143,7 @@ describe("backup archive validation", () => {
       settings: {
         language: "system",
         reptileSort: { field: "name", direction: "asc" },
-        reptileView: "single",
+        reptileView: "cards",
       },
       loggingDefaults: {
         mealMeasure: "weight",
@@ -320,7 +320,7 @@ describe("backup archive validation", () => {
       settings: {
         language: "en",
         reptileSort: { field: "name", direction: "asc" },
-        reptileView: "single",
+        reptileView: "cards",
       },
       loggingDefaults: {
         mealMeasure: "weight",
@@ -345,7 +345,7 @@ describe("backup archive validation", () => {
       settings: {
         language: "en",
         reptileSort: { field: "name", direction: "asc" },
-        reptileView: "single",
+        reptileView: "cards",
       },
       loggingDefaults: {
         mealMeasure: "weight",

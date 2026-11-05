@@ -1,4 +1,8 @@
 {
+  "common": {
+    "edit": "Edit",
+    "delete": "Delete"
+  },
   "tabs": {
     "reptiles": "Reptiles",
     "reminders": "Reminders",
@@ -107,7 +111,7 @@
     },
     "view": {
       "grid": "Grid",
-      "single": "Single column",
+      "cards": "Cards",
       "list": "List"
     }
   },
@@ -179,8 +183,6 @@
     "addActivity": "Add activity",
     "actions": "More actions",
     "actionsHint": "Edit or delete this reptile",
-    "edit": "Edit reptile",
-    "delete": "Delete reptile",
     "deleteTitle": "Delete {{animalName}}?",
     "deleteMessage": "This also deletes every feeding, growth, shed, poop record, and document logged for {{animalName}}. There is no way to undo it.",
     "deleteConfirm": "Delete",
@@ -579,10 +581,6 @@
       "both": "Feces & urate"
     },
     "openHint": "Opens this record",
-    "swipe": {
-      "edit": "Edit",
-      "delete": "Delete"
-    },
     "waterChanged": "Water changed",
     "enclosureCleaned": "Enclosure cleaned"
   },
@@ -721,6 +719,7 @@
       }
     },
     "documents": {
+      "actions": "More actions",
       "add": {
         "hint": "Adds a new document for this reptile"
       },
@@ -788,8 +787,6 @@
     "doneHint": "Closes this record",
     "actions": "More actions",
     "actionsHint": "Edit or delete this record",
-    "edit": "Edit record",
-    "delete": "Delete record",
     "deleteTitle": "Delete this {{activityType}} record?",
     "deleteMessage": "This record is the only account of what happened. There is no way to undo it.",
     "deleteMedicalMessage": "This also deletes every linked document from this device. There is no way to undo it.",

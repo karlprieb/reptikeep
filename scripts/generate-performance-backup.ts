@@ -116,7 +116,7 @@ function emptyData(): BackupData {
     settings: {
       language: "system",
       reptileSort: { field: "name", direction: "asc" },
-      reptileView: "single",
+      reptileView: "cards",
     },
     loggingDefaults: {
       mealMeasure: "weight",

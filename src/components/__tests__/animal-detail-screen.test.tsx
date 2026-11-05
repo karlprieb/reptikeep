@@ -41,7 +41,7 @@ describe("AnimalDetailScreen actions menu", () => {
   it("opens the edit sheet for this animal", async () => {
     const screen = await render(<AnimalDetailScreen />);
 
-    await fireEvent.press(screen.getByLabelText("Edit reptile"));
+    await fireEvent.press(screen.getByLabelText("Edit"));
 
     expect(router.push).toHaveBeenCalledWith("/animal/willow/edit");
   });
@@ -49,7 +49,7 @@ describe("AnimalDetailScreen actions menu", () => {
   it("warns that deletion cannot be undone, and changes nothing unless confirmed", async () => {
     const screen = await render(<AnimalDetailScreen />);
 
-    await fireEvent.press(screen.getByLabelText("Delete reptile"));
+    await fireEvent.press(screen.getByLabelText("Delete"));
 
     expect(Alert.alert).toHaveBeenCalledWith(
       "Delete Willow?",
@@ -66,7 +66,7 @@ describe("AnimalDetailScreen actions menu", () => {
 
   it("deletes only once the screen has left, so the pop never shows not-found", async () => {
     const screen = await render(<AnimalDetailScreen />);
-    await fireEvent.press(screen.getByLabelText("Delete reptile"));
+    await fireEvent.press(screen.getByLabelText("Delete"));
 
     pressAlertButton("Delete");
 

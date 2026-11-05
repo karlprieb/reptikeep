@@ -350,7 +350,7 @@ describe("AnimalCard", () => {
 
 describe("selectColumnCount", () => {
   it("follows the view mode: single stays 1 column, grid is 2", () => {
-    expect(selectColumnCount("single")).toBe(1);
+    expect(selectColumnCount("cards")).toBe(1);
     expect(selectColumnCount("grid")).toBe(2);
   });
 
@@ -358,7 +358,7 @@ describe("selectColumnCount", () => {
     expect(selectColumnCount("grid", 1.5)).toBe(2);
     expect(selectColumnCount("grid", 1.75)).toBe(1);
     expect(selectColumnCount("grid", 3.1)).toBe(1);
-    expect(selectColumnCount("single", 1.75)).toBe(1);
+    expect(selectColumnCount("cards", 1.75)).toBe(1);
   });
 });
 

@@ -291,7 +291,7 @@ function ActivityRow({
 
       <SwipeActions.Actions edge="leading">
         <Button
-          label={t("timeline.swipe.edit")}
+          label={t("common.edit")}
           systemImage="square.and.pencil"
           onPress={openEdit}
           modifiers={[tint(theme.primary)]}
@@ -300,7 +300,7 @@ function ActivityRow({
 
       <SwipeActions.Actions edge="trailing">
         <Button
-          label={t("timeline.swipe.delete")}
+          label={t("common.delete")}
           systemImage="trash"
           onPress={confirmDelete}
           modifiers={[tint(theme.danger)]}

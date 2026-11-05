@@ -36,7 +36,7 @@ const SORT_FIELDS: AnimalSortField[] = [
 
 const SORT_DIRECTIONS: SortDirection[] = ["asc", "desc"];
 
-const VIEW_MODES: ReptileViewMode[] = ["single", "grid", "list"];
+const VIEW_MODES: ReptileViewMode[] = ["cards", "grid", "list"];
 
 const DIRECTION_LABELS: Record<SortDirection, "ascending" | "descending"> = {
   asc: "ascending",

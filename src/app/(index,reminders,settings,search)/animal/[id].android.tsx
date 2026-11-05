@@ -227,7 +227,7 @@ export default function AnimalDetailScreen() {
                   }}
                 >
                   <DropdownMenuItem.Text>
-                    <Text color={theme.text}>{t("animal.edit")}</Text>
+                    <Text color={theme.text}>{t("common.edit")}</Text>
                   </DropdownMenuItem.Text>
                   <DropdownMenuItem.LeadingIcon>
                     <Icon
@@ -245,7 +245,7 @@ export default function AnimalDetailScreen() {
                   }}
                 >
                   <DropdownMenuItem.Text>
-                    <Text color={theme.danger}>{t("animal.delete")}</Text>
+                    <Text color={theme.danger}>{t("common.delete")}</Text>
                   </DropdownMenuItem.Text>
                   <DropdownMenuItem.LeadingIcon>
                     <Icon

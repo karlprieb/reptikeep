@@ -241,7 +241,7 @@ function ActivityRow({
         renderLeftActions={() => (
           <SwipeAction
             icon={MODE_EDIT_ICON}
-            label={t("timeline.swipe.edit")}
+            label={t("common.edit")}
             backgroundColor={theme.primary}
             contentColor={theme.onPrimary}
             rowHeight={rowHeight}
@@ -251,7 +251,7 @@ function ActivityRow({
         renderRightActions={() => (
           <SwipeAction
             icon={DELETE_ICON}
-            label={t("timeline.swipe.delete")}
+            label={t("common.delete")}
             backgroundColor={theme.danger}
             contentColor={theme.onPrimary}
             rowHeight={rowHeight}

@@ -143,7 +143,7 @@ describe("ActivityDetailSheet actions", () => {
     };
 
     const screen = await renderDetail(toActivity("medical", record));
-    await fireEvent.press(screen.getByLabelText("Delete record"));
+    await fireEvent.press(screen.getByLabelText("Delete"));
 
     expect(alert).toHaveBeenCalledWith(
       expect.any(String),
@@ -156,7 +156,7 @@ describe("ActivityDetailSheet actions", () => {
     await act(() => feedingStore.$.set({ [FEEDING.id]: FEEDING }));
 
     const screen = await renderDetail(toActivity("feed", FEEDING));
-    await fireEvent.press(screen.getByLabelText("Edit record"));
+    await fireEvent.press(screen.getByLabelText("Edit"));
 
     expect(router.replace).toHaveBeenCalledWith(
       `/animal/${ANIMAL_ID}/feed?activityId=${FEEDING.id}`,
@@ -173,7 +173,7 @@ describe("ActivityDetailSheet actions", () => {
       });
 
     const screen = await renderDetail(toActivity("feed", FEEDING));
-    await fireEvent.press(screen.getByLabelText("Delete record"));
+    await fireEvent.press(screen.getByLabelText("Delete"));
 
     expect(feedingStore.$.peek()[FEEDING.id]).toBeUndefined();
     expect(router.back).toHaveBeenCalled();

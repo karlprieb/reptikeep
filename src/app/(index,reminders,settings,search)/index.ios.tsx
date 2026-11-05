@@ -37,7 +37,7 @@ const VIEW_MODES: {
   mode: ReptileViewMode;
   icon: "square.grid.2x2" | "square" | "list.bullet";
 }[] = [
-  { mode: "single", icon: "square" },
+  { mode: "cards", icon: "square" },
   { mode: "grid", icon: "square.grid.2x2" },
   { mode: "list", icon: "list.bullet" },
 ];

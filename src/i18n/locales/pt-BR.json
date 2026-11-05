@@ -1,4 +1,8 @@
 {
+  "common": {
+    "edit": "Editar",
+    "delete": "Excluir"
+  },
   "tabs": {
     "reptiles": "Répteis",
     "reminders": "Lembretes",
@@ -107,7 +111,7 @@
     },
     "view": {
       "grid": "Grade",
-      "single": "Coluna única",
+      "cards": "Cartões",
       "list": "Lista"
     }
   },
@@ -179,8 +183,6 @@
     "addActivity": "Adicionar atividade",
     "actions": "Mais ações",
     "actionsHint": "Editar ou excluir este réptil",
-    "edit": "Editar réptil",
-    "delete": "Excluir réptil",
     "deleteTitle": "Excluir {{animalName}}?",
     "deleteMessage": "Isto também exclui todos os registros de alimentação, crescimento, muda, fezes e documentos de {{animalName}}. Não há como desfazer.",
     "deleteConfirm": "Excluir",
@@ -579,10 +581,6 @@
       "both": "Fezes e urato"
     },
     "openHint": "Abre este registro",
-    "swipe": {
-      "edit": "Editar",
-      "delete": "Excluir"
-    },
     "waterChanged": "Água trocada",
     "enclosureCleaned": "Terrário limpo"
   },
@@ -721,6 +719,7 @@
       }
     },
     "documents": {
+      "actions": "Mais ações",
       "add": {
         "hint": "Adiciona um novo documento para este réptil"
       },
@@ -788,8 +787,6 @@
     "doneHint": "Fecha este registro",
     "actions": "Mais ações",
     "actionsHint": "Editar ou excluir este registro",
-    "edit": "Editar registro",
-    "delete": "Excluir registro",
     "deleteTitle": "Excluir este registro de {{activityType}}?",
     "deleteMessage": "Este registro é o único relato do que aconteceu. Não há como desfazer.",
     "deleteMedicalMessage": "Isto também exclui deste dispositivo todos os documentos vinculados. Não há como desfazer.",
