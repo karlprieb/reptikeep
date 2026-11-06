@@ -194,6 +194,13 @@ describe("RemindersScreen exact alarm card", () => {
   });
 
   it("stays hidden while exact alarms are granted", async () => {
+    jest
+      .spyOn(Notifications, "getExactAlarmPermissionsAsync")
+      .mockResolvedValue({ granted: true } as never);
+    await act(async () =>
+      addAnimal(makeAnimal({ id: ANIMAL_ID, name: "Buddy" })),
+    );
+
     const { queryByText } = await renderScreen();
 
     await waitFor(() =>

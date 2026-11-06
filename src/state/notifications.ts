@@ -115,6 +115,7 @@ async function reschedule(): Promise<void> {
 
   const alarmClock =
     Platform.OS === "android" && (await exactAlarmPermission()) === "granted";
+  if (run !== generation) return;
 
   const { hour, minute } = reminders$.peek();
 
