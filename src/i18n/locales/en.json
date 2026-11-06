@@ -156,6 +156,14 @@
       "action": "Turn on notifications",
       "openSettings": "Open Settings"
     },
+    "exactAlarm": {
+      "title": "Exact alarms",
+      "body": "Allow exact alarms so reminders land at the exact time, even in battery saver.",
+      "dismiss": "Dismiss",
+      "on": "On",
+      "off": "Off",
+      "action": "Allow exact alarms"
+    },
     "notification": {
       "title": "Today's care",
       "line": "{{routine}}: {{names}}",
@@ -716,6 +724,9 @@
       },
       "openSettings": {
         "hint": "Opens ReptiKeep in the device Settings app"
+      },
+      "exactAlarm": {
+        "hint": "Opens the system screen where you allow exact alarms"
       }
     },
     "documents": {

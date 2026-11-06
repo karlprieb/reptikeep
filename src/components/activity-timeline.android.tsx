@@ -1,10 +1,20 @@
-import { Box, Column, Host, Icon, Row, Text } from "@expo/ui/jetpack-compose";
+import {
+  Box,
+  Column,
+  Host,
+  Icon,
+  LazyColumn,
+  RNHostView,
+  Row,
+  Text,
+} from "@expo/ui/jetpack-compose";
 import {
   background,
   clickable,
   clip,
   fillMaxSize,
   fillMaxWidth,
+  height,
   padding,
   semantics,
   Shapes,
@@ -12,17 +22,12 @@ import {
   weight,
 } from "@expo/ui/jetpack-compose/modifiers";
 import { router } from "expo-router";
-import { useCallback, useMemo, useRef, useState, type ReactNode } from "react";
+import { useCallback, useMemo, useRef } from "react";
 import {
-  Animated,
   StyleSheet,
   useWindowDimensions,
   View,
   type ImageSourcePropType,
-  type NativeScrollEvent,
-  type NativeSyntheticEvent,
-  type StyleProp,
-  type ViewStyle,
 } from "react-native";
 import Swipeable, {
   type SwipeableMethods,
@@ -415,30 +420,22 @@ function SeeAllRow({
   );
 }
 
-const HISTORY_PAGE = 60;
+const HISTORY_OVERSCAN = 4;
 
 export type ActivityHistoryListProps = {
   entries: AnimalActivity[];
   animalId: string;
   background?: string;
-  header?: ReactNode;
-  scrollY?: Animated.Value;
-  contentContainerStyle?: StyleProp<ViewStyle>;
 };
 
 export function ActivityHistoryList({
   entries,
   animalId,
   background: backgroundColor,
-  header,
-  scrollY,
-  contentContainerStyle,
 }: ActivityHistoryListProps) {
   const theme = useTheme();
   const { fontScale } = useWindowDimensions();
   const { weightUnit } = useAnimalDefaults(animalId);
-  const [limit, setLimit] = useState(HISTORY_PAGE);
-  const [localScrollY] = useState(() => new Animated.Value(0));
   const rowBackground = backgroundColor ?? theme.bg;
 
   const badgeSize = Math.round(
@@ -451,55 +448,48 @@ export function ActivityHistoryList({
     badgeSize,
   );
   const previous = useMemo(() => previousOfSameType(entries), [entries]);
-  const visible = entries.slice(0, limit);
 
-  const growNearEnd = useCallback(
-    ({ nativeEvent }: NativeSyntheticEvent<NativeScrollEvent>) => {
-      const { contentOffset, layoutMeasurement, contentSize } = nativeEvent;
-      const remaining =
-        contentSize.height - contentOffset.y - layoutMeasurement.height;
-
-      if (remaining < layoutMeasurement.height * 2) {
-        setLimit((current) => Math.min(current + HISTORY_PAGE, entries.length));
-      }
-    },
-    [entries.length],
-  );
-
-  const onScroll = Animated.event(
-    [{ nativeEvent: { contentOffset: { y: scrollY ?? localScrollY } } }],
-    { useNativeDriver: true, listener: growNearEnd },
+  const renderRow = useCallback(
+    ({ item, index }: { item: AnimalActivity; index: number }) => (
+      <RNHostView
+        modifiers={[
+          fillMaxWidth(),
+          height(rowHeight + StyleSheet.hairlineWidth),
+        ]}
+      >
+        <ActivityRow
+          entry={item}
+          previous={previous[`${item.type}:${item.id}`]}
+          theme={theme}
+          unit={weightUnit}
+          badgeSize={badgeSize}
+          stacked={stacked}
+          divided={index > 0}
+          rowHeight={rowHeight}
+          rowBackground={rowBackground}
+          edgeToEdge
+        />
+      </RNHostView>
+    ),
+    [previous, theme, weightUnit, badgeSize, stacked, rowHeight, rowBackground],
   );
 
   return (
-    <Animated.ScrollView
-      style={[
-        styles.historyScroll,
-        backgroundColor ? { backgroundColor } : null,
-      ]}
-      contentContainerStyle={contentContainerStyle}
-      onScroll={onScroll}
-      scrollEventThrottle={16}
+    <Host
+      style={[styles.historyHost, { backgroundColor: rowBackground }]}
+      matchContents={false}
     >
-      {header}
-      <View>
-        {visible.map((entry, index) => (
-          <ActivityRow
-            key={`${entry.type}:${entry.id}`}
-            entry={entry}
-            previous={previous[`${entry.type}:${entry.id}`]}
-            theme={theme}
-            unit={weightUnit}
-            badgeSize={badgeSize}
-            stacked={stacked}
-            divided={index > 0}
-            rowHeight={rowHeight}
-            rowBackground={rowBackground}
-            edgeToEdge
-          />
-        ))}
-      </View>
-    </Animated.ScrollView>
+      <LazyColumn>
+        <LazyColumn.Items
+          data={entries}
+          keyExtractor={(entry) => `${entry.type}:${entry.id}`}
+          estimatedItemSize={rowHeight}
+          overscanCount={HISTORY_OVERSCAN}
+        >
+          {renderRow}
+        </LazyColumn.Items>
+      </LazyColumn>
+    </Host>
   );
 }
 
@@ -605,8 +595,9 @@ const styles = StyleSheet.create({
   host: {
     width: "100%",
   },
-  historyScroll: {
+  historyHost: {
     flex: 1,
+    width: "100%",
   },
   panel: {
     width: "100%",

@@ -156,6 +156,14 @@
       "action": "Ligar notificações",
       "openSettings": "Abrir Ajustes"
     },
+    "exactAlarm": {
+      "title": "Alarmes exatos",
+      "body": "Permita alarmes exatos para os lembretes chegarem na hora certa, mesmo com economia de bateria.",
+      "dismiss": "Dispensar",
+      "on": "Ativado",
+      "off": "Desativado",
+      "action": "Permitir alarmes exatos"
+    },
     "notification": {
       "title": "Cuidados de hoje",
       "line": "{{routine}}: {{names}}",
@@ -716,6 +724,9 @@
       },
       "openSettings": {
         "hint": "Abre o ReptiKeep no app de Ajustes do dispositivo"
+      },
+      "exactAlarm": {
+        "hint": "Abre a tela do sistema onde você permite alarmes exatos"
       }
     },
     "documents": {

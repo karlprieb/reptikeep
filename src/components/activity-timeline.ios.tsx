@@ -38,14 +38,8 @@ import {
   tint,
 } from "@expo/ui/swift-ui/modifiers";
 import { router } from "expo-router";
-import { useCallback, useMemo, useState, type ReactNode } from "react";
-import {
-  ScrollView,
-  StyleSheet,
-  useWindowDimensions,
-  type NativeScrollEvent,
-  type NativeSyntheticEvent,
-} from "react-native";
+import { useCallback, useMemo } from "react";
+import { StyleSheet, useWindowDimensions } from "react-native";
 import { useTranslation } from "react-i18next";
 
 import { EmptyStateContent } from "@/components/empty-state";
@@ -373,25 +367,22 @@ function SeeAllRow({
   );
 }
 
-const HISTORY_PAGE = 60;
+const HISTORY_OVERSCAN = 4;
 
 export type ActivityHistoryListProps = {
   entries: AnimalActivity[];
   animalId: string;
   background?: string;
-  header?: ReactNode;
 };
 
 export function ActivityHistoryList({
   entries,
   animalId,
   background,
-  header,
 }: ActivityHistoryListProps) {
   const theme = useTheme();
   const { fontScale } = useWindowDimensions();
   const { weightUnit } = useAnimalDefaults(animalId);
-  const [limit, setLimit] = useState(HISTORY_PAGE);
 
   const badgeSize = Math.round(
     BADGE_SIZE * Math.min(fontScale, BADGE_MAX_SCALE),
@@ -402,63 +393,50 @@ export function ActivityHistoryList({
     fontScale,
     badgeSize,
   );
+  const textInset = Spacing.md + badgeSize + Spacing.sm;
   const previous = useMemo(() => previousOfSameType(entries), [entries]);
-  const visible = entries.slice(0, limit);
 
-  const growNearEnd = useCallback(
-    ({ nativeEvent }: NativeSyntheticEvent<NativeScrollEvent>) => {
-      const { contentOffset, layoutMeasurement, contentSize } = nativeEvent;
-      const remaining =
-        contentSize.height - contentOffset.y - layoutMeasurement.height;
-
-      if (remaining < layoutMeasurement.height * 2) {
-        setLimit((current) => Math.min(current + HISTORY_PAGE, entries.length));
-      }
-    },
-    [entries.length],
+  const renderRow = useCallback(
+    ({ item, index }: { item: AnimalActivity; index: number }) => (
+      <ActivityRow
+        entry={item}
+        previous={previous[`${item.type}:${item.id}`]}
+        theme={theme}
+        unit={weightUnit}
+        badgeSize={badgeSize}
+        stacked={stacked}
+        divided={index > 0}
+        textInset={textInset}
+        rowHeight={rowHeight}
+      />
+    ),
+    [previous, theme, weightUnit, badgeSize, stacked, textInset, rowHeight],
   );
 
   return (
-    <ScrollView
+    <Host
       style={[
         styles.historyHost,
         background ? { backgroundColor: background } : null,
       ]}
-      contentInsetAdjustmentBehavior="automatic"
-      onScroll={growNearEnd}
-      scrollEventThrottle={64}
     >
-      {header}
-      <Host
-        style={[styles.historyList, { height: rowHeight * visible.length }]}
-        matchContents={false}
+      <List
+        modifiers={[
+          listStyle("plain"),
+          listRowSpacing(0),
+          scrollContentBackground("hidden"),
+        ]}
       >
-        <List
-          modifiers={[
-            listStyle("plain"),
-            scrollDisabled(true),
-            listRowSpacing(0),
-            scrollContentBackground("hidden"),
-            frame({ height: rowHeight * visible.length }),
-          ]}
+        <List.ForEach
+          data={entries}
+          keyExtractor={(entry) => `${entry.type}:${entry.id}`}
+          estimatedItemSize={rowHeight}
+          overscanCount={HISTORY_OVERSCAN}
         >
-          {visible.map((entry, index) => (
-            <ActivityRow
-              key={`${entry.type}:${entry.id}`}
-              entry={entry}
-              previous={previous[`${entry.type}:${entry.id}`]}
-              theme={theme}
-              unit={weightUnit}
-              badgeSize={badgeSize}
-              stacked={stacked}
-              divided={index > 0}
-              textInset={Spacing.md + badgeSize + Spacing.sm}
-              rowHeight={rowHeight}
-            />
-          ))}
-        </List>
-      </Host>
-    </ScrollView>
+          {renderRow}
+        </List.ForEach>
+      </List>
+    </Host>
   );
 }
 
@@ -578,9 +556,6 @@ const styles = StyleSheet.create({
   },
   historyHost: {
     flex: 1,
-  },
-  historyList: {
     width: "100%",
-    overflow: "hidden",
   },
 });

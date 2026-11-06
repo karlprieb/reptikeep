@@ -22,6 +22,7 @@ import {
   weight,
 } from "@expo/ui/jetpack-compose/modifiers";
 import { router } from "expo-router";
+import { useSelector as useValue } from "@legendapp/state/react";
 import { useCallback, useRef, useState } from "react";
 import {
   Animated,
@@ -54,9 +55,13 @@ import { useReminderPermission } from "@/hooks/use-reminder-permission";
 import { useRemindersData, type DueState } from "@/hooks/use-reminders-data";
 import { type ReminderRoutine } from "@/state/care-schedule";
 import {
+  dismissExactAlarmPrompt,
+  exactAlarmPrompt$,
+} from "@/state/exact-alarm-prompt";
+import {
+  requestExactAlarmPermission,
   requestReminderPermission,
   rescheduleSoon,
-  type ReminderPermission,
 } from "@/state/notifications";
 import { type CareReminder } from "@/utils/care-reminders";
 import {
@@ -67,6 +72,7 @@ import {
 import { formatAbsoluteDate } from "@/utils/format-date";
 import { panelRowHeight } from "@/utils/panel-row";
 
+import CLOSE_ICON from "@/assets/images/icons/close.xml";
 import CALENDAR_ICON from "@/assets/images/icons/calendar-month.xml";
 import NOTIFICATIONS_OFF_ICON from "@/assets/images/icons/notifications-off.xml";
 import RADIO_UNCHECKED_ICON from "@/assets/images/icons/radio-button-unchecked.xml";
@@ -460,28 +466,31 @@ function ReminderPanel({
   );
 }
 
-type PermissionNoticeProps = {
-  permission: Exclude<ReminderPermission, "granted">;
-  time: string;
+type PermissionCardProps = {
+  icon: typeof CALENDAR_ICON;
+  tint: string;
+  title: string;
+  body: string;
+  label?: string;
+  hint?: string;
   theme: Theme;
-  onGrant: (permission: ReminderPermission) => void;
+  onPress?: () => void;
+  dismissLabel?: string;
+  onDismiss?: () => void;
 };
 
-function PermissionNotice({
-  permission,
-  time,
+function PermissionCard({
+  icon,
+  tint,
+  title,
+  body,
+  label,
+  hint,
   theme,
-  onGrant,
-}: PermissionNoticeProps) {
-  const { t } = useTranslation();
-  const blocked = permission === "blocked";
-  const label = blocked
-    ? t("reminders.permission.openSettings")
-    : t("reminders.permission.action");
-  const hint = blocked
-    ? t("a11y.reminders.openSettings.hint")
-    : t("a11y.reminders.allow.hint");
-
+  onPress,
+  dismissLabel,
+  onDismiss,
+}: PermissionCardProps) {
   return (
     <View
       style={[
@@ -505,56 +514,60 @@ function PermissionNotice({
             verticalAlignment="top"
             horizontalArrangement={{ spacedBy: Spacing.sm }}
           >
-            <Icon
-              source={NOTIFICATIONS_OFF_ICON}
-              tint={theme.warning}
-              size={24}
-            />
+            <Icon source={icon} tint={tint} size={24} />
             <Column
               horizontalAlignment="start"
               verticalArrangement={{ spacedBy: Spacing["2xs"] }}
               modifiers={[weight(1)]}
             >
               <Text style={composeTextStyle("heading")} color={theme.text}>
-                {t("reminders.permission.title")}
+                {title}
               </Text>
               <Text
                 style={composeTextStyle("bodyS")}
                 color={theme.textSecondary}
               >
-                {blocked
-                  ? t("reminders.permission.blocked")
-                  : t("reminders.permission.ask", { time })}
+                {body}
               </Text>
             </Column>
+            {onDismiss ? (
+              <IconButton
+                onClick={onDismiss}
+                colors={{ contentColor: theme.textSecondary }}
+              >
+                <Icon
+                  source={CLOSE_ICON}
+                  tint={theme.textSecondary}
+                  size={20}
+                  contentDescription={dismissLabel}
+                />
+              </IconButton>
+            ) : null}
           </Row>
 
-          <Button
-            onClick={() => {
-              if (blocked) Linking.openSettings();
-              else
-                void requestReminderPermission().then((next) => {
-                  onGrant(next);
-                  if (next === "granted") rescheduleSoon();
-                });
-            }}
-            colors={{
-              containerColor: theme.primary,
-              contentColor: theme.onPrimary,
-            }}
-            modifiers={[
-              fillMaxWidth(),
-              semantics({
-                contentDescription: [label, hint].join(", "),
-                role: "button",
-                mergeDescendants: true,
-              }),
-            ]}
-          >
-            <Text style={composeTextStyle("body")} color={theme.onPrimary}>
-              {label}
-            </Text>
-          </Button>
+          {label && onPress ? (
+            <Button
+              onClick={onPress}
+              colors={{
+                containerColor: theme.primary,
+                contentColor: theme.onPrimary,
+              }}
+              modifiers={[
+                fillMaxWidth(),
+                semantics({
+                  contentDescription: [label, hint]
+                    .filter((part): part is string => Boolean(part))
+                    .join(", "),
+                  role: "button",
+                  mergeDescendants: true,
+                }),
+              ]}
+            >
+              <Text style={composeTextStyle("body")} color={theme.onPrimary}>
+                {label}
+              </Text>
+            </Button>
+          ) : null}
         </Column>
       </Host>
     </View>
@@ -566,7 +579,9 @@ export default function RemindersScreen() {
   const { t } = useTranslation();
   const { fontScale } = useWindowDimensions();
 
-  const [permission, setPermission] = useReminderPermission();
+  const [permission, setPermission, exactAlarm, setExactAlarm] =
+    useReminderPermission();
+  const exactAlarmDismissed = useValue(exactAlarmPrompt$.dismissed);
   const { reminders, dueState, sections, handleStopReminding, clockTime } =
     useRemindersData();
 
@@ -629,11 +644,54 @@ export default function RemindersScreen() {
         ) : (
           <>
             {permission && permission !== "granted" ? (
-              <PermissionNotice
-                permission={permission}
-                time={clockTime}
+              <PermissionCard
+                icon={NOTIFICATIONS_OFF_ICON}
+                tint={theme.warning}
+                title={t("reminders.permission.title")}
+                body={
+                  permission === "blocked"
+                    ? t("reminders.permission.blocked")
+                    : t("reminders.permission.ask", { time: clockTime })
+                }
+                label={
+                  permission === "blocked"
+                    ? t("reminders.permission.openSettings")
+                    : t("reminders.permission.action")
+                }
+                hint={
+                  permission === "blocked"
+                    ? t("a11y.reminders.openSettings.hint")
+                    : t("a11y.reminders.allow.hint")
+                }
                 theme={theme}
-                onGrant={setPermission}
+                onPress={() => {
+                  if (permission === "blocked") Linking.openSettings();
+                  else
+                    void requestReminderPermission().then((next) => {
+                      setPermission(next);
+                      if (next === "granted") rescheduleSoon();
+                    });
+                }}
+              />
+            ) : null}
+
+            {exactAlarm === "denied" && !exactAlarmDismissed ? (
+              <PermissionCard
+                icon={CALENDAR_ICON}
+                tint={theme.textSecondary}
+                title={t("reminders.exactAlarm.title")}
+                body={t("reminders.exactAlarm.body")}
+                label={t("reminders.exactAlarm.action")}
+                hint={t("a11y.reminders.exactAlarm.hint")}
+                theme={theme}
+                onPress={() => {
+                  void requestExactAlarmPermission().then((next) => {
+                    setExactAlarm(next);
+                    if (next === "granted") rescheduleSoon();
+                  });
+                }}
+                dismissLabel={t("reminders.exactAlarm.dismiss")}
+                onDismiss={dismissExactAlarmPrompt}
               />
             ) : null}
 
