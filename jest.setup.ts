@@ -60,6 +60,7 @@ jest.mock("expo-localization", () => ({
 
 jest.mock("expo-notifications", () => ({
   SchedulableTriggerInputTypes: { DATE: "date" },
+  AndroidImportance: { HIGH: 4 },
   setNotificationHandler: jest.fn(),
   getPermissionsAsync: jest.fn(async () => ({
     granted: true,
@@ -69,6 +70,15 @@ jest.mock("expo-notifications", () => ({
     granted: true,
     canAskAgain: true,
   })),
+  getExactAlarmPermissionsAsync: jest.fn(async () => ({
+    granted: true,
+    canAskAgain: false,
+  })),
+  requestExactAlarmPermissionsAsync: jest.fn(async () => ({
+    granted: true,
+    canAskAgain: false,
+  })),
+  setNotificationChannelAsync: jest.fn(async () => null),
   cancelAllScheduledNotificationsAsync: jest.fn(async () => undefined),
   scheduleNotificationAsync: jest.fn(async () => "notification-id"),
   getLastNotificationResponse: jest.fn(() => null),

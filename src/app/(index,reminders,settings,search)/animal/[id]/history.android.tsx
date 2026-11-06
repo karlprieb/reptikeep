@@ -22,7 +22,7 @@ import {
 import { router } from "expo-router";
 import { useState } from "react";
 import {
-  Animated,
+  ScrollView,
   StatusBar,
   StyleSheet,
   useWindowDimensions,
@@ -39,11 +39,7 @@ import { ActivityTypeFilter } from "@/components/activity-type-filter";
 import { AddActivitySheet } from "@/components/add-activity-sheet";
 import { AnimalNotFound, useAnimalRoute } from "@/components/animal-route";
 import { EmptyStateContent } from "@/components/empty-state";
-import {
-  ACTION_ICON_SIZE,
-  TOP_BAR_HEIGHT,
-  useScrollLift,
-} from "@/utils/form-sheet-shared";
+import { ACTION_ICON_SIZE, TOP_BAR_HEIGHT } from "@/utils/form-sheet-shared";
 import { Radius, Spacing, StackAboveFontScale } from "@/constants/theme";
 import { composeTextStyle } from "@/constants/type-font-compose";
 import { useAddActivity } from "@/hooks/use-add-activity";
@@ -193,7 +189,6 @@ export default function AnimalHistoryScreen() {
   const { fontScale } = useWindowDimensions();
   const { id, animal } = useAnimalRoute();
   const [menuOpen, setMenuOpen] = useState(false);
-  const { scrollY, lifted, onScroll } = useScrollLift();
   const {
     entries,
     types,
@@ -249,15 +244,13 @@ export default function AnimalHistoryScreen() {
   return (
     <View style={[historyStyles.root, { backgroundColor: theme.bg }]}>
       {entries.length === 0 ? (
-        <Animated.ScrollView
+        <ScrollView
           style={historyStyles.scroll}
           contentContainerStyle={{
             paddingTop: contentPaddingTop,
             paddingBottom: insets.bottom + Spacing.xl,
             paddingHorizontal: Spacing.md,
           }}
-          scrollEventThrottle={16}
-          onScroll={onScroll}
         >
           <ActivityPanel
             entries={entries}
@@ -265,16 +258,14 @@ export default function AnimalHistoryScreen() {
             animalName={animal.name}
             onAddActivity={addActivity.open}
           />
-        </Animated.ScrollView>
+        </ScrollView>
       ) : shown.length === 0 ? (
-        <Animated.ScrollView
+        <ScrollView
           style={historyStyles.scroll}
           contentContainerStyle={{
             paddingTop: contentPaddingTop,
             paddingBottom: insets.bottom + Spacing.xl,
           }}
-          scrollEventThrottle={16}
-          onScroll={onScroll}
         >
           <View style={historyStyles.emptyPanel}>{filterBar}</View>
           <View style={historyStyles.emptyPanel}>
@@ -283,21 +274,25 @@ export default function AnimalHistoryScreen() {
               onClear={clearFilters}
             />
           </View>
-        </Animated.ScrollView>
+        </ScrollView>
       ) : (
-        <ActivityHistoryList
-          entries={shown}
-          animalId={id}
-          background={theme.bg}
-          header={
-            <View style={historyStyles.filterBarRowInset}>{filterBar}</View>
-          }
-          scrollY={scrollY}
-          contentContainerStyle={{
-            paddingTop: contentPaddingTop,
-            paddingBottom: insets.bottom + Spacing.xl,
-          }}
-        />
+        <View
+          style={[
+            historyStyles.list,
+            {
+              paddingTop: contentPaddingTop,
+              paddingBottom: insets.bottom + Spacing.xl,
+            },
+          ]}
+        >
+          <View style={historyStyles.filterBarRowInset}>{filterBar}</View>
+
+          <ActivityHistoryList
+            entries={shown}
+            animalId={id}
+            background={theme.bg}
+          />
+        </View>
       )}
 
       <View
@@ -307,16 +302,9 @@ export default function AnimalHistoryScreen() {
         <StatusBar
           barStyle={scheme === "dark" ? "light-content" : "dark-content"}
         />
-        <Animated.View
+        <View
           pointerEvents="none"
           style={[StyleSheet.absoluteFill, { backgroundColor: theme.bg }]}
-        />
-        <Animated.View
-          pointerEvents="none"
-          style={[
-            StyleSheet.absoluteFill,
-            { backgroundColor: theme.surface, opacity: lifted },
-          ]}
         />
         <Host
           style={historyStyles.topBarHost}
@@ -465,6 +453,10 @@ const historyStyles = StyleSheet.create({
   },
   scroll: {
     flex: 1,
+  },
+  list: {
+    flex: 1,
+    width: "100%",
   },
   filterBar: {
     paddingBottom: Spacing.sm,

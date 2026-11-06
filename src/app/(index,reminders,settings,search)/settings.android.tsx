@@ -23,7 +23,13 @@ import {
 import { useValue } from "@legendapp/state/react";
 import { router } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
-import { Animated, KeyboardAvoidingView, StyleSheet, View } from "react-native";
+import {
+  Animated,
+  KeyboardAvoidingView,
+  Linking,
+  StyleSheet,
+  View,
+} from "react-native";
 import { useTranslation } from "react-i18next";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -31,10 +37,12 @@ import { BAR_HEIGHT, MaterialAppBar } from "@/components/material-app-bar";
 import { Spacing, type Theme } from "@/constants/theme";
 import { composeTextStyle, SECTION_LABEL } from "@/constants/type-font-compose";
 import { useCareScheduleEditor } from "@/hooks/use-care-schedule-editor";
+import { useReminderPermission } from "@/hooks/use-reminder-permission";
 import { useTheme } from "@/hooks/use-theme";
 import { SCHEDULE_FREQUENCIES } from "@/state/care-schedule";
 import { DEFECATION_TYPES } from "@/state/defecation";
 import { defaults$, FEEDING_MEASURES } from "@/state/logging-defaults";
+import { requestExactAlarmPermission } from "@/state/notifications";
 import { reminders$ } from "@/state/reminders";
 import { settings$, setLanguage, type LanguageSetting } from "@/state/settings";
 import { atClockTime, formatClockTime } from "@/utils/format-date";
@@ -60,6 +68,7 @@ export default function SettingsScreen() {
   const water = useCareScheduleEditor("water");
   const cleaning = useCareScheduleEditor("cleaning");
   const reminderTime = useValue(reminders$);
+  const [, , exactAlarm, setExactAlarm] = useReminderPermission();
 
   const [scrollY] = useState(() => new Animated.Value(0));
   const insets = useSafeAreaInsets();
@@ -163,6 +172,26 @@ export default function SettingsScreen() {
                 hint={t("a11y.reminders.time.hint")}
                 onClick={() => setShowTimePicker(true)}
               />
+              {exactAlarm ? (
+                <NavRow
+                  theme={theme}
+                  title={t("reminders.exactAlarm.title")}
+                  value={t(
+                    exactAlarm === "granted"
+                      ? "reminders.exactAlarm.on"
+                      : "reminders.exactAlarm.off",
+                  )}
+                  hint={t(
+                    exactAlarm === "granted"
+                      ? "a11y.reminders.openSettings.hint"
+                      : "a11y.reminders.exactAlarm.hint",
+                  )}
+                  onClick={() => {
+                    if (exactAlarm === "granted") void Linking.openSettings();
+                    else void requestExactAlarmPermission().then(setExactAlarm);
+                  }}
+                />
+              ) : null}
               <SectionFooter
                 theme={theme}
                 text={t("reminders.settings.footer")}

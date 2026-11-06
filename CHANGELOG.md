@@ -7,8 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- On Android, reminders can now arrive at the exact time you set, even in
+  battery saver. A card on Reminders and a row in Settings let you allow it. The
+  card goes away once allowed, or when you dismiss it. Without it, reminders
+  work as before.
+
 ### Changed
 
+- Activity history now stays fast and smooth even with thousands of records,
+  and its filter chips stay pinned at the top while you scroll. On Android, that
+  screen's top bar no longer changes shade as you scroll.
 - The reptile list's single-column view is now called Cards, to match Grid and
   List. Nothing moves; it is the same large photo card, just a clearer name.
 - Menu items now say Edit and Delete, with no repeated noun. The screen reader

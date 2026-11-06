@@ -1,7 +1,7 @@
 import { observe } from "@legendapp/state";
 import * as Notifications from "expo-notifications";
 import { AndroidImportance } from "expo-notifications";
-import { AppState } from "react-native";
+import { AppState, Platform } from "react-native";
 
 import i18n from "@/i18n";
 import { animals$ } from "@/state/animal";
@@ -39,6 +39,8 @@ const SETTLE_MS = 250;
 
 export type ReminderPermission = "granted" | "ask" | "blocked";
 
+export type ExactAlarmPermission = "granted" | "denied";
+
 function toPermission({
   granted,
   canAskAgain,
@@ -54,6 +56,18 @@ export async function reminderPermission(): Promise<ReminderPermission> {
 
 export async function requestReminderPermission(): Promise<ReminderPermission> {
   return toPermission(await Notifications.requestPermissionsAsync());
+}
+
+function toExactAlarm({ granted }: { granted: boolean }): ExactAlarmPermission {
+  return granted ? "granted" : "denied";
+}
+
+export async function exactAlarmPermission(): Promise<ExactAlarmPermission> {
+  return toExactAlarm(await Notifications.getExactAlarmPermissionsAsync());
+}
+
+export async function requestExactAlarmPermission(): Promise<ExactAlarmPermission> {
+  return toExactAlarm(await Notifications.requestExactAlarmPermissionsAsync());
 }
 
 function notificationBody(routines: ReminderDay["routines"]): string {
@@ -99,6 +113,10 @@ async function reschedule(): Promise<void> {
   await ensureCareChannel();
   if (run !== generation) return;
 
+  const alarmClock =
+    Platform.OS === "android" && (await exactAlarmPermission()) === "granted";
+  if (run !== generation) return;
+
   const { hour, minute } = reminders$.peek();
 
   for (const day of days) {
@@ -119,6 +137,7 @@ async function reschedule(): Promise<void> {
         type: Notifications.SchedulableTriggerInputTypes.DATE,
         date: at,
         channelId: CARE_CHANNEL_ID,
+        ...(alarmClock ? { delivery: "alarmClock" as const } : null),
       },
     });
 

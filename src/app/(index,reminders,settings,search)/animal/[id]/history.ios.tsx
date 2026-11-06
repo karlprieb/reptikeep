@@ -12,6 +12,7 @@ import {
   tint,
 } from "@expo/ui/swift-ui/modifiers";
 import { Stack } from "expo-router";
+import { useHeaderHeight } from "expo-router/react-navigation";
 import {
   ScrollView,
   StyleSheet,
@@ -19,6 +20,7 @@ import {
   View,
 } from "react-native";
 import { useTranslation } from "react-i18next";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import {
   ActivityHistoryList,
@@ -173,6 +175,8 @@ export default function AnimalHistoryScreen() {
   const theme = useTheme();
   const { t } = useTranslation();
   const { fontScale } = useWindowDimensions();
+  const headerHeight = useHeaderHeight();
+  const insets = useSafeAreaInsets();
   const { id, animal } = useAnimalRoute();
   const {
     entries,
@@ -246,12 +250,24 @@ export default function AnimalHistoryScreen() {
           </View>
         </ScrollView>
       ) : (
-        <ActivityHistoryList
-          entries={shown}
-          animalId={id}
-          background={theme.bg}
-          header={filterBar}
-        />
+        <View
+          style={[
+            styles.list,
+            {
+              backgroundColor: theme.bg,
+              paddingTop: headerHeight + Spacing.md,
+              paddingBottom: insets.bottom + Spacing.xl,
+            },
+          ]}
+        >
+          {filterBar}
+
+          <ActivityHistoryList
+            entries={shown}
+            animalId={id}
+            background={theme.bg}
+          />
+        </View>
       )}
 
       <PageHeader
