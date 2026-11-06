@@ -181,7 +181,11 @@ export default function SettingsScreen() {
                       ? "reminders.exactAlarm.on"
                       : "reminders.exactAlarm.off",
                   )}
-                  hint={t("a11y.reminders.exactAlarm.hint")}
+                  hint={t(
+                    exactAlarm === "granted"
+                      ? "a11y.reminders.openSettings.hint"
+                      : "a11y.reminders.exactAlarm.hint",
+                  )}
                   onClick={() => {
                     if (exactAlarm === "granted") void Linking.openSettings();
                     else void requestExactAlarmPermission().then(setExactAlarm);
