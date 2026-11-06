@@ -1,0 +1,4 @@
+Os lembretes agora podem chegar na hora exata que você escolheu, até com a economia de bateria ligada. Permita no cartão da tela Lembretes ou nos Ajustes.
+O histórico de atividades continua rápido e fluido mesmo com milhares de registros, e os filtros ficam fixos no topo.
+A visualização de uma coluna da lista de répteis agora se chama Cartões, e os menus dizem só Editar e Excluir.
+Atualizamos o motor por trás do app para mantê-lo em dia.

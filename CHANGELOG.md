@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.8.0] - 2026-11-06
+
 ### Added
 
 - On Android, reminders can now arrive at the exact time you set, even in
@@ -353,7 +355,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Reset app data** in Settings, which permanently clears every reptile and
   record on the device.
 
-[Unreleased]: https://github.com/karlprieb/reptikeep/compare/0.7.1...HEAD
+[Unreleased]: https://github.com/karlprieb/reptikeep/compare/0.8.0...HEAD
+[0.8.0]: https://github.com/karlprieb/reptikeep/compare/0.7.1...0.8.0
 [0.7.1]: https://github.com/karlprieb/reptikeep/compare/0.7.0...0.7.1
 [0.7.0]: https://github.com/karlprieb/reptikeep/compare/0.6.2...0.7.0
 [0.6.2]: https://github.com/karlprieb/reptikeep/compare/0.6.1...0.6.2

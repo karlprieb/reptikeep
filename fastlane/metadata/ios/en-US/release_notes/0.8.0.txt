@@ -1,0 +1,3 @@
+Activity history stays fast and smooth even with thousands of records, and the filter chips stay pinned at the top.
+The single-column reptile list view is now called Cards, and menus say just Edit and Delete.
+Updated the engine under the app to keep it current.

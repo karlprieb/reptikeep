@@ -1,0 +1,4 @@
+Reminders can now arrive at the exact time you set, even in battery saver. Allow it from the card on Reminders or from Settings.
+Activity history stays fast and smooth even with thousands of records, and the filter chips stay pinned at the top.
+The single-column reptile list view is now called Cards, and menus say just Edit and Delete.
+Updated the engine under the app to keep it current.
