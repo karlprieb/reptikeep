@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.0] - 2026-11-07
+
 ### Fixed
 
 - On iOS 27, saving an activity while a text field was still active no longer
@@ -360,7 +362,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Reset app data** in Settings, which permanently clears every reptile and
   record on the device.
 
-[Unreleased]: https://github.com/karlprieb/reptikeep/compare/0.8.0...HEAD
+[Unreleased]: https://github.com/karlprieb/reptikeep/compare/1.0.0...HEAD
+[1.0.0]: https://github.com/karlprieb/reptikeep/compare/0.8.0...1.0.0
 [0.8.0]: https://github.com/karlprieb/reptikeep/compare/0.7.1...0.8.0
 [0.7.1]: https://github.com/karlprieb/reptikeep/compare/0.7.0...0.7.1
 [0.7.0]: https://github.com/karlprieb/reptikeep/compare/0.6.2...0.7.0

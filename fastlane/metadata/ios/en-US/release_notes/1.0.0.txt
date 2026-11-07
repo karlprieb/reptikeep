@@ -1,0 +1,1 @@
+ReptiKeep 1.0 is here. Fixed a crash on iOS 27 that closed the app right after saving an activity while a text field was still active. The activity was saved either way.

@@ -1,0 +1,1 @@
+O ReptiKeep 1.0 chegou. Corrigimos um fechamento do app no iOS 27 que acontecia logo depois de salvar uma atividade com um campo de texto ainda ativo. A atividade já era salva mesmo assim.
