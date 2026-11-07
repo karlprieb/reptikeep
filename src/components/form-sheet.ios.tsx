@@ -12,6 +12,7 @@ import {
   tint,
 } from "@expo/ui/swift-ui/modifiers";
 import { router, Stack } from "expo-router";
+import { Keyboard } from "react-native";
 import { useTranslation } from "react-i18next";
 
 import { Typography } from "@/constants/theme";
@@ -41,6 +42,11 @@ export function FormSheetChrome({
   const colorScheme = useColorScheme();
   const { t } = useTranslation();
 
+  const closeAfter = (action: () => void) => () => {
+    Keyboard.dismiss();
+    action();
+  };
+
   return (
     <>
       <Stack.Title
@@ -54,7 +60,7 @@ export function FormSheetChrome({
           accessibilityLabel={t(`${namespace}.cancel`)}
           accessibilityHint={t(`${namespace}.cancelHint`)}
           disabled={cancelDisabled}
-          onPress={() => router.back()}
+          onPress={closeAfter(() => router.back())}
         >
           {t(`${namespace}.cancel`)}
         </Stack.Toolbar.Button>
@@ -76,7 +82,7 @@ export function FormSheetChrome({
           )}
           variant="done"
           disabled={saveDisabled}
-          onPress={onSave}
+          onPress={closeAfter(onSave)}
         >
           {t(`${namespace}.save`)}
         </Stack.Toolbar.Button>
