@@ -4,18 +4,15 @@ import { Keyboard } from "react-native";
 
 import { FormSheetChrome } from "@/components/form-sheet";
 
-function renderChrome(onSave = jest.fn()) {
-  return {
-    onSave,
-    screen: render(
-      <FormSheetChrome
-        namespace="shedForm"
-        animalName="Willow"
-        saveDisabled={false}
-        onSave={onSave}
-      />,
-    ),
-  };
+function renderChrome(onSave: () => void = jest.fn()) {
+  return render(
+    <FormSheetChrome
+      namespace="shedForm"
+      animalName="Willow"
+      saveDisabled={false}
+      onSave={onSave}
+    />,
+  );
 }
 
 describe("FormSheetChrome", () => {
@@ -24,9 +21,11 @@ describe("FormSheetChrome", () => {
     jest.spyOn(Keyboard, "dismiss").mockImplementation(() => {
       calls.push("dismiss");
     });
-    const { screen } = renderChrome(() => calls.push("save"));
+    const screen = await renderChrome(() => {
+      calls.push("save");
+    });
 
-    await fireEvent.press((await screen).getByLabelText("Save"));
+    await fireEvent.press(screen.getByLabelText("Save"));
 
     expect(calls).toEqual(["dismiss", "save"]);
   });
@@ -37,9 +36,9 @@ describe("FormSheetChrome", () => {
       calls.push("dismiss");
     });
     (router.back as jest.Mock).mockImplementation(() => calls.push("back"));
-    const { screen } = renderChrome();
+    const screen = await renderChrome();
 
-    await fireEvent.press((await screen).getByLabelText("Cancel"));
+    await fireEvent.press(screen.getByLabelText("Cancel"));
 
     expect(calls).toEqual(["dismiss", "back"]);
   });
