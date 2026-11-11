@@ -4,12 +4,15 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   beta:
     runs-on: ubuntu-latest
     steps:
+      - if: github.ref_type != 'tag'
+        run: echo "::error::Pick a release tag in 'Use workflow from', not a branch" && exit 1
+
       - uses: actions/checkout@v5
 
       - uses: DeterminateSystems/nix-installer-action@v23
@@ -36,3 +39,11 @@ jobs:
           ANDROID_RELEASE_KEY_PASSWORD: ${{ secrets.ANDROID_RELEASE_KEY_PASSWORD }}
           PLAY_JSON_KEY_CONTENT: ${{ secrets.PLAY_JSON_KEY_CONTENT }}
         run: nix develop .#android-ci -c fastlane android beta
+
+      - name: Attach the APK to the GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          VERSION=$(jq -r .expo.version app.json)
+          cp android/app/build/outputs/apk/release/app-release.apk "ReptiKeep-$VERSION.apk"
+          gh release upload "$VERSION" "ReptiKeep-$VERSION.apk" --clobber

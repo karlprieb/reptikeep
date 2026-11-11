@@ -54,3 +54,4 @@ example
 # fastlane
 fastlane/report.xml
 fastlane/.env
+build/
