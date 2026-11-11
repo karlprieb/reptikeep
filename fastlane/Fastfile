@@ -69,8 +69,7 @@ platform :android do
     end
 
     gradle(
-      task: "bundle",
-      build_type: "Release",
+      tasks: ["bundleRelease", "assembleRelease"],
       project_dir: File.expand_path("../android", __dir__)
     )
 
@@ -158,7 +157,9 @@ platform :ios do
     build_app(
       workspace: File.expand_path("../ios/ReptiKeep.xcworkspace", __dir__),
       scheme: "ReptiKeep",
-      export_method: "app-store"
+      export_method: "app-store",
+      output_directory: File.expand_path("../build", __dir__),
+      output_name: "ReptiKeep.ipa"
     )
 
     upload_to_testflight(
