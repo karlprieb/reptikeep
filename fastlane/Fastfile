@@ -1,5 +1,6 @@
 require "json"
 require "securerandom"
+require "tmpdir"
 
 platform :android do
   desc "Build a release APK"
@@ -168,6 +169,33 @@ platform :ios do
         "en-US" => { whats_new: changelog_en },
         "pt-BR" => { whats_new: changelog_pt }
       }
+    )
+  end
+
+  desc "Attach a tested TestFlight build to its App Store version, optionally submit it for review"
+  lane :release do
+    build_number = ENV["BUILD_NUMBER"].to_s
+    UI.user_error!("Set BUILD_NUMBER to the TestFlight build you tested") if build_number.empty?
+
+    version = JSON.parse(File.read(File.expand_path("../app.json", __dir__)))["expo"]["version"]
+    release_notes = %w[en-US pt-BR].to_h do |locale|
+      [locale, File.read(File.expand_path("metadata/ios/#{locale}/release_notes/#{version}.txt", __dir__)).strip]
+    end
+
+    deliver(
+      api_key: asc_api_key,
+      app_identifier: "app.reptikeep",
+      app_version: version,
+      build_number: build_number,
+      skip_binary_upload: true,
+      skip_screenshots: true,
+      metadata_path: Dir.mktmpdir,
+      release_notes: release_notes,
+      automatic_release: true,
+      submit_for_review: ENV["SUBMIT"] == "true",
+      submission_information: { add_id_info_uses_idfa: false },
+      run_precheck_before_submit: false,
+      force: true
     )
   end
 end

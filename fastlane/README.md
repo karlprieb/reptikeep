@@ -52,6 +52,14 @@ Generate/fetch the Apple Distribution cert and provisioning profile via match
 
 Build and upload a release build to TestFlight
 
+### ios release
+
+```sh
+[bundle exec] fastlane ios release
+```
+
+Attach a tested TestFlight build to its App Store version, optionally submit it for review
+
 ----
 
 This README.md is auto-generated and will be re-generated every time [_fastlane_](https://fastlane.tools) is run.

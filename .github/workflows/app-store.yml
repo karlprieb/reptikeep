@@ -1,0 +1,34 @@
+name: App Store
+
+on:
+  workflow_dispatch:
+    inputs:
+      build_number:
+        description: TestFlight build number
+        required: true
+        type: string
+      submit:
+        description: Submit for review (off = only attach the build and release notes)
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+jobs:
+  release:
+    runs-on: macos-26
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: DeterminateSystems/nix-installer-action@v23
+      - uses: DeterminateSystems/magic-nix-cache-action@v15
+
+      - name: Attach the tested build to the App Store version
+        env:
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+          ASC_KEY_CONTENT: ${{ secrets.ASC_KEY_CONTENT }}
+          BUILD_NUMBER: ${{ inputs.build_number }}
+          SUBMIT: ${{ inputs.submit }}
+        run: nix develop .#ios-ci -c fastlane ios release
