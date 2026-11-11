@@ -14,6 +14,22 @@ I'm building this app around my own needs as a reptile keeper. That means it's o
 
 Right now the app is fully local. Eventually I plan to offer an optional, paid sync server for people who want to access their data from multiple devices or the web and keep everything in sync — or for households where more than one person takes care of the same animals.
 
+## Get the app
+
+- [App Store](https://apps.apple.com/app/id6798089328) for iPhone.
+- [TestFlight](https://testflight.apple.com/join/NE9QP7kc) if you want new builds before they reach the App Store.
+
+### Android beta
+
+The Android app is still in closed testing on Google Play. To try it:
+
+1. Join the [testers group](https://groups.google.com/g/reptikeep-testers) by clicking "Join group". Membership is what makes you eligible to test.
+2. Open the [testing page](https://play.google.com/apps/testing/app.reptikeep) and click "Become a tester".
+3. Wait a few minutes, then click the download button on that same page.
+4. It sends you to the Play Store, where you can install the app.
+
+If the Play Store says the app isn't available, give it a few more minutes and try again. Access can take a little while to kick in.
+
 ## Screenshots
 
 <p align="center">
