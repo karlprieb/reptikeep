@@ -10,7 +10,7 @@
       "icon": "./assets/ios.icon",
       "bundleIdentifier": "app.reptikeep",
       "appleTeamId": "3K9KUB8992",
-      "buildNumber": "4",
+      "buildNumber": "1",
       "associatedDomains": ["applinks:reptikeep.com"],
       "config": {
         "usesNonExemptEncryption": false
@@ -23,7 +23,7 @@
         "monochromeImage": "./assets/adaptive-icon-monochrome.png",
         "backgroundColor": "#FBF7EE"
       },
-      "versionCode": 2,
+      "versionCode": 1,
       "predictiveBackGestureEnabled": true,
       "allowBackup": false,
       "permissions": ["android.permission.SCHEDULE_EXACT_ALARM"],
