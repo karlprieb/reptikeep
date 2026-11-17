@@ -171,4 +171,34 @@ describe("AddMedicalSheet documents", () => {
       [],
     );
   });
+
+  it("keeps a link to a deleted feeding when editing something else", async () => {
+    const record = createMedicalActivity({
+      animalId: ANIMAL_ID,
+      summary: "Regurgitation",
+      kind: "regurgitation",
+      feedingId: "deleted-feeding",
+    });
+    medicalStore.add(record);
+    const save = jest
+      .spyOn(medical, "saveMedicalActivity")
+      .mockResolvedValueOnce(undefined as never);
+
+    const screen = await render(
+      <AddMedicalSheet
+        animalId={ANIMAL_ID}
+        animalName="Juno"
+        activity={record}
+        kind="regurgitation"
+        feedingId="deleted-feeding"
+      />,
+    );
+    await fireEvent.press(screen.getByLabelText("Save"));
+
+    expect(save).toHaveBeenCalledWith(
+      expect.objectContaining({ feedingId: "deleted-feeding" }),
+      [],
+      [],
+    );
+  });
 });

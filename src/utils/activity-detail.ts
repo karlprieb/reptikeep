@@ -197,6 +197,7 @@ function medicalDetail(
   entry: Extract<AnimalActivity, { type: "medical" }>,
   t: TFunction,
   feedings: Record<string, FeedingActivity>,
+  unit: WeightUnit,
 ): Detail {
   const kind = medicalKind(entry.record);
   const linked = entry.record.feedingId
@@ -225,7 +226,7 @@ function medicalDetail(
             {
               key: "feeding",
               label: t("medicalForm.feedingLabel"),
-              value: feedingLabel(feeding),
+              value: feedingLabel(feeding, unit),
               mono: true,
             },
           ]
@@ -300,7 +301,7 @@ export function buildActivityDetail(
     case "habitat":
       return habitatDetail(entry, t);
     case "medical":
-      return medicalDetail(entry, t, feedings);
+      return medicalDetail(entry, t, feedings, weightUnit);
     case "shed":
     case "poop":
       return observationDetail(entry, t);

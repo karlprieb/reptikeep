@@ -404,7 +404,8 @@
     "feeding": "Meal",
     "feedingLabel": "Regurgitated meal",
     "feedingNone": "Not linked",
-    "feedingHint": "Accepted feedings from the {{days}} days before."
+    "feedingHint": "Accepted feedings from the {{days}} days before.",
+    "feedingDeleted": "Deleted meal"
   },
   "weightForm": {
     "title": "Log weight",

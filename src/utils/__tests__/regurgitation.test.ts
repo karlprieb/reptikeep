@@ -1,6 +1,8 @@
 import { createFeedingActivity } from "@/state/feeding";
 import { createMedicalActivity } from "@/state/medical";
 import {
+  feedingChoices,
+  feedingLabel,
   recentFeedings,
   regurgitationFor,
   takenFeedings,
@@ -95,5 +97,45 @@ describe("takenFeedings", () => {
         takenFeedings(medical, linked.id),
       ).map((f) => f.id),
     ).toEqual(["recent", "older"]);
+  });
+});
+
+describe("regurgitationFor validity", () => {
+  it("ignores a link once the feeding moved after it or was refused", () => {
+    const linked = createMedicalActivity({
+      animalId: "a",
+      occurredAt: "2026-03-18T12:00:00.000Z",
+      summary: "Regurgitation",
+      kind: "regurgitation",
+      feedingId: "recent",
+    });
+    const medical = { [linked.id]: linked };
+
+    expect(
+      regurgitationFor(medical, {
+        ...feedings.recent,
+        occurredAt: "2026-03-19T12:00:00.000Z",
+      }),
+    ).toBeUndefined();
+    expect(
+      regurgitationFor(medical, { ...feedings.recent, refused: true }),
+    ).toBeUndefined();
+  });
+});
+
+describe("meal labels", () => {
+  const t = ((key: string) => key) as never;
+
+  it("include the feeder weight", () => {
+    expect(feedingLabel({ ...feedings.recent, weight: 45 }, "g")).toContain(
+      "45 g",
+    );
+  });
+
+  it("keep a deleted link as its own choice", () => {
+    expect(feedingChoices([], t, "g", "gone").map((c) => c.value)).toEqual([
+      "gone",
+      "none",
+    ]);
   });
 });

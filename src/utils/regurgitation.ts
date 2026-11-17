@@ -3,6 +3,8 @@ import type { TFunction } from "i18next";
 import type { FeedingActivity } from "@/state/feeding";
 import type { MedicalActivity } from "@/state/medical";
 import { formatAbsoluteDate, formatAbsoluteTime } from "@/utils/format-date";
+import { formatWeight } from "@/utils/format-number";
+import type { WeightUnit } from "@/utils/weight-unit";
 
 export const REGURGITATION_WINDOW_DAYS = 14;
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -46,7 +48,7 @@ export function regurgitationFor(
     (record) =>
       record.kind === "regurgitation" &&
       record.feedingId === feeding.id &&
-      record.animalId === feeding.animalId,
+      linkableFeeding(feeding, record.animalId, new Date(record.occurredAt)),
   );
 }
 
@@ -66,12 +68,16 @@ export function takenFeedings(
   );
 }
 
-export function feedingLabel(feeding: FeedingActivity): string {
+export function feedingLabel(
+  feeding: FeedingActivity,
+  unit: WeightUnit,
+): string {
   return [
     formatAbsoluteDate(feeding.occurredAt),
     formatAbsoluteTime(feeding.occurredAt),
     feeding.foodType,
     feeding.amount,
+    feeding.weight != null ? formatWeight(feeding.weight, unit) : undefined,
   ]
     .filter(Boolean)
     .join(" · ");
@@ -82,12 +88,17 @@ export const NO_FEEDING = "none";
 export function feedingChoices(
   feedings: FeedingActivity[],
   t: TFunction,
+  unit: WeightUnit,
+  deletedId?: string,
 ): { value: string; label: string }[] {
   return [
     ...feedings.map((feeding) => ({
       value: feeding.id,
-      label: feedingLabel(feeding),
+      label: feedingLabel(feeding, unit),
     })),
+    ...(deletedId
+      ? [{ value: deletedId, label: t("medicalForm.feedingDeleted") }]
+      : []),
     { value: NO_FEEDING, label: t("medicalForm.feedingNone") },
   ];
 }

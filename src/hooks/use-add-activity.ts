@@ -45,6 +45,7 @@ export function useAddActivity(animalId: string | undefined) {
         return;
       }
 
+      setStep("activity");
       if (picked.kind)
         router.push({
           pathname: "/animal/[id]/medical",

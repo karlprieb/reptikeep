@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { feedingStore } from "@/state/feeding";
+import { useAnimalDefaults } from "@/state/logging-defaults";
 import { medicalStore } from "@/state/medical";
 import {
   feedingChoices,
@@ -21,8 +22,13 @@ export function useFeedingLink(
   const { t } = useTranslation();
   const feedings = useValue(feedingStore.$);
   const medical = useValue(medicalStore.$);
+  const { weightUnit } = useAnimalDefaults(animalId);
   const [picked, setSelected] = useState<string>();
   const wanted = picked ?? initialFeedingId;
+  const deletedId =
+    picked === undefined && initialFeedingId && !feedings[initialFeedingId]
+      ? initialFeedingId
+      : undefined;
   const choices = feedingChoices(
     recentFeedings(
       feedings,
@@ -32,6 +38,8 @@ export function useFeedingLink(
       takenFeedings(medical, editingId),
     ),
     t,
+    weightUnit,
+    deletedId,
   );
   const isChoice = (id: string | undefined) =>
     choices.some((choice) => choice.value === id);

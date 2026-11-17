@@ -404,7 +404,8 @@
     "feeding": "Refeição",
     "feedingLabel": "Refeição regurgitada",
     "feedingNone": "Sem vínculo",
-    "feedingHint": "Alimentações aceitas nos {{days}} dias anteriores."
+    "feedingHint": "Alimentações aceitas nos {{days}} dias anteriores.",
+    "feedingDeleted": "Refeição excluída"
   },
   "weightForm": {
     "title": "Registrar peso",
