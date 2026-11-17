@@ -325,7 +325,7 @@
     },
     "medical": {
       "title": "Saúde",
-      "description": "Tratamento ou regurgitação"
+      "description": "Cuidados e regurgitação"
     },
     "healthTitle": "Saúde",
     "healthPrompt": "O que aconteceu com {{animalName}}?",

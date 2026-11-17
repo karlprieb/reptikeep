@@ -13,6 +13,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   from Health or from the feeding itself. Medical records are now called Health,
   and the feeding shows when it was brought up.
 
+### Changed
+
+- The cards in the add record sheet are now square, with their icon and text
+  centered.
+
 ## [1.0.0] - 2026-11-07
 
 ### Fixed
