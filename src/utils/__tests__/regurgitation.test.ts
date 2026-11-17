@@ -84,9 +84,13 @@ describe("takenFeedings", () => {
     const medical = { [linked.id]: linked };
 
     expect(
-      recentFeedings(feedings, "a", NOW, undefined, takenFeedings(medical)).map(
-        (f) => f.id,
-      ),
+      recentFeedings(
+        feedings,
+        "a",
+        NOW,
+        undefined,
+        takenFeedings(medical, feedings),
+      ).map((f) => f.id),
     ).toEqual(["older"]);
     expect(
       recentFeedings(
@@ -94,7 +98,7 @@ describe("takenFeedings", () => {
         "a",
         NOW,
         "recent",
-        takenFeedings(medical, linked.id),
+        takenFeedings(medical, feedings, linked.id),
       ).map((f) => f.id),
     ).toEqual(["recent", "older"]);
   });
@@ -137,5 +141,21 @@ describe("meal labels", () => {
       "gone",
       "none",
     ]);
+  });
+});
+
+describe("takenFeedings validity", () => {
+  it("frees a meal whose link no longer holds", () => {
+    const linked = createMedicalActivity({
+      animalId: "a",
+      occurredAt: "2026-03-16T12:00:00.000Z",
+      summary: "Regurgitation",
+      kind: "regurgitation",
+      feedingId: "recent",
+    });
+
+    expect(takenFeedings({ [linked.id]: linked }, feedings).has("recent")).toBe(
+      false,
+    );
   });
 });

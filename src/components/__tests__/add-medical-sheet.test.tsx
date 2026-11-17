@@ -201,4 +201,22 @@ describe("AddMedicalSheet documents", () => {
       [],
     );
   });
+
+  it("never offers an unknown feeding from the URL on a new record", async () => {
+    const save = jest
+      .spyOn(medical, "saveMedicalActivity")
+      .mockResolvedValueOnce(undefined as never);
+
+    const screen = await render(
+      <AddMedicalSheet
+        animalId={ANIMAL_ID}
+        animalName="Juno"
+        kind="regurgitation"
+        feedingId="../x"
+      />,
+    );
+    await fireEvent.press(screen.getByLabelText("Save"));
+
+    expect(save.mock.calls[0][0].feedingId).toBeUndefined();
+  });
 });

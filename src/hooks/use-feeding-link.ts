@@ -26,7 +26,7 @@ export function useFeedingLink(
   const [picked, setSelected] = useState<string>();
   const wanted = picked ?? initialFeedingId;
   const deletedId =
-    picked === undefined && initialFeedingId && !feedings[initialFeedingId]
+    editingId && initialFeedingId && !feedings[initialFeedingId]
       ? initialFeedingId
       : undefined;
   const choices = feedingChoices(
@@ -35,7 +35,7 @@ export function useFeedingLink(
       animalId,
       occurredAt,
       wanted,
-      takenFeedings(medical, editingId),
+      takenFeedings(medical, feedings, editingId),
     ),
     t,
     weightUnit,
