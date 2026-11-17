@@ -54,6 +54,8 @@ const KIND_ICONS = { general: HOSPITAL_ICON, regurgitation: RESTAURANT_ICON };
 const BADGE_DIAMETER = 64;
 const BADGE_SYMBOL_RATIO = 0.55;
 const CARD_MIN_HEIGHT = 156;
+// Material 3 caps ModalBottomSheet at 640dp.
+const SHEET_MAX_WIDTH = 640;
 
 type AddActivitySheetProps = {
   visible: boolean;
@@ -101,7 +103,9 @@ export function AddActivitySheet({
   const iconSize = 24 * Math.min(fontScale, 2);
   const columns = selectCardColumns(fontScale);
   const cardMinHeight =
-    columns === 2 ? (width - Spacing.lg * 2 - Spacing.sm) / 2 : CARD_MIN_HEIGHT;
+    columns === 2
+      ? (Math.min(width, SHEET_MAX_WIDTH) - Spacing.lg * 2 - Spacing.sm) / 2
+      : CARD_MIN_HEIGHT;
 
   return (
     <Host key={step} style={styles.host} matchContents pointerEvents="box-none">
