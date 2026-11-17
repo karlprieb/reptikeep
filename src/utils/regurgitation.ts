@@ -54,16 +54,17 @@ export function regurgitationFor(
 
 export function takenFeedings(
   medical: Record<string, MedicalActivity>,
-  feedings: Record<string, FeedingActivity>,
   exceptRecordId?: string,
 ): Set<string> {
   return new Set(
-    Object.values(feedings)
-      .filter((feeding) => {
-        const owner = regurgitationFor(medical, feeding);
-        return owner && owner.id !== exceptRecordId;
-      })
-      .map((feeding) => feeding.id),
+    Object.values(medical)
+      .filter(
+        (record) =>
+          record.kind === "regurgitation" &&
+          record.feedingId &&
+          record.id !== exceptRecordId,
+      )
+      .map((record) => record.feedingId!),
   );
 }
 

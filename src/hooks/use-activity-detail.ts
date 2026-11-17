@@ -10,7 +10,7 @@ import { medicalStore } from "@/state/medical";
 import { weightStore } from "@/state/weight";
 import { buildActivityDetail } from "@/utils/activity-detail";
 import type { AnimalActivity } from "@/utils/animal-activity";
-import { regurgitationFor } from "@/utils/regurgitation";
+import { takenFeedings } from "@/utils/regurgitation";
 import { confirmDeleteActivity } from "@/utils/confirm-delete-activity";
 import { formatAbsoluteDate, formatAbsoluteTime } from "@/utils/format-date";
 
@@ -45,7 +45,7 @@ export function useActivityDetail(entry: AnimalActivity) {
   const logRegurgitation =
     entry.type === "feed" &&
     !entry.record.refused &&
-    !regurgitationFor(medical, entry.record)
+    !takenFeedings(medical).has(entry.id)
       ? () =>
           router.replace({
             pathname: "/animal/[id]/medical",

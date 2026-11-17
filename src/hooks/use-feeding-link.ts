@@ -35,7 +35,7 @@ export function useFeedingLink(
       animalId,
       occurredAt,
       wanted,
-      takenFeedings(medical, feedings, editingId),
+      takenFeedings(medical, editingId),
     ),
     t,
     weightUnit,
