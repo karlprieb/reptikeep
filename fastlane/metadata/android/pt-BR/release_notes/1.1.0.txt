@@ -1,0 +1,3 @@
+Agora dá para registrar uma regurgitação e vinculá-la à refeição que veio antes, pela Saúde ou direto na alimentação. A alimentação passa a mostrar quando foi regurgitada.
+Os registros médicos agora se chamam Saúde.
+Os cartões de Adicionar registro agora são quadrados, com ícone e texto centralizados.
