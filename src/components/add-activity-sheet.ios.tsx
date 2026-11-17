@@ -7,7 +7,6 @@ import {
   Host,
   Image,
   ScrollView,
-  Spacer,
   Text,
   VStack,
   ZStack,
@@ -195,15 +194,15 @@ export function AddActivitySheet({
                   ]}
                 >
                   <VStack
-                    alignment="leading"
+                    alignment="center"
                     spacing={Spacing.md}
                     modifiers={[
                       padding({ all: Spacing.md }),
                       frame({
                         minWidth: cardWidth,
                         maxWidth: cardWidth,
-                        minHeight: CARD_MIN_HEIGHT,
-                        alignment: "topLeading",
+                        minHeight: columns === 2 ? cardWidth : CARD_MIN_HEIGHT,
+                        alignment: "center",
                       }),
                       glassEffect({
                         glass: { variant: "regular", interactive: true },
@@ -242,9 +241,7 @@ export function AddActivitySheet({
                       />
                     </ZStack>
 
-                    <Spacer />
-
-                    <VStack alignment="leading" spacing={Spacing["2xs"]}>
+                    <VStack alignment="center" spacing={Spacing["2xs"]}>
                       <Text
                         modifiers={[
                           typeFont("heading"),

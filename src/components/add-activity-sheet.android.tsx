@@ -74,7 +74,7 @@ export function AddActivitySheet({
 }: AddActivitySheetProps) {
   const theme = useTheme();
   const { t } = useTranslation();
-  const { fontScale } = useWindowDimensions();
+  const { width, fontScale } = useWindowDimensions();
   const [mounted, setMounted] = useState(visible);
   const sheetRef = useRef<ModalBottomSheetRef>(null);
   if (visible && !mounted) setMounted(true);
@@ -100,6 +100,8 @@ export function AddActivitySheet({
 
   const iconSize = 24 * Math.min(fontScale, 2);
   const columns = selectCardColumns(fontScale);
+  const cardMinHeight =
+    columns === 2 ? (width - Spacing.lg * 2 - Spacing.sm) / 2 : CARD_MIN_HEIGHT;
 
   return (
     <Host key={step} style={styles.host} matchContents pointerEvents="box-none">
@@ -178,6 +180,7 @@ export function AddActivitySheet({
                   <ActivityCardButton
                     key={cardKey(card)}
                     card={card}
+                    minHeight={cardMinHeight}
                     theme={theme}
                     onPress={() => handlePick(card.type, card.kind)}
                     accessibilityLabel={t(card.titleKey)}
@@ -195,12 +198,14 @@ export function AddActivitySheet({
 
 function ActivityCardButton({
   card,
+  minHeight,
   theme,
   onPress,
   accessibilityLabel,
   accessibilityDescription,
 }: {
   card: ActivityCard;
+  minHeight: number;
   theme: ReturnType<typeof useTheme>;
   onPress: () => void;
   accessibilityLabel: string;
@@ -208,9 +213,10 @@ function ActivityCardButton({
 }) {
   return (
     <Box
+      contentAlignment="center"
       modifiers={[
         weight(1),
-        defaultMinSize({ minHeight: CARD_MIN_HEIGHT }),
+        defaultMinSize({ minHeight }),
         clip(Shapes.RoundedCorner(Radius.xl)),
         background(theme.surface),
         clickable(onPress),
@@ -225,11 +231,10 @@ function ActivityCardButton({
       ]}
     >
       <Column
-        horizontalAlignment="start"
-        verticalArrangement="spaceBetween"
+        horizontalAlignment="center"
+        verticalArrangement={{ spacedBy: Spacing.md }}
         modifiers={[
           fillMaxWidth(),
-          defaultMinSize({ minHeight: CARD_MIN_HEIGHT }),
           padding(Spacing.md, Spacing.md, Spacing.md, Spacing.md),
         ]}
       >
@@ -251,7 +256,7 @@ function ActivityCardButton({
         </Box>
 
         <Column
-          horizontalAlignment="start"
+          horizontalAlignment="center"
           verticalArrangement={{ spacedBy: Spacing["2xs"] }}
         >
           <Text
