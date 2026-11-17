@@ -324,8 +324,18 @@
       "description": "Water & cleaning"
     },
     "medical": {
-      "title": "Medical",
-      "description": "Log care or treatment"
+      "title": "Health",
+      "description": "Treatment or regurgitation"
+    },
+    "healthTitle": "Health",
+    "healthPrompt": "What happened to {{animalName}}?",
+    "regurgitation": {
+      "title": "Regurgitation",
+      "description": "Brought up a meal"
+    },
+    "medicalNote": {
+      "title": "Medical note",
+      "description": "Illness or treatment"
     }
   },
   "feedingForm": {
@@ -364,13 +374,13 @@
     "notesPlaceholder": "Add an observation"
   },
   "medicalForm": {
-    "title": "Log medical record",
-    "editTitle": "Edit medical record",
+    "title": "Log health record",
+    "editTitle": "Edit health record",
     "cancel": "Cancel",
     "cancelHint": "Dismisses without saving",
     "save": "Save",
-    "saveHint": "Adds this medical record to {{animalName}}'s history",
-    "editSaveHint": "Saves these changes to this medical record",
+    "saveHint": "Adds this health record to {{animalName}}'s history",
+    "editSaveHint": "Saves these changes to this health record",
     "timing": "Timing",
     "when": "When",
     "timingHint": "Logging for {{animalName}}. Backdate this to when it happened.",
@@ -382,11 +392,19 @@
     "addDocument": "Add document",
     "removeDocument": "Remove document",
     "removeDocumentTitle": "Remove {{title}}?",
-    "removeDocumentMessage": "This removes the document when you save this medical record.",
+    "removeDocumentMessage": "This removes the document when you save this health record.",
     "removeDocumentConfirm": "Remove",
     "documentTooLarge": "This document is {{size}}. Choose one smaller than {{limit}}.",
     "unsupportedDocument": "That file type isn't supported. Choose a PDF, JPG, PNG, or HEIC.",
-    "saveError": "We couldn't save this medical record. Try again."
+    "saveError": "We couldn't save this health record. Try again.",
+    "kind": {
+      "general": "Medical note",
+      "regurgitation": "Regurgitation"
+    },
+    "feeding": "Meal",
+    "feedingLabel": "Regurgitated meal",
+    "feedingNone": "Not linked",
+    "feedingHint": "Accepted feedings from the {{days}} days before."
   },
   "weightForm": {
     "title": "Log weight",
@@ -789,7 +807,7 @@
       "poop": "Poop",
       "weight": "Growth",
       "habitat": "Habitat",
-      "medical": "Medical"
+      "medical": "Health"
     }
   },
   "activityDetail": {
@@ -811,7 +829,11 @@
     "yes": "Yes",
     "no": "No",
     "recordedOn": "Logged on {{date}}, after the fact.",
-    "loggedFor": "Logged for {{animalName}}."
+    "loggedFor": "Logged for {{animalName}}.",
+    "kind": "Type",
+    "afterFeeding": "After feeding",
+    "regurgitated": "Regurgitated",
+    "logRegurgitation": "Log regurgitation"
   },
   "schedule": {
     "frequency": {

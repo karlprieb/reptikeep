@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- You can now log a regurgitation and link it to the meal it followed, either
+  from Health or from the feeding itself. Medical records are now called Health,
+  and the feeding shows when it was brought up.
+
 ## [1.0.0] - 2026-11-07
 
 ### Fixed

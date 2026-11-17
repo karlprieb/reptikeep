@@ -239,6 +239,46 @@ describe("backup archive validation", () => {
     ).rejects.toThrow("activity");
   });
 
+  it.each([
+    [5, {}, true],
+    [5, { kind: "general" }, true],
+    [5, { kind: "regurgitation", feedingId: "feed-1" }, true],
+    [5, { kind: "regurgitation", feedingId: "gone-1" }, true],
+    [5, { kind: "vet" }, false],
+    [5, { kind: "regurgitation", feedingId: "../x" }, false],
+    [5, { feedingId: "feed-1" }, false],
+    [5, { kind: "regurgitation", feedingId: "foreign-1" }, false],
+    [4, { kind: "general" }, false],
+  ])("validates v%i medical fields %j", async (schemaVersion, extra, valid) => {
+    const record = activity("medical", { summary: "Exam", ...extra });
+    const otter = { ...animal, id: "otter-1", name: "Otter" };
+    const parsed = parseBackup(
+      archive(
+        {
+          ...manifest,
+          schemaVersion,
+          inventory: { animals: 2, records: 0, photos: 0 },
+        },
+        {
+          ...husbandry,
+          animals: { ...husbandry.animals, [otter.id]: otter },
+          feedings: {
+            "feed-1": activity("feed", { frozen: false, refused: false }),
+            "foreign-1": {
+              ...activity("feed", { frozen: false, refused: false }),
+              id: "foreign-1",
+              animalId: otter.id,
+            },
+          },
+          documents: {},
+          medical: { [record.id]: record },
+        },
+      ),
+    );
+    if (valid) await expect(parsed).resolves.toBeDefined();
+    else await expect(parsed).rejects.toThrow("activity");
+  });
+
   it("rejects traversal paths before inflate", async () => {
     await expect(
       parseBackup(archive(manifest, husbandry, { "../photo.webp": webp })),

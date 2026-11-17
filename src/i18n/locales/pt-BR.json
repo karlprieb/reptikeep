@@ -324,8 +324,18 @@
       "description": "Água e limpeza"
     },
     "medical": {
-      "title": "Médico",
-      "description": "Registrar cuidado ou tratamento"
+      "title": "Saúde",
+      "description": "Tratamento ou regurgitação"
+    },
+    "healthTitle": "Saúde",
+    "healthPrompt": "O que aconteceu com {{animalName}}?",
+    "regurgitation": {
+      "title": "Regurgitação",
+      "description": "Regurgitou uma refeição"
+    },
+    "medicalNote": {
+      "title": "Nota médica",
+      "description": "Doença ou tratamento"
     }
   },
   "feedingForm": {
@@ -364,13 +374,13 @@
     "notesPlaceholder": "Adicione uma observação"
   },
   "medicalForm": {
-    "title": "Registrar atendimento médico",
-    "editTitle": "Editar atendimento médico",
+    "title": "Registrar saúde",
+    "editTitle": "Editar registro de saúde",
     "cancel": "Cancelar",
     "cancelHint": "Descarta sem salvar",
     "save": "Salvar",
-    "saveHint": "Adiciona este atendimento médico ao histórico de {{animalName}}",
-    "editSaveHint": "Salva estas alterações neste atendimento médico",
+    "saveHint": "Adiciona este registro de saúde ao histórico de {{animalName}}",
+    "editSaveHint": "Salva estas alterações neste registro de saúde",
     "timing": "Quando",
     "when": "Data e hora",
     "timingHint": "Registrando para {{animalName}}. Ajuste para quando aconteceu.",
@@ -382,11 +392,19 @@
     "addDocument": "Adicionar documento",
     "removeDocument": "Remover documento",
     "removeDocumentTitle": "Remover {{title}}?",
-    "removeDocumentMessage": "Isto remove o documento quando você salvar este atendimento médico.",
+    "removeDocumentMessage": "Isto remove o documento quando você salvar este registro de saúde.",
     "removeDocumentConfirm": "Remover",
     "documentTooLarge": "Este documento tem {{size}}. Escolha um menor que {{limit}}.",
     "unsupportedDocument": "Este tipo de arquivo não é aceito. Escolha um PDF, JPG, PNG ou HEIC.",
-    "saveError": "Não foi possível salvar este atendimento médico. Tente novamente."
+    "saveError": "Não foi possível salvar este registro de saúde. Tente novamente.",
+    "kind": {
+      "general": "Nota médica",
+      "regurgitation": "Regurgitação"
+    },
+    "feeding": "Refeição",
+    "feedingLabel": "Refeição regurgitada",
+    "feedingNone": "Sem vínculo",
+    "feedingHint": "Alimentações aceitas nos {{days}} dias anteriores."
   },
   "weightForm": {
     "title": "Registrar peso",
@@ -789,7 +807,7 @@
       "poop": "Fezes",
       "weight": "Crescimento",
       "habitat": "Habitat",
-      "medical": "Médico"
+      "medical": "Saúde"
     }
   },
   "activityDetail": {
@@ -811,7 +829,11 @@
     "yes": "Sim",
     "no": "Não",
     "recordedOn": "Registrado em {{date}}, depois do ocorrido.",
-    "loggedFor": "Registrado para {{animalName}}."
+    "loggedFor": "Registrado para {{animalName}}.",
+    "kind": "Tipo",
+    "afterFeeding": "Após a alimentação",
+    "regurgitated": "Regurgitou",
+    "logRegurgitation": "Registrar regurgitação"
   },
   "schedule": {
     "frequency": {

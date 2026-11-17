@@ -5,6 +5,7 @@ import { Alert } from "react-native";
 import { AddMedicalSheet } from "@/components/add-medical-sheet";
 import { addDocument, documents$ } from "@/state/document";
 import * as medical from "@/state/medical";
+import { createFeedingActivity, feedingStore } from "@/state/feeding";
 import { createMedicalActivity, medicalStore } from "@/state/medical";
 import * as storage from "@/utils/animal-document-storage";
 
@@ -29,6 +30,7 @@ const ANIMAL_ID = "animal-1";
 
 beforeEach(() => {
   medicalStore.clear();
+  feedingStore.clear();
   documents$.set({});
   jest.clearAllMocks();
 });
@@ -91,7 +93,7 @@ describe("AddMedicalSheet documents", () => {
     await fireEvent.press(screen.getByLabelText("Save"));
 
     expect(
-      screen.getByText("We couldn't save this medical record. Try again."),
+      screen.getByText("We couldn't save this health record. Try again."),
     ).toBeTruthy();
   });
 
@@ -138,5 +140,35 @@ describe("AddMedicalSheet documents", () => {
     );
 
     expect(screen.queryByText("Vet invoice")).toBeNull();
+  });
+
+  it("links a regurgitation to the latest feeding by default", async () => {
+    const meal = createFeedingActivity({
+      animalId: ANIMAL_ID,
+      occurredAt: new Date(Date.now() - 3 * 86400000).toISOString(),
+    });
+    feedingStore.add(meal);
+    const save = jest
+      .spyOn(medical, "saveMedicalActivity")
+      .mockResolvedValueOnce(undefined as never);
+
+    const screen = await render(
+      <AddMedicalSheet
+        animalId={ANIMAL_ID}
+        animalName="Juno"
+        kind="regurgitation"
+      />,
+    );
+    await fireEvent.press(screen.getByLabelText("Save"));
+
+    expect(save).toHaveBeenCalledWith(
+      expect.objectContaining({
+        kind: "regurgitation",
+        feedingId: meal.id,
+        summary: "Regurgitation",
+      }),
+      [],
+      [],
+    );
   });
 });

@@ -21,6 +21,7 @@ import {
   contentShape,
   controlSize,
   font,
+  fixedSize,
   foregroundStyle,
   frame,
   glassEffect,
@@ -44,9 +45,13 @@ import {
 } from "@/constants/theme";
 import { typeFont } from "@/constants/type-font";
 import { useTheme } from "@/hooks/use-theme";
+import type { MedicalKind } from "@/state/medical";
 import {
   CARD_MIN_HEIGHT,
+  cardKey,
   cardRows,
+  cardsFor,
+  type AddSheetStep,
   selectCardColumns,
   sheetScrolls,
 } from "@/utils/activity-sheet-layout";
@@ -54,18 +59,24 @@ import {
 const BADGE_DIAMETER = 64;
 const BADGE_SYMBOL_SIZE = 30;
 const CLOSE_BUTTON_SIZE = 48;
+const KIND_SYMBOLS = {
+  general: "cross.case",
+  regurgitation: "fork.knife",
+} as const;
 
 type AddActivitySheetProps = {
   visible: boolean;
   animalName: string;
+  step?: AddSheetStep;
   onClose: () => void;
   onDismiss?: () => void;
-  onPick: (type: ActivityType) => void;
+  onPick: (type: ActivityType, kind?: MedicalKind) => void;
 };
 
 export function AddActivitySheet({
   visible,
   animalName,
+  step = "activity",
   onClose,
   onDismiss,
   onPick,
@@ -81,11 +92,11 @@ export function AddActivitySheet({
   const cardWidth =
     columns === 2 ? (contentWidth - Spacing.sm) / 2 : contentWidth;
 
-  const rows = cardRows(columns);
+  const rows = cardRows(columns, cardsFor(step));
   const scrolls = sheetScrolls(columns, rows.length, height, fontScale);
 
-  const handlePick = (type: ActivityType) => {
-    onPick(type);
+  const handlePick = (type: ActivityType, kind?: MedicalKind) => {
+    onPick(type, kind);
     onClose();
   };
 
@@ -104,6 +115,7 @@ export function AddActivitySheet({
           top: Spacing.xl,
           bottom: Spacing.xl,
         }),
+        fixedSize({ horizontal: false, vertical: true }),
         ...(scrolls ? [] : presentation),
       ]}
     >
@@ -123,7 +135,7 @@ export function AddActivitySheet({
           ]}
         >
           <Text modifiers={[typeFont("title"), foregroundStyle(theme.text)]}>
-            {t("addRecord.title")}
+            {t(step === "health" ? "addRecord.healthTitle" : "addRecord.title")}
           </Text>
           <Text
             modifiers={[
@@ -131,7 +143,10 @@ export function AddActivitySheet({
               foregroundStyle(theme.textSecondary),
             ]}
           >
-            {t("addRecord.prompt", { animalName })}
+            {t(
+              step === "health" ? "addRecord.healthPrompt" : "addRecord.prompt",
+              { animalName },
+            )}
           </Text>
         </VStack>
 
@@ -163,15 +178,15 @@ export function AddActivitySheet({
         <VStack alignment="leading" spacing={Spacing.sm}>
           {rows.map((row) => (
             <HStack
-              key={row[0].type}
+              key={cardKey(row[0])}
               alignment="top"
               spacing={Spacing.sm}
               modifiers={[frame({ width: contentWidth, alignment: "leading" })]}
             >
               {row.map((card) => (
                 <Button
-                  key={card.type}
-                  onPress={() => handlePick(card.type)}
+                  key={cardKey(card)}
+                  onPress={() => handlePick(card.type, card.kind)}
                   modifiers={[
                     buttonStyle("plain"),
                     accessibilityElement("combine"),
@@ -212,7 +227,11 @@ export function AddActivitySheet({
                         modifiers={[foregroundStyle(CategoryColors[card.type])]}
                       />
                       <Image
-                        systemName={ActivitySymbols[card.type]}
+                        systemName={
+                          card.kind
+                            ? KIND_SYMBOLS[card.kind]
+                            : ActivitySymbols[card.type]
+                        }
                         modifiers={[
                           font({
                             size: BADGE_SYMBOL_SIZE,
@@ -258,7 +277,7 @@ export function AddActivitySheet({
   if (!mounted) return null;
 
   return (
-    <Host style={styles.host} matchContents pointerEvents="box-none">
+    <Host key={step} style={styles.host} matchContents pointerEvents="box-none">
       <BottomSheet
         isPresented={visible}
         fitToContents={!scrolls}

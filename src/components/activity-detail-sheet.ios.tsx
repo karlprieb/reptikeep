@@ -72,6 +72,7 @@ export function ActivityDetailSheet({
     recordedDate,
     backdated,
     openEdit: handleEdit,
+    logRegurgitation,
     confirmDelete: handleDelete,
   } = useActivityDetail(entry);
 
@@ -109,6 +110,14 @@ export function ActivityDetailSheet({
           >
             {t("common.edit")}
           </Stack.Toolbar.MenuAction>
+          {logRegurgitation ? (
+            <Stack.Toolbar.MenuAction
+              icon="cross.case"
+              onPress={logRegurgitation}
+            >
+              {t("activityDetail.logRegurgitation")}
+            </Stack.Toolbar.MenuAction>
+          ) : null}
           <Stack.Toolbar.MenuAction
             icon="trash"
             destructive

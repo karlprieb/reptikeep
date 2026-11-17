@@ -13,6 +13,7 @@ import {
   type DocumentKind,
 } from "@/state/document";
 import { defaults$ } from "@/state/logging-defaults";
+import { MEDICAL_KINDS } from "@/state/medical";
 import { reminders$ } from "@/state/reminders";
 import { setLanguage, settings$ } from "@/state/settings";
 import {
@@ -35,8 +36,8 @@ import {
 import { TEXT_LIMITS, clampTextFields } from "@/utils/text-limits";
 
 const FORMAT = "app.reptikeep.backup";
-const VERSION = 4;
-const SUPPORTED_VERSIONS = [1, 2, 3, 4];
+const VERSION = 5;
+const SUPPORTED_VERSIONS = [1, 2, 3, 4, 5];
 const MAX_ARCHIVE_BYTES = 80 * 1024 * 1024;
 const MAX_EXPANDED_BYTES = 160 * 1024 * 1024;
 const MAX_ENTRY_BYTES = MAX_DOCUMENT_BYTES;
@@ -122,6 +123,10 @@ function isPlainObject(value: unknown): value is Record<string, unknown> {
     !Array.isArray(value) &&
     Object.getPrototypeOf(value) === Object.prototype
   );
+}
+
+function sameAnimal(target: unknown, animalId: unknown): boolean {
+  return !isPlainObject(target) || target.animalId === animalId;
 }
 
 function exactKeys(
@@ -383,6 +388,8 @@ function validActivity(
   record: unknown,
   id: string,
   animals: Record<string, Animal>,
+  schemaVersion: number,
+  feedings: Table,
 ): boolean {
   if (
     !isPlainObject(record) ||
@@ -428,7 +435,15 @@ function validActivity(
       "cleaning",
       "notes",
     ],
-    medical: ["id", "animalId", "createdAt", "occurredAt", "summary", "notes"],
+    medical: [
+      "id",
+      "animalId",
+      "createdAt",
+      "occurredAt",
+      "summary",
+      "notes",
+      ...(schemaVersion >= 5 ? ["kind", "feedingId"] : []),
+    ],
   };
 
   if (!exactKeys(record, allowed[name])) return false;
@@ -471,7 +486,13 @@ function validActivity(
       typeof record.summary === "string" &&
       record.summary.trim().length > 0 &&
       record.summary.length <= TEXT_LIMITS.summary &&
-      (record.notes === undefined || typeof record.notes === "string")
+      (record.notes === undefined || typeof record.notes === "string") &&
+      (record.kind === undefined ||
+        (MEDICAL_KINDS as readonly unknown[]).includes(record.kind)) &&
+      (record.feedingId === undefined ||
+        (record.kind === "regurgitation" &&
+          safeId(record.feedingId) &&
+          sameAnimal(feedings[record.feedingId], record.animalId)))
     );
 
   return (
@@ -634,7 +655,16 @@ function validate(parsed: ParsedBackup): void {
 
   for (const name of activityNames)
     for (const [id, record] of Object.entries((data[name] ?? {}) as Table))
-      if (!validActivity(name, record, id, animals))
+      if (
+        !validActivity(
+          name,
+          record,
+          id,
+          animals,
+          schemaVersion,
+          (data.feedings ?? {}) as Table,
+        )
+      )
         throw new Error("Backup has an invalid activity.");
 
   const documentRecords = (data.documents ?? {}) as Table;

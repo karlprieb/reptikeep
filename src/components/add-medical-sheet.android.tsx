@@ -26,6 +26,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
   DateTimeField,
   FormSheetTopBar,
+  MenuField,
   Section,
 } from "@/components/form-sheet";
 import {
@@ -43,9 +44,12 @@ import {
 } from "@/utils/form-sheet-shared";
 import { Spacing, StackAboveFontScale } from "@/constants/theme";
 import { composeTextStyle } from "@/constants/type-font-compose";
+import { useFeedingLink } from "@/hooks/use-feeding-link";
+import { REGURGITATION_WINDOW_DAYS } from "@/utils/regurgitation";
 import { useTheme } from "@/hooks/use-theme";
 import {
   createMedicalActivity,
+  type MedicalKind,
   saveMedicalActivity,
   type MedicalActivity,
   type PendingMedicalDocument,
@@ -65,14 +69,19 @@ type AddMedicalSheetProps = {
   animalId: string;
   animalName: string;
   activity?: MedicalActivity;
+  kind?: MedicalKind;
+  feedingId?: string;
 };
 
 type MedicalDraft = { occurredAt: Date; summary: string; notes: string };
 
-function initialDraft(activity?: MedicalActivity): MedicalDraft {
+function initialDraft(
+  initialSummary: string,
+  activity?: MedicalActivity,
+): MedicalDraft {
   return {
     occurredAt: activity ? new Date(activity.occurredAt) : new Date(),
-    summary: activity?.summary ?? "",
+    summary: initialSummary,
     notes: activity?.notes ?? "",
   };
 }
@@ -81,13 +90,27 @@ export function AddMedicalSheet({
   animalId,
   animalName,
   activity,
+  kind = "general",
+  feedingId,
 }: AddMedicalSheetProps) {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
   const { t } = useTranslation();
   const { fontScale } = useWindowDimensions();
-  const [draft, updateDraft] = useDraft(() => initialDraft(activity));
-  const summaryText = useNativeState(activity?.summary ?? "");
+  const initialSummary =
+    activity?.summary ??
+    (kind === "regurgitation" ? t("medicalForm.kind.regurgitation") : "");
+  const [draft, updateDraft] = useDraft(() =>
+    initialDraft(initialSummary, activity),
+  );
+  const feeding = useFeedingLink(
+    animalId,
+    draft.occurredAt,
+    feedingId,
+    !activity && kind === "regurgitation",
+    activity?.id,
+  );
+  const summaryText = useNativeState(initialSummary);
   const notesText = useNativeState(activity?.notes ?? "");
   const allDocuments = useValue(documents$);
   const linked = activity
@@ -140,6 +163,8 @@ export function AddMedicalSheet({
       occurredAt: draft.occurredAt.toISOString(),
       summary: draft.summary,
       notes: optionalText(draft.notes),
+      kind,
+      feedingId: feeding.feedingId,
     });
     savingRef.current = true;
     setSaving(true);
@@ -220,6 +245,27 @@ export function AddMedicalSheet({
                 maxDate={new Date()}
               />
             </Section>
+
+            {kind === "regurgitation" ? (
+              <Section
+                title={t("medicalForm.feeding")}
+                footer={t("medicalForm.feedingHint", {
+                  days: REGURGITATION_WINDOW_DAYS,
+                })}
+              >
+                <MenuField
+                  label={t("medicalForm.feedingLabel")}
+                  value={feeding.selectedLabel ?? ""}
+                  theme={theme}
+                  iconSize={iconSize}
+                  items={feeding.choices.map((choice) => ({
+                    ...choice,
+                    selected: choice.value === feeding.selected,
+                  }))}
+                  onSelect={feeding.setSelected}
+                />
+              </Section>
+            ) : null}
 
             <Section title={t("medicalForm.summary")}>
               <OutlinedTextField

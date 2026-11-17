@@ -25,6 +25,20 @@ describe("medical activity integrity", () => {
     jest.clearAllMocks();
   });
 
+  it("keeps the feeding link only on regurgitations", () => {
+    const base = { animalId: "animal-1", summary: "Regurgitation" };
+    expect(
+      createMedicalActivity({ ...base, feedingId: "feed-1" }).feedingId,
+    ).toBeUndefined();
+    expect(
+      createMedicalActivity({
+        ...base,
+        kind: "regurgitation",
+        feedingId: "feed-1",
+      }).feedingId,
+    ).toBe("feed-1");
+  });
+
   it("creates a timestamped medical record", () => {
     const record = createMedicalActivity({
       animalId: "animal-1",

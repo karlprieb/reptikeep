@@ -1,4 +1,5 @@
 import {
+  ACTIVITY_CARDS,
   cardRows,
   selectCardColumns,
   sheetScrolls,
@@ -21,10 +22,10 @@ describe("sheetScrolls", () => {
   const SHORT = 667;
 
   it("lets the current card set hug a tall phone, and scrolls a short one", () => {
-    const rows = cardRows(2).length;
+    const rows = cardRows(2, ACTIVITY_CARDS).length;
 
     expect(rows).toBe(3);
-    expect(cardRows(1)).toHaveLength(6);
+    expect(cardRows(1, ACTIVITY_CARDS)).toHaveLength(6);
     expect(sheetScrolls(2, rows, TALL, 1)).toBe(false);
     expect(sheetScrolls(2, rows, SHORT, 1)).toBe(true);
   });
@@ -34,6 +35,8 @@ describe("sheetScrolls", () => {
   });
 
   it("always scrolls in a single column", () => {
-    expect(sheetScrolls(1, cardRows(1).length, TALL, 2)).toBe(true);
+    expect(sheetScrolls(1, cardRows(1, ACTIVITY_CARDS).length, TALL, 2)).toBe(
+      true,
+    );
   });
 });
