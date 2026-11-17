@@ -248,7 +248,7 @@ describe("backup export", () => {
 
     const parsed = await parseBackup(await createBackup());
 
-    expect(parsed.manifest.schemaVersion).toBe(4);
+    expect(parsed.manifest.schemaVersion).toBe(5);
     expect(parsed.manifest.inventory.documents).toBe(2);
     expect(Object.keys(parsed.documents).sort()).toEqual([
       "doc-invoice",

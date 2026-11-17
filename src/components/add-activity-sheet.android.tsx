@@ -31,13 +31,25 @@ import {
   CategoryColors,
   Radius,
   Spacing,
-  StackAboveFontScale,
   type ActivityType,
 } from "@/constants/theme";
 import { composeTextStyle } from "@/constants/type-font-compose";
 import { useTheme } from "@/hooks/use-theme";
+import type { MedicalKind } from "@/state/medical";
+import {
+  cardKey,
+  cardRows,
+  cardsFor,
+  selectCardColumns,
+  type ActivityCard,
+  type AddSheetStep,
+} from "@/utils/activity-sheet-layout";
 
 import CLOSE_ICON from "@/assets/images/icons/close.xml";
+import HOSPITAL_ICON from "@/assets/images/icons/local-hospital.xml";
+import RESTAURANT_ICON from "@/assets/images/icons/restaurant.xml";
+
+const KIND_ICONS = { general: HOSPITAL_ICON, regurgitation: RESTAURANT_ICON };
 
 const BADGE_DIAMETER = 64;
 const BADGE_SYMBOL_RATIO = 0.55;
@@ -46,67 +58,16 @@ const CARD_MIN_HEIGHT = 156;
 type AddActivitySheetProps = {
   visible: boolean;
   animalName: string;
+  step?: AddSheetStep;
   onClose: () => void;
   onDismiss?: () => void;
-  onPick: (type: ActivityType) => void;
+  onPick: (type: ActivityType, kind?: MedicalKind) => void;
 };
-
-type ActivityCard = {
-  type: ActivityType;
-  titleKey: string;
-  descriptionKey: string;
-};
-
-const ACTIVITY_CARDS: ActivityCard[] = [
-  {
-    type: "feed",
-    titleKey: "addRecord.feeding.title",
-    descriptionKey: "addRecord.feeding.description",
-  },
-  {
-    type: "weight",
-    titleKey: "addRecord.weight.title",
-    descriptionKey: "addRecord.weight.description",
-  },
-  {
-    type: "shed",
-    titleKey: "addRecord.shed.title",
-    descriptionKey: "addRecord.shed.description",
-  },
-  {
-    type: "poop",
-    titleKey: "addRecord.defecation.title",
-    descriptionKey: "addRecord.defecation.description",
-  },
-  {
-    type: "habitat",
-    titleKey: "addRecord.habitat.title",
-    descriptionKey: "addRecord.habitat.description",
-  },
-  {
-    type: "medical",
-    titleKey: "addRecord.medical.title",
-    descriptionKey: "addRecord.medical.description",
-  },
-];
-
-function selectCardColumns(fontScale: number): 1 | 2 {
-  return fontScale >= StackAboveFontScale ? 1 : 2;
-}
-
-function cardRows(cards: ActivityCard[], columns: 1 | 2): ActivityCard[][] {
-  if (columns === 1) return cards.map((card) => [card]);
-
-  return cards.reduce<ActivityCard[][]>((rows, card, index) => {
-    if (index % 2 === 0) rows.push([card]);
-    else rows[rows.length - 1].push(card);
-    return rows;
-  }, []);
-}
 
 export function AddActivitySheet({
   visible,
   animalName,
+  step = "activity",
   onClose,
   onDismiss,
   onPick,
@@ -130,8 +91,8 @@ export function AddActivitySheet({
     finishClosing();
   };
 
-  const handlePick = (type: ActivityType) => {
-    onPick(type);
+  const handlePick = (type: ActivityType, kind?: MedicalKind) => {
+    onPick(type, kind);
     finishClosing();
   };
 
@@ -141,7 +102,7 @@ export function AddActivitySheet({
   const columns = selectCardColumns(fontScale);
 
   return (
-    <Host style={styles.host} matchContents pointerEvents="box-none">
+    <Host key={step} style={styles.host} matchContents pointerEvents="box-none">
       <ModalBottomSheet
         ref={sheetRef}
         onDismissRequest={requestClose}
@@ -166,13 +127,22 @@ export function AddActivitySheet({
               modifiers={[weight(1)]}
             >
               <Text style={composeTextStyle("title")} color={theme.text}>
-                {t("addRecord.title")}
+                {t(
+                  step === "health"
+                    ? "addRecord.healthTitle"
+                    : "addRecord.title",
+                )}
               </Text>
               <Text
                 style={composeTextStyle("bodyL")}
                 color={theme.textSecondary}
               >
-                {t("addRecord.prompt", { animalName })}
+                {t(
+                  step === "health"
+                    ? "addRecord.healthPrompt"
+                    : "addRecord.prompt",
+                  { animalName },
+                )}
               </Text>
             </Column>
 
@@ -197,19 +167,19 @@ export function AddActivitySheet({
             verticalArrangement={{ spacedBy: Spacing.sm }}
             modifiers={[fillMaxWidth()]}
           >
-            {cardRows(ACTIVITY_CARDS, columns).map((row) => (
+            {cardRows(columns, cardsFor(step)).map((row) => (
               <Row
-                key={row[0].type}
+                key={cardKey(row[0])}
                 verticalAlignment="top"
                 horizontalArrangement={{ spacedBy: Spacing.sm }}
                 modifiers={[fillMaxWidth()]}
               >
                 {row.map((card) => (
                   <ActivityCardButton
-                    key={card.type}
+                    key={cardKey(card)}
                     card={card}
                     theme={theme}
-                    onPress={() => handlePick(card.type)}
+                    onPress={() => handlePick(card.type, card.kind)}
                     accessibilityLabel={t(card.titleKey)}
                     accessibilityDescription={t(card.descriptionKey)}
                   />
@@ -272,7 +242,9 @@ function ActivityCardButton({
           ]}
         >
           <Icon
-            source={ActivityIcons[card.type]}
+            source={
+              card.kind ? KIND_ICONS[card.kind] : ActivityIcons[card.type]
+            }
             tint={theme.onPrimary}
             size={Math.round(BADGE_DIAMETER * BADGE_SYMBOL_RATIO)}
           />

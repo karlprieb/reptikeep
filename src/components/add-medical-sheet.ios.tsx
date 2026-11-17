@@ -3,6 +3,7 @@ import {
   Button,
   DatePicker,
   Form,
+  Picker,
   Section,
   Text,
   TextField,
@@ -13,6 +14,8 @@ import {
   datePickerStyle,
   foregroundStyle,
   lineLimit,
+  pickerStyle,
+  tag,
   textInputAutocapitalization,
 } from "@expo/ui/swift-ui/modifiers";
 import { useValue } from "@legendapp/state/react";
@@ -30,9 +33,12 @@ import {
 } from "@/components/form-sheet";
 import { formSheetStyles as styles } from "@/constants/form-sheet-ios";
 import { asEditOf, optionalText, useDraft } from "@/utils/form-sheet-shared";
+import { useFeedingLink } from "@/hooks/use-feeding-link";
+import { REGURGITATION_WINDOW_DAYS } from "@/utils/regurgitation";
 import { useTheme } from "@/hooks/use-theme";
 import {
   createMedicalActivity,
+  type MedicalKind,
   saveMedicalActivity,
   type MedicalActivity,
   type PendingMedicalDocument,
@@ -49,14 +55,19 @@ type AddMedicalSheetProps = {
   animalId: string;
   animalName: string;
   activity?: MedicalActivity;
+  kind?: MedicalKind;
+  feedingId?: string;
 };
 
 type MedicalDraft = { occurredAt: Date; summary: string; notes: string };
 
-function initialDraft(activity?: MedicalActivity): MedicalDraft {
+function initialDraft(
+  initialSummary: string,
+  activity?: MedicalActivity,
+): MedicalDraft {
   return {
     occurredAt: activity ? new Date(activity.occurredAt) : new Date(),
-    summary: activity?.summary ?? "",
+    summary: initialSummary,
     notes: activity?.notes ?? "",
   };
 }
@@ -65,12 +76,26 @@ export function AddMedicalSheet({
   animalId,
   animalName,
   activity,
+  kind = "general",
+  feedingId,
 }: AddMedicalSheetProps) {
   const theme = useTheme();
   const { t } = useTranslation();
   const modifiers = useFormModifiers();
-  const [draft, updateDraft] = useDraft(() => initialDraft(activity));
-  const summaryText = useNativeState(activity?.summary ?? "");
+  const initialSummary =
+    activity?.summary ??
+    (kind === "regurgitation" ? t("medicalForm.kind.regurgitation") : "");
+  const [draft, updateDraft] = useDraft(() =>
+    initialDraft(initialSummary, activity),
+  );
+  const feeding = useFeedingLink(
+    animalId,
+    draft.occurredAt,
+    feedingId,
+    !activity && kind === "regurgitation",
+    activity?.id,
+  );
+  const summaryText = useNativeState(initialSummary);
   const notesText = useNativeState(activity?.notes ?? "");
   const allDocuments = useValue(documents$);
   const linked = activity
@@ -122,6 +147,8 @@ export function AddMedicalSheet({
       occurredAt: draft.occurredAt.toISOString(),
       summary: draft.summary,
       notes: optionalText(draft.notes),
+      kind,
+      feedingId: feeding.feedingId,
     });
     savingRef.current = true;
     setSaving(true);
@@ -191,6 +218,41 @@ export function AddMedicalSheet({
                 modifiers={[datePickerStyle("compact")]}
               />
             </Section>
+            {kind === "regurgitation" ? (
+              <Section
+                header={
+                  <FormSectionHeader>
+                    {t("medicalForm.feeding")}
+                  </FormSectionHeader>
+                }
+                footer={
+                  <FormSectionFooter>
+                    {t("medicalForm.feedingHint", {
+                      days: REGURGITATION_WINDOW_DAYS,
+                    })}
+                  </FormSectionFooter>
+                }
+                modifiers={modifiers.row}
+              >
+                <Picker
+                  label={t("medicalForm.feedingLabel")}
+                  selection={feeding.selected}
+                  onSelectionChange={(value) =>
+                    feeding.setSelected(value as string)
+                  }
+                  modifiers={[
+                    pickerStyle("menu"),
+                    accessibilityLabel(t("medicalForm.feedingLabel")),
+                  ]}
+                >
+                  {feeding.choices.map((choice) => (
+                    <Text key={choice.value} modifiers={[tag(choice.value)]}>
+                      {choice.label}
+                    </Text>
+                  ))}
+                </Picker>
+              </Section>
+            ) : null}
             <Section
               header={
                 <FormSectionHeader>

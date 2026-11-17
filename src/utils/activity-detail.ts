@@ -1,6 +1,7 @@
 import type { TFunction } from "i18next";
 
 import type { FeedingActivity } from "@/state/feeding";
+import { medicalKind, type MedicalActivity } from "@/state/medical";
 import type { WeightActivity } from "@/state/weight";
 import type { AnimalActivity } from "@/utils/animal-activity";
 import { daysSince, formatAbsoluteDate } from "@/utils/format-date";
@@ -9,6 +10,11 @@ import {
   formatWeight,
   formatWeightDelta,
 } from "@/utils/format-number";
+import {
+  feedingLabel,
+  linkableFeeding,
+  regurgitationFor,
+} from "@/utils/regurgitation";
 import { previousRecord, weightChange } from "@/utils/weight-change";
 import type { WeightUnit } from "@/utils/weight-unit";
 
@@ -30,8 +36,10 @@ function feedDetail(
   entry: Extract<AnimalActivity, { type: "feed" }>,
   t: TFunction,
   feedings: Record<string, FeedingActivity>,
+  medical: Record<string, MedicalActivity>,
   unit: WeightUnit,
 ): Detail {
+  const regurgitation = regurgitationFor(medical, entry.record);
   const { foodType, amount, weight, frozen, refused } = entry.record;
 
   const previous = previousRecord(
@@ -93,6 +101,17 @@ function feedDetail(
               label: t("activityDetail.sincePrevious"),
               value: t("activityDetail.dayInterval", { count: interval }),
               mono: true,
+            },
+          ]
+        : []),
+      ...(regurgitation
+        ? [
+            {
+              key: "regurgitated",
+              label: t("activityDetail.regurgitated"),
+              value: formatAbsoluteDate(regurgitation.occurredAt),
+              mono: true,
+              flagged: true,
             },
           ]
         : []),
@@ -176,10 +195,53 @@ function habitatDetail(
 
 function medicalDetail(
   entry: Extract<AnimalActivity, { type: "medical" }>,
+  t: TFunction,
+  feedings: Record<string, FeedingActivity>,
+  unit: WeightUnit,
 ): Detail {
+  const kind = medicalKind(entry.record);
+  const linked = entry.record.feedingId
+    ? feedings[entry.record.feedingId]
+    : undefined;
+  const feeding =
+    kind === "regurgitation" &&
+    linkableFeeding(linked, entry.record.animalId, new Date(entry.occurredAt))
+      ? linked
+      : undefined;
+  const interval = feeding
+    ? daysSince(feeding.occurredAt, new Date(entry.occurredAt))
+    : null;
+
   return {
     header: entry.record.summary,
-    rows: [],
+    rows: [
+      {
+        key: "kind",
+        label: t("activityDetail.kind"),
+        value: t(`medicalForm.kind.${kind}`),
+        flagged: kind === "regurgitation",
+      },
+      ...(feeding
+        ? [
+            {
+              key: "feeding",
+              label: t("medicalForm.feedingLabel"),
+              value: feedingLabel(feeding, unit),
+              mono: true,
+            },
+          ]
+        : []),
+      ...(interval != null
+        ? [
+            {
+              key: "afterFeeding",
+              label: t("activityDetail.afterFeeding"),
+              value: t("activityDetail.dayInterval", { count: interval }),
+              mono: true,
+            },
+          ]
+        : []),
+    ],
   };
 }
 
@@ -221,6 +283,7 @@ function observationDetail(
 
 type ActivityDetailContext = {
   feedings: Record<string, FeedingActivity>;
+  medical: Record<string, MedicalActivity>;
   weights: Record<string, WeightActivity>;
   weightUnit: WeightUnit;
 };
@@ -228,17 +291,17 @@ type ActivityDetailContext = {
 export function buildActivityDetail(
   entry: AnimalActivity,
   t: TFunction,
-  { feedings, weights, weightUnit }: ActivityDetailContext,
+  { feedings, medical, weights, weightUnit }: ActivityDetailContext,
 ): Detail {
   switch (entry.type) {
     case "feed":
-      return feedDetail(entry, t, feedings, weightUnit);
+      return feedDetail(entry, t, feedings, medical, weightUnit);
     case "weight":
       return weightDetail(entry, t, weights, weightUnit);
     case "habitat":
       return habitatDetail(entry, t);
     case "medical":
-      return medicalDetail(entry);
+      return medicalDetail(entry, t, feedings, weightUnit);
     case "shed":
     case "poop":
       return observationDetail(entry, t);

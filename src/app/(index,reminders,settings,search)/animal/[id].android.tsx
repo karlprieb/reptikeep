@@ -263,6 +263,7 @@ export default function AnimalDetailScreen() {
 
       <AddActivitySheet
         visible={addActivity.visible}
+        step={addActivity.step}
         animalName={animal.name}
         onClose={addActivity.close}
         onDismiss={addActivity.dismiss}

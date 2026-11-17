@@ -6,9 +6,11 @@ import { removeActivity } from "@/state/activity-stores";
 import { documents$, documentsForActivity } from "@/state/document";
 import { feedingStore } from "@/state/feeding";
 import { useAnimalDefaults } from "@/state/logging-defaults";
+import { medicalStore } from "@/state/medical";
 import { weightStore } from "@/state/weight";
 import { buildActivityDetail } from "@/utils/activity-detail";
 import type { AnimalActivity } from "@/utils/animal-activity";
+import { takenFeedings } from "@/utils/regurgitation";
 import { confirmDeleteActivity } from "@/utils/confirm-delete-activity";
 import { formatAbsoluteDate, formatAbsoluteTime } from "@/utils/format-date";
 
@@ -16,6 +18,7 @@ export function useActivityDetail(entry: AnimalActivity) {
   const { t } = useTranslation();
   const feedings = useValue(feedingStore.$);
   const weights = useValue(weightStore.$);
+  const medical = useValue(medicalStore.$);
   const documents = useValue(documents$);
 
   const typeName = t(`activity.type.${entry.type}`);
@@ -24,6 +27,7 @@ export function useActivityDetail(entry: AnimalActivity) {
 
   const detail = buildActivityDetail(entry, t, {
     feedings,
+    medical,
     weights,
     weightUnit,
   });
@@ -37,6 +41,21 @@ export function useActivityDetail(entry: AnimalActivity) {
 
   const openEdit = () =>
     router.replace(`/animal/${animalId}/${entry.type}?activityId=${entry.id}`);
+
+  const logRegurgitation =
+    entry.type === "feed" &&
+    !entry.record.refused &&
+    !takenFeedings(medical).has(entry.id)
+      ? () =>
+          router.replace({
+            pathname: "/animal/[id]/medical",
+            params: {
+              id: animalId,
+              kind: "regurgitation",
+              feedingId: entry.id,
+            },
+          })
+      : undefined;
 
   const confirmDelete = () =>
     confirmDeleteActivity(
@@ -60,6 +79,7 @@ export function useActivityDetail(entry: AnimalActivity) {
     recordedDate,
     backdated: recordedDate !== occurredDate,
     openEdit,
+    logRegurgitation,
     confirmDelete,
   };
 }

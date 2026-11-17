@@ -3,6 +3,7 @@ import {
   Spacing,
   type ActivityType,
 } from "@/constants/theme";
+import type { MedicalKind } from "@/state/medical";
 
 export const CARD_MIN_HEIGHT = 180;
 
@@ -14,7 +15,10 @@ export type ActivityCard = {
   type: ActivityType;
   titleKey: string;
   descriptionKey: string;
+  kind?: MedicalKind;
 };
+
+export type AddSheetStep = "activity" | "health";
 
 export const ACTIVITY_CARDS: ActivityCard[] = [
   {
@@ -49,10 +53,33 @@ export const ACTIVITY_CARDS: ActivityCard[] = [
   },
 ];
 
-export function cardRows(columns: 1 | 2): ActivityCard[][] {
-  if (columns === 1) return ACTIVITY_CARDS.map((card) => [card]);
+export const HEALTH_CARDS: ActivityCard[] = [
+  {
+    type: "medical",
+    kind: "regurgitation",
+    titleKey: "addRecord.regurgitation.title",
+    descriptionKey: "addRecord.regurgitation.description",
+  },
+  {
+    type: "medical",
+    kind: "general",
+    titleKey: "addRecord.medicalNote.title",
+    descriptionKey: "addRecord.medicalNote.description",
+  },
+];
 
-  return ACTIVITY_CARDS.reduce<ActivityCard[][]>((rows, card, index) => {
+export const cardsFor = (step: AddSheetStep) =>
+  step === "health" ? HEALTH_CARDS : ACTIVITY_CARDS;
+
+export const cardKey = (card: ActivityCard) => card.kind ?? card.type;
+
+export function cardRows(
+  columns: 1 | 2,
+  cards: ActivityCard[],
+): ActivityCard[][] {
+  if (columns === 1) return cards.map((card) => [card]);
+
+  return cards.reduce<ActivityCard[][]>((rows, card, index) => {
     if (index % 2 === 0) rows.push([card]);
     else rows[rows.length - 1].push(card);
     return rows;

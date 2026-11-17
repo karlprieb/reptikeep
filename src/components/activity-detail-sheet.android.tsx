@@ -51,6 +51,7 @@ import type { AnimalActivity } from "@/utils/animal-activity";
 import { relativeLine } from "@/utils/relative-date";
 
 import ARROW_BACK_ICON from "@/assets/images/icons/arrow-back.xml";
+import HOSPITAL_ICON from "@/assets/images/icons/local-hospital.xml";
 import DELETE_ICON from "@/assets/images/icons/delete.xml";
 import DESCRIPTION_ICON from "@/assets/images/icons/description.xml";
 import MODE_EDIT_ICON from "@/assets/images/icons/mode-edit.xml";
@@ -88,6 +89,7 @@ export function ActivityDetailSheet({
     recordedDate,
     backdated,
     openEdit,
+    logRegurgitation,
     confirmDelete,
   } = useActivityDetail(entry);
 
@@ -349,6 +351,27 @@ export function ActivityDetailSheet({
                     />
                   </DropdownMenuItem.LeadingIcon>
                 </DropdownMenuItem>
+                {logRegurgitation ? (
+                  <DropdownMenuItem
+                    onClick={() => {
+                      setMenuOpen(false);
+                      logRegurgitation();
+                    }}
+                  >
+                    <DropdownMenuItem.Text>
+                      <Text style={composeTextStyle("body")} color={theme.text}>
+                        {t("activityDetail.logRegurgitation")}
+                      </Text>
+                    </DropdownMenuItem.Text>
+                    <DropdownMenuItem.LeadingIcon>
+                      <Icon
+                        source={HOSPITAL_ICON}
+                        tint={theme.text}
+                        size={iconSize}
+                      />
+                    </DropdownMenuItem.LeadingIcon>
+                  </DropdownMenuItem>
+                ) : null}
                 <DropdownMenuItem
                   onClick={handleDelete}
                   elementColors={{

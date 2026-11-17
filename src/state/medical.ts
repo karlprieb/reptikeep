@@ -22,10 +22,18 @@ import {
 } from "./document";
 import { medicalActivityStore } from "./document-link-registry";
 
+export const MEDICAL_KINDS = ["general", "regurgitation"] as const;
+export type MedicalKind = (typeof MEDICAL_KINDS)[number];
+
 export interface MedicalActivity extends ActivityRecord {
   summary: string;
   notes?: string;
+  kind?: MedicalKind;
+  feedingId?: string;
 }
+
+export const medicalKind = (record: MedicalActivity): MedicalKind =>
+  record.kind ?? "general";
 
 export type CreateMedicalInput = Omit<
   MedicalActivity,
@@ -37,7 +45,9 @@ export type CreateMedicalInput = Omit<
 function validMedicalActivity(record: MedicalActivity): MedicalActivity {
   const clamped = clampTextFields(record);
   if (!clamped.summary) throw new Error("Medical summary is required.");
-  return clamped;
+  if (clamped.kind === "regurgitation" || !clamped.feedingId) return clamped;
+  const { feedingId: _, ...unlinked } = clamped;
+  return unlinked;
 }
 
 export function createMedicalActivity(
