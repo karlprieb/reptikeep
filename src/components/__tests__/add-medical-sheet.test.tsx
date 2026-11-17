@@ -219,4 +219,36 @@ describe("AddMedicalSheet documents", () => {
 
     expect(save.mock.calls[0][0].feedingId).toBeUndefined();
   });
+
+  it("keeps a link to a meal later marked refused when editing something else", async () => {
+    const meal = createFeedingActivity({
+      animalId: ANIMAL_ID,
+      occurredAt: new Date(Date.now() - 86400000).toISOString(),
+      refused: true,
+    });
+    feedingStore.add(meal);
+    const record = createMedicalActivity({
+      animalId: ANIMAL_ID,
+      summary: "Regurgitation",
+      kind: "regurgitation",
+      feedingId: meal.id,
+    });
+    medicalStore.add(record);
+    const save = jest
+      .spyOn(medical, "saveMedicalActivity")
+      .mockResolvedValueOnce(undefined as never);
+
+    const screen = await render(
+      <AddMedicalSheet
+        animalId={ANIMAL_ID}
+        animalName="Juno"
+        activity={record}
+        kind="regurgitation"
+        feedingId={meal.id}
+      />,
+    );
+    await fireEvent.press(screen.getByLabelText("Save"));
+
+    expect(save.mock.calls[0][0].feedingId).toBe(meal.id);
+  });
 });
