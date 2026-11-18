@@ -78,6 +78,7 @@ platform :android do
       track: track,
       aab: lane_context[SharedValues::GRADLE_AAB_OUTPUT_PATH],
       json_key_data: json_key_data,
+      skip_upload_apk: true,
       release_status: "completed"
     )
   end
