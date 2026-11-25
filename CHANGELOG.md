@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Birthday notifications. Every reptile with a known birth date gets a
+  notification at the daily reminder time on its birthday, and tapping it
+  opens the reptile. On by default, with a toggle in Settings, and it never
+  asks for notification permission.
+
 ## [1.1.0] - 2026-11-17
 
 ### Added

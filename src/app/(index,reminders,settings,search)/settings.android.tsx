@@ -192,6 +192,13 @@ export default function SettingsScreen() {
                   }}
                 />
               ) : null}
+              <ToggleRow
+                theme={theme}
+                title={t("reminders.settings.birthdays")}
+                hint={t("a11y.reminders.birthdays.hint")}
+                checked={reminderTime.birthdays}
+                onCheckedChange={(value) => reminders$.birthdays.set(value)}
+              />
               <SectionFooter
                 theme={theme}
                 text={t("reminders.settings.footer")}
@@ -318,7 +325,7 @@ export default function SettingsScreen() {
               <TimePickerDialog
                 initialDate={reminderDate.toISOString()}
                 onDateSelected={(next) => {
-                  reminders$.set({
+                  reminders$.assign({
                     hour: next.getHours(),
                     minute: next.getMinutes(),
                   });

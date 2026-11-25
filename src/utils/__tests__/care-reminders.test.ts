@@ -1,6 +1,10 @@
 import type { Animal } from "@/state/animal";
 import type { CareSchedule, ReminderRoutine } from "@/state/care-schedule";
-import { careReminders, reminderDigest } from "@/utils/care-reminders";
+import {
+  careReminders,
+  reminderDigest,
+  upcomingBirthdays,
+} from "@/utils/care-reminders";
 
 const TODAY = new Date(2026, 6, 20);
 
@@ -260,5 +264,46 @@ describe("reminderDigest", () => {
     );
 
     expect(reminderDigest(reminders, TODAY, 3)).toEqual([]);
+  });
+});
+
+describe("upcomingBirthdays", () => {
+  it("finds birthdays from today through the horizon", () => {
+    const birthdays = upcomingBirthdays(
+      byId(
+        animal("Rex", { birthDate: "2020-07-20" }),
+        animal("Mo", { birthDate: "2023-07-22" }),
+        animal("Late", { birthDate: "2021-07-23" }),
+        animal("Unknown"),
+      ),
+      TODAY,
+      3,
+    );
+
+    expect(birthdays).toEqual([
+      { animalId: "Rex", name: "Rex", date: "2026-07-20", age: 6 },
+      { animalId: "Mo", name: "Mo", date: "2026-07-22", age: 3 },
+    ]);
+  });
+
+  it("skips the day an animal was born", () => {
+    expect(
+      upcomingBirthdays(
+        byId(animal("New", { birthDate: "2026-07-20" })),
+        TODAY,
+        1,
+      ),
+    ).toEqual([]);
+  });
+
+  it("moves a leap-day birthday to Feb 28 in common years", () => {
+    const leapling = byId(animal("Leap", { birthDate: "2024-02-29" }));
+
+    expect(upcomingBirthdays(leapling, new Date(2026, 1, 28), 2)).toEqual([
+      { animalId: "Leap", name: "Leap", date: "2026-02-28", age: 2 },
+    ]);
+    expect(upcomingBirthdays(leapling, new Date(2028, 1, 28), 2)).toEqual([
+      { animalId: "Leap", name: "Leap", date: "2028-02-29", age: 4 },
+    ]);
   });
 });

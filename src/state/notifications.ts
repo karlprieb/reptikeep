@@ -12,11 +12,14 @@ import { summaries$, summaryLookups } from "@/state/summary";
 import {
   careReminders,
   reminderDigest,
+  upcomingBirthdays,
   type ReminderDay,
 } from "@/utils/care-reminders";
 import { atClockTime, fromCalendarDate } from "@/utils/format-date";
 
 const HORIZON_DAYS = 14;
+
+const IOS_PENDING_LIMIT = 64;
 
 const CARE_CHANNEL_ID = "care-reminders";
 
@@ -96,18 +99,40 @@ let settling: ReturnType<typeof setTimeout> | undefined;
 async function reschedule(): Promise<void> {
   const run = (generation += 1);
 
+  const { hour, minute, birthdays: birthdaysOn } = reminders$.peek();
+  const fireAt = (value: string) => {
+    const date = fromCalendarDate(value);
+    return date ? atClockTime(date, hour, minute) : null;
+  };
+  const isAhead = ({ date }: { date: string }) =>
+    (fireAt(date)?.getTime() ?? 0) > Date.now();
+
   const days = reminderDigest(
     careReminders(animals$.peek(), careSchedules$.peek(), careLookups()),
     new Date(),
     HORIZON_DAYS,
-  );
+  ).filter(isAhead);
+
+  const upcoming = birthdaysOn
+    ? upcomingBirthdays(animals$.peek(), new Date(), HORIZON_DAYS).filter(
+        isAhead,
+      )
+    : [];
+  // shortcut: iOS keeps only the soonest IOS_PENDING_LIMIT pending notifications, so cap birthdays to what is left after care; shorten the horizon if keepers hit the cap
+  const birthdays =
+    Platform.OS === "ios"
+      ? upcoming.slice(0, Math.max(0, IOS_PENDING_LIMIT - days.length))
+      : upcoming;
 
   await Notifications.cancelAllScheduledNotificationsAsync();
-  if (run !== generation || days.length === 0) return;
+  if (run !== generation || (days.length === 0 && birthdays.length === 0))
+    return;
 
   const asked = await reminderPermission();
   const permission =
-    asked === "ask" ? await requestReminderPermission() : asked;
+    asked === "ask" && days.length > 0
+      ? await requestReminderPermission()
+      : asked;
   if (permission !== "granted" || run !== generation) return;
 
   await ensureCareChannel();
@@ -117,14 +142,16 @@ async function reschedule(): Promise<void> {
     Platform.OS === "android" && (await exactAlarmPermission()) === "granted";
   if (run !== generation) return;
 
-  const { hour, minute } = reminders$.peek();
+  const trigger = (at: Date) => ({
+    type: Notifications.SchedulableTriggerInputTypes.DATE,
+    date: at,
+    channelId: CARE_CHANNEL_ID,
+    ...(alarmClock ? { delivery: "alarmClock" as const } : null),
+  });
 
   for (const day of days) {
-    const date = fromCalendarDate(day.date);
-    if (!date) continue;
-
-    const at = atClockTime(date, hour, minute);
-    if (at.getTime() <= Date.now()) continue;
+    const at = fireAt(day.date);
+    if (!at || at.getTime() <= Date.now()) continue;
 
     await Notifications.scheduleNotificationAsync({
       identifier: `care-${day.date}`,
@@ -133,12 +160,29 @@ async function reschedule(): Promise<void> {
         body: notificationBody(day.routines),
         data: { url: "/reminders" },
       },
-      trigger: {
-        type: Notifications.SchedulableTriggerInputTypes.DATE,
-        date: at,
-        channelId: CARE_CHANNEL_ID,
-        ...(alarmClock ? { delivery: "alarmClock" as const } : null),
+      trigger: trigger(at),
+    });
+
+    if (run !== generation) return;
+  }
+
+  for (const birthday of birthdays) {
+    const at = fireAt(birthday.date);
+    if (!at || at.getTime() <= Date.now()) continue;
+
+    await Notifications.scheduleNotificationAsync({
+      identifier: `birthday-${birthday.animalId}-${birthday.date}`,
+      content: {
+        title: i18n.t("reminders.notification.birthdayTitle", {
+          name: birthday.name,
+        }),
+        body: i18n.t("reminders.notification.birthdayBody", {
+          name: birthday.name,
+          count: birthday.age,
+        }),
+        data: { url: `/animal/${birthday.animalId}` },
       },
+      trigger: trigger(at),
     });
 
     if (run !== generation) return;

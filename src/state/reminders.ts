@@ -3,7 +3,7 @@ import { syncObservable } from "@legendapp/state/sync";
 
 import { persistPlugin } from "./persist";
 
-export const reminders$ = observable({ hour: 9, minute: 0 });
+export const reminders$ = observable({ hour: 9, minute: 0, birthdays: true });
 
 syncObservable(reminders$, {
   persist: {

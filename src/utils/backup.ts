@@ -36,8 +36,8 @@ import {
 import { TEXT_LIMITS, clampTextFields } from "@/utils/text-limits";
 
 const FORMAT = "app.reptikeep.backup";
-const VERSION = 5;
-const SUPPORTED_VERSIONS = [1, 2, 3, 4, 5];
+const VERSION = 6;
+const SUPPORTED_VERSIONS = [1, 2, 3, 4, 5, 6];
 const MAX_ARCHIVE_BYTES = 80 * 1024 * 1024;
 const MAX_EXPANDED_BYTES = 160 * 1024 * 1024;
 const MAX_ENTRY_BYTES = MAX_DOCUMENT_BYTES;
@@ -704,7 +704,14 @@ function validate(parsed: ParsedBackup): void {
       typeof defaults.frozen !== "boolean" ||
       !["g", "kg", "lb"].includes(defaults.weightUnit as string) ||
       !["poop", "urate", "both"].includes(defaults.poopType as string) ||
-      !exactKeys(reminders, ["hour", "minute"]) ||
+      !exactKeys(
+        reminders,
+        schemaVersion >= 6
+          ? ["hour", "minute", "birthdays"]
+          : ["hour", "minute"],
+      ) ||
+      (reminders.birthdays !== undefined &&
+        typeof reminders.birthdays !== "boolean") ||
       !Number.isInteger(reminders.hour) ||
       !Number.isInteger(reminders.minute) ||
       (reminders.hour as number) < 0 ||
@@ -964,6 +971,8 @@ export function preferencesForBackup() {
         reminders.minute <= 59
           ? reminders.minute
           : 0,
+      birthdays:
+        typeof reminders.birthdays === "boolean" ? reminders.birthdays : true,
     },
     careSchedules: {
       ...(validSchedule(schedules.water) ? { water: schedules.water } : {}),
@@ -1252,7 +1261,7 @@ export async function restoreBackup(file: File): Promise<RestoredBackup> {
               : data.settings?.reptileView,
         } as never);
         defaults$.set(data.loggingDefaults as never);
-        reminders$.set(data.reminders as never);
+        reminders$.set({ birthdays: true, ...data.reminders } as never);
         careSchedules$.set(data.careSchedules as never);
       }
     });
