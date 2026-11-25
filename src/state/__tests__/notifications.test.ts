@@ -108,6 +108,18 @@ it("caps the birthday list on iOS so care reminders stay scheduled", async () =>
   expect(careIds()).toEqual(careOnly);
 });
 
+it("keeps today's passed birthdays out of the iOS cap", async () => {
+  jest.setSystemTime(new Date(2026, 6, 20, 10));
+  for (let i = 0; i < 70; i += 1)
+    addAnimal({ ...REX, id: `rex-${i}`, name: `Rex ${i}` });
+  addAnimal({ ...REX, id: "mo", name: "Mo", birthDate: "2021-07-21" });
+
+  await reschedule();
+
+  expect(scheduled).toHaveBeenCalledTimes(1);
+  expect(scheduled.mock.calls[0][0].identifier).toBe("birthday-mo-2026-07-21");
+});
+
 it("does not cap the birthday list on Android", async () => {
   setPlatform("android");
   for (let i = 0; i < 70; i += 1)

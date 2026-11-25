@@ -99,15 +99,24 @@ let settling: ReturnType<typeof setTimeout> | undefined;
 async function reschedule(): Promise<void> {
   const run = (generation += 1);
 
+  const { hour, minute, birthdays: birthdaysOn } = reminders$.peek();
+  const fireAt = (value: string) => {
+    const date = fromCalendarDate(value);
+    return date ? atClockTime(date, hour, minute) : null;
+  };
+  const isAhead = ({ date }: { date: string }) =>
+    (fireAt(date)?.getTime() ?? 0) > Date.now();
+
   const days = reminderDigest(
     careReminders(animals$.peek(), careSchedules$.peek(), careLookups()),
     new Date(),
     HORIZON_DAYS,
-  );
+  ).filter(isAhead);
 
-  const { hour, minute, birthdays: birthdaysOn } = reminders$.peek();
   const upcoming = birthdaysOn
-    ? upcomingBirthdays(animals$.peek(), new Date(), HORIZON_DAYS)
+    ? upcomingBirthdays(animals$.peek(), new Date(), HORIZON_DAYS).filter(
+        isAhead,
+      )
     : [];
   // shortcut: iOS keeps only the soonest IOS_PENDING_LIMIT pending notifications, so cap birthdays to what is left after care; shorten the horizon if keepers hit the cap
   const birthdays =
@@ -141,11 +150,8 @@ async function reschedule(): Promise<void> {
   });
 
   for (const day of days) {
-    const date = fromCalendarDate(day.date);
-    if (!date) continue;
-
-    const at = atClockTime(date, hour, minute);
-    if (at.getTime() <= Date.now()) continue;
+    const at = fireAt(day.date);
+    if (!at || at.getTime() <= Date.now()) continue;
 
     await Notifications.scheduleNotificationAsync({
       identifier: `care-${day.date}`,
@@ -161,11 +167,8 @@ async function reschedule(): Promise<void> {
   }
 
   for (const birthday of birthdays) {
-    const date = fromCalendarDate(birthday.date);
-    if (!date) continue;
-
-    const at = atClockTime(date, hour, minute);
-    if (at.getTime() <= Date.now()) continue;
+    const at = fireAt(birthday.date);
+    if (!at || at.getTime() <= Date.now()) continue;
 
     await Notifications.scheduleNotificationAsync({
       identifier: `birthday-${birthday.animalId}-${birthday.date}`,
