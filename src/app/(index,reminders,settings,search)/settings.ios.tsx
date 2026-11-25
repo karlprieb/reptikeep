@@ -122,7 +122,7 @@ export default function SettingsScreen() {
               selection={reminderDate}
               displayedComponents={["hourAndMinute"]}
               onDateChange={(value) =>
-                reminders$.set({
+                reminders$.assign({
                   hour: value.getHours(),
                   minute: value.getMinutes(),
                 })
@@ -131,6 +131,15 @@ export default function SettingsScreen() {
                 datePickerStyle("compact"),
                 listRowBackground(theme.surface),
                 accessibilityHint(t("a11y.reminders.time.hint")),
+              ]}
+            />
+            <Toggle
+              label={t("reminders.settings.birthdays")}
+              isOn={reminderTime.birthdays}
+              onIsOnChange={(value) => reminders$.birthdays.set(value)}
+              modifiers={[
+                listRowBackground(theme.surface),
+                accessibilityHint(t("a11y.reminders.birthdays.hint")),
               ]}
             />
           </Section>

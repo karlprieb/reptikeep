@@ -17,7 +17,7 @@ function isPortuguese(): boolean {
 
 type YearMonthDay = { year: number; month: number; day: number };
 
-function daysInMonth(year: number, month: number): number {
+export function daysInMonth(year: number, month: number): number {
   if (month === 2) {
     return year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0) ? 29 : 28;
   }

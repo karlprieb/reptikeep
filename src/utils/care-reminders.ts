@@ -6,7 +6,11 @@ import {
   type CareSchedule,
   type ReminderRoutine,
 } from "@/state/care-schedule";
-import { fromCalendarDate, toCalendarDate } from "@/utils/format-date";
+import {
+  daysInMonth,
+  fromCalendarDate,
+  toCalendarDate,
+} from "@/utils/format-date";
 import { scheduleIntervalDays } from "@/utils/schedule";
 
 export type CareReminder = {
@@ -20,6 +24,48 @@ export type ReminderDay = {
   date: string;
   routines: { routine: ReminderRoutine; names: string[] }[];
 };
+
+export type Birthday = {
+  animalId: string;
+  name: string;
+  date: string;
+  age: number;
+};
+
+export function upcomingBirthdays(
+  animals: Record<string, Animal>,
+  today: Date,
+  horizonDays: number,
+): Birthday[] {
+  const birthdays: Birthday[] = [];
+
+  for (let offset = 0; offset < horizonDays; offset += 1) {
+    const day = new Date(today);
+    day.setDate(day.getDate() + offset);
+    const year = day.getFullYear();
+
+    for (const animal of Object.values(animals)) {
+      const born = animal.birthDate && fromCalendarDate(animal.birthDate);
+      if (!born) continue;
+
+      const month = born.getMonth();
+      const date = Math.min(born.getDate(), daysInMonth(year, month + 1));
+      if (day.getMonth() !== month || day.getDate() !== date) continue;
+
+      const age = year - born.getFullYear();
+      if (age < 1) continue;
+
+      birthdays.push({
+        animalId: animal.id,
+        name: animal.name,
+        date: toCalendarDate(day),
+        age,
+      });
+    }
+  }
+
+  return birthdays;
+}
 
 function addDays(value: string, days: number): string | null {
   const from = fromCalendarDate(value);

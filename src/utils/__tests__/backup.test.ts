@@ -151,7 +151,7 @@ describe("backup archive validation", () => {
         weightUnit: "g",
         poopType: "both",
       },
-      reminders: { hour: 9, minute: 0 },
+      reminders: { hour: 9, minute: 0, birthdays: true },
       careSchedules: {},
     });
   });
@@ -408,6 +408,66 @@ describe("backup archive validation", () => {
         archive(preferenceManifest, {
           ...preferences,
           reminders: { hour: 24, minute: 0 },
+        }),
+      ),
+    ).rejects.toThrow("preferences");
+  });
+
+  it("gates the birthdays preference key on schema version 6", async () => {
+    const preferences = {
+      settings: {
+        language: "en",
+        reptileSort: { field: "name", direction: "asc" },
+        reptileView: "cards",
+      },
+      loggingDefaults: {
+        mealMeasure: "weight",
+        frozen: false,
+        weightUnit: "g",
+        poopType: "both",
+      },
+      reminders: { hour: 9, minute: 0 },
+      careSchedules: {},
+    };
+    const v6Manifest = {
+      ...manifest,
+      schemaVersion: 6,
+      scopes: { husbandry: "absent", preferences: "present" },
+    };
+
+    await expect(
+      parseBackup(
+        archive(v6Manifest, {
+          ...preferences,
+          reminders: { hour: 9, minute: 0, birthdays: false },
+        }),
+      ),
+    ).resolves.toBeDefined();
+    await expect(
+      parseBackup(
+        archive(v6Manifest, {
+          ...preferences,
+          reminders: { hour: 9, minute: 0, birthdays: "yes" },
+        }),
+      ),
+    ).rejects.toThrow("preferences");
+    await expect(
+      parseBackup(
+        archive(v6Manifest, {
+          ...preferences,
+          reminders: { hour: 9, minute: 0 },
+        }),
+      ),
+    ).resolves.toBeDefined();
+    const olderManifest = {
+      ...manifest,
+      scopes: { husbandry: "absent", preferences: "present" },
+    };
+    await expect(
+      parseBackup(
+        archive(olderManifest, {
+          ...preferences,
+          reminders: { hour: 9, minute: 0, birthdays: true },
         }),
       ),
     ).rejects.toThrow("preferences");

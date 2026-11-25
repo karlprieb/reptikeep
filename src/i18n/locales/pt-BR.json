@@ -145,9 +145,10 @@
       "subtitle": "Defina uma rotina de alimentação no perfil de um réptil, ou de troca de água ou de limpeza do terrário nos Ajustes, e o que estiver por vir aparece aqui."
     },
     "settings": {
+      "birthdays": "Notificações de aniversário",
       "section": "Lembretes",
       "time": "Horário dos lembretes",
-      "footer": "Os lembretes do dia chegam juntos neste horário. Ative-os para um réptil no perfil dele."
+      "footer": "Os lembretes do dia chegam juntos neste horário. Ative os lembretes de alimentação de um réptil no perfil dele."
     },
     "permission": {
       "title": "As notificações estão desligadas",
@@ -165,6 +166,9 @@
       "action": "Permitir alarmes exatos"
     },
     "notification": {
+      "birthdayTitle": "Feliz aniversário, {{name}}!",
+      "birthdayBody_one": "{{name}} completa {{count}} ano hoje.",
+      "birthdayBody_other": "{{name}} completa {{count}} anos hoje.",
       "title": "Cuidados de hoje",
       "line": "{{routine}}: {{names}}",
       "overflow": "{{names}} e mais {{count}}"
@@ -709,6 +713,9 @@
       }
     },
     "reminders": {
+      "birthdays": {
+        "hint": "Envia uma notificação no horário dos lembretes diários no aniversário de cada réptil, se as notificações estiverem permitidas"
+      },
       "feed": {
         "hint": "Envia uma notificação quando a alimentação deste réptil vencer"
       },

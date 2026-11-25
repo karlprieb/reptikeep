@@ -2,6 +2,7 @@ import { File } from "expo-file-system";
 import { zipSync } from "fflate";
 
 import { animals$, type Animal } from "@/state/animal";
+import { reminders$ } from "@/state/reminders";
 import { activityStores } from "@/state/activity-stores";
 import { addDocument, documents$, type AnimalDocument } from "@/state/document";
 import {
@@ -248,7 +249,7 @@ describe("backup export", () => {
 
     const parsed = await parseBackup(await createBackup());
 
-    expect(parsed.manifest.schemaVersion).toBe(5);
+    expect(parsed.manifest.schemaVersion).toBe(6);
     expect(parsed.manifest.inventory.documents).toBe(2);
     expect(Object.keys(parsed.documents).sort()).toEqual([
       "doc-invoice",
@@ -411,6 +412,39 @@ describe("backup restore", () => {
     await restoreBackup(archive);
 
     expect(mockFiles.get(invoice.file)).toEqual(PDF_BYTES);
+  });
+
+  it("restores a pre-v6 backup without the birthdays key as on by default", async () => {
+    const archive = writeArchive({
+      "manifest.json": json({
+        ...manifest(5, { animals: 1, records: 0, photos: 0, documents: 0 }),
+        scopes: { husbandry: "all", preferences: "present" },
+      }),
+      "data.json": json({
+        ...husbandryOnly({}, {}),
+        settings: {
+          language: "system",
+          reptileSort: { field: "name", direction: "asc" },
+          reptileView: "cards",
+        },
+        loggingDefaults: {
+          mealMeasure: "weight",
+          frozen: false,
+          weightUnit: "g",
+          poopType: "both",
+        },
+        reminders: { hour: 8, minute: 30 },
+        careSchedules: {},
+      }),
+    });
+
+    await restoreBackup(archive);
+
+    expect(reminders$.peek()).toEqual({
+      hour: 8,
+      minute: 30,
+      birthdays: true,
+    });
   });
 
   it("removes documents whose animals the backup replaces", async () => {

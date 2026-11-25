@@ -145,9 +145,10 @@
       "subtitle": "Set a feeding schedule on a reptile's own profile, or a water change or enclosure cleaning schedule in Settings, and what's coming up shows here."
     },
     "settings": {
+      "birthdays": "Birthday notifications",
       "section": "Reminders",
       "time": "Daily reminder time",
-      "footer": "The day's reminders arrive together at this time. Turn them on for a reptile in its own profile."
+      "footer": "The day's reminders arrive together at this time. Turn on feeding reminders for a reptile in its own profile."
     },
     "permission": {
       "title": "Notifications are off",
@@ -165,6 +166,9 @@
       "action": "Allow exact alarms"
     },
     "notification": {
+      "birthdayTitle": "Happy birthday, {{name}}!",
+      "birthdayBody_one": "{{name}} turns {{count}} today.",
+      "birthdayBody_other": "{{name}} turns {{count}} today.",
       "title": "Today's care",
       "line": "{{routine}}: {{names}}",
       "overflow": "{{names}} and {{count}} more"
@@ -709,6 +713,9 @@
       }
     },
     "reminders": {
+      "birthdays": {
+        "hint": "Sends a notification at the daily reminder time on each reptile's birthday, if notifications are allowed"
+      },
       "feed": {
         "hint": "Sends a notification when this reptile's feeding comes due"
       },
